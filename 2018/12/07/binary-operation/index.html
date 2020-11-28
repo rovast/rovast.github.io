@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>二进制运算 | rovast</title>
+  <meta name="description" content="二进制逻辑运算逻辑加法（“或”运算）逻辑加法通常用符号“+”或“∨”来表示。逻辑加法运算规则如下：12340+0=0， 0∨0=00+1=1， 0∨1=11+0=1， 1∨0=11+1=1， 1∨1=1 从上式可见，逻辑加法有“或”的意义。也就是说，在给定的逻辑变量中，A或B只要有一个为1，其逻辑加的结果就为1；只有当两者都为0时逻辑加的结果才为0。 逻辑乘法（“与”运算）逻辑乘法通常用符号“×”">
+<meta name="keywords" content="Web PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="二进制运算">
+<meta property="og:url" content="https://rovast.github.io/2018/12/07/binary-operation/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="二进制逻辑运算逻辑加法（“或”运算）逻辑加法通常用符号“+”或“∨”来表示。逻辑加法运算规则如下：12340+0=0， 0∨0=00+1=1， 0∨1=11+0=1， 1∨0=11+1=1， 1∨1=1 从上式可见，逻辑加法有“或”的意义。也就是说，在给定的逻辑变量中，A或B只要有一个为1，其逻辑加的结果就为1；只有当两者都为0时逻辑加的结果才为0。 逻辑乘法（“与”运算）逻辑乘法通常用符号“×”">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-28T08:49:18.044Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="二进制运算">
+<meta name="twitter:description" content="二进制逻辑运算逻辑加法（“或”运算）逻辑加法通常用符号“+”或“∨”来表示。逻辑加法运算规则如下：12340+0=0， 0∨0=00+1=1， 0∨1=11+0=1， 1∨0=11+1=1， 1∨1=1 从上式可见，逻辑加法有“或”的意义。也就是说，在给定的逻辑变量中，A或B只要有一个为1，其逻辑加的结果就为1；只有当两者都为0时逻辑加的结果才为0。 逻辑乘法（“与”运算）逻辑乘法通常用符号“×”">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2018/12/07/binary-operation/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Web Developer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/流程/">流程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.33px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.67px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/docker/" style="font-size: 13.33px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.33px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/makefile/" style="font-size: 13px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13px;">php</a> <a href="/tags/soar/" style="font-size: 13.33px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.33px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.33px;">wiki</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.33px;">杂项</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 13.67px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/云原生/">云原生</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/11/28/build-your-own-ui-for-skywalking/" class="title">借助 skywalking 搭建自己的 APM 数据展示平台</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-11-28T09:27:41.000Z" itemprop="datePublished">2020-11-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/11/28/hello-world/" class="title">Hello World</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-11-28T08:49:18.064Z" itemprop="datePublished">2020-11-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/杂项/">杂项</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/12/02/install-php72-ubuntu/" class="title">Install php7.2 on Ubuntu 18.04 LTS</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-12-02T01:54:24.000Z" itemprop="datePublished">2019-12-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/杂项/">杂项</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/28/install-docker/" class="title">docker 安装</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-28T09:06:18.000Z" itemprop="datePublished">2019-11-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/基础/">基础</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/06/time-complexity/" class="title">时间复杂度</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-06T01:35:45.000Z" itemprop="datePublished">2019-11-06</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#二进制逻辑运算"><span class="toc-number">1.</span> <span class="toc-text">二进制逻辑运算</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#逻辑加法（“或”运算）"><span class="toc-number">1.1.</span> <span class="toc-text">逻辑加法（“或”运算）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#逻辑乘法（“与”运算）"><span class="toc-number">1.2.</span> <span class="toc-text">逻辑乘法（“与”运算）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#异或逻辑运算（“半加”运算）"><span class="toc-number">1.3.</span> <span class="toc-text">异或逻辑运算（“半加”运算）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#反码"><span class="toc-number">2.</span> <span class="toc-text">反码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#补码"><span class="toc-number">3.</span> <span class="toc-text">补码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#运算"><span class="toc-number">3.1.</span> <span class="toc-text">运算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#补码的工作原理"><span class="toc-number">3.2.</span> <span class="toc-text">补码的工作原理</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-binary-operation" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      二进制运算
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2018/12/07/binary-operation/" class="article-date">
+	  <time datetime="2018-12-07T10:34:26.000Z" itemprop="datePublished">2018-12-07</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/编程/">编程</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2018/12/07/binary-operation/" class="leancloud_visitors" data-flag-title="二进制运算">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2018/12/07/binary-operation/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 7(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="二进制逻辑运算"><a href="#二进制逻辑运算" class="headerlink" title="二进制逻辑运算"></a>二进制逻辑运算</h2><h3 id="逻辑加法（“或”运算）"><a href="#逻辑加法（“或”运算）" class="headerlink" title="逻辑加法（“或”运算）"></a>逻辑加法（“或”运算）</h3><p>逻辑加法通常用符号“+”或“∨”来表示。逻辑加法运算规则如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0+0=0， 0∨0=0</span><br><span class="line">0+1=1， 0∨1=1</span><br><span class="line">1+0=1， 1∨0=1</span><br><span class="line">1+1=1， 1∨1=1</span><br></pre></td></tr></table></figure></p>
+<p>从上式可见，逻辑加法有“或”的意义。也就是说，在给定的逻辑变量中，A或B只要有一个为1，其逻辑加的结果就为1；只有当两者都为0时逻辑加的结果才为0。</p>
+<h3 id="逻辑乘法（“与”运算）"><a href="#逻辑乘法（“与”运算）" class="headerlink" title="逻辑乘法（“与”运算）"></a>逻辑乘法（“与”运算）</h3><p>逻辑乘法通常用符号“×”或“∧”或“·”来表示。逻辑乘法运算规则如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0×0=0， 0∧0=0， 0·0=0</span><br><span class="line">0×1=0， 0∧1=0， 0·1=0</span><br><span class="line">1×0=0， 1∧0=0， 1·0=0</span><br><span class="line">1×1=1， 1∧1=1， 1·1=1</span><br></pre></td></tr></table></figure></p>
+<p>不难看出，逻辑乘法有“与”的意义。它表示只当参与运算的逻辑变量都同时取值为1时，其逻辑乘积才等于1。</p>
+<h3 id="异或逻辑运算（“半加”运算）"><a href="#异或逻辑运算（“半加”运算）" class="headerlink" title="异或逻辑运算（“半加”运算）"></a>异或逻辑运算（“半加”运算）</h3><p>异或运算通常用符号”⊕”表示，其运算规则为：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0⊕0=0 0同0异或，结果为0</span><br><span class="line">0⊕1=1 0同1异或，结果为1</span><br><span class="line">1⊕0=1 1同0异或，结果为1</span><br><span class="line">1⊕1=0 1同1异或，结果为0</span><br></pre></td></tr></table></figure></p>
+<p>即两个逻辑变量相异，输出才为1</p>
+<h2 id="反码"><a href="#反码" class="headerlink" title="反码"></a>反码</h2><p>将二进制数反转，得到的数即为原二进制的反码（ones’ complement）。若某一位为0，则使其变为1，反之亦然。</p>
+<p>例如，+3是0011，用反码表示-3便是1100。</p>
+<p>下表列出了4-bit二进数所能表示的整数。<a href="https://www.wikiwand.com/zh-cn/%E4%B8%80%E8%A3%9C%E6%95%B8" target="_blank" rel="noopener">wiki 反码</a></p>
+<table>
+<thead>
+<tr>
+<th>二进数</th>
+<th>无符号</th>
+<th>符号比特</th>
+<th>反码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0000</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0001</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>0010</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr>
+<td>0011</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>0100</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>0101</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>0110</td>
+<td>6</td>
+<td>6</td>
+<td>6</td>
+</tr>
+<tr>
+<td>0111</td>
+<td>7</td>
+<td>7</td>
+<td>7</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>8</td>
+<td>-0</td>
+<td>-7</td>
+</tr>
+<tr>
+<td>1001</td>
+<td>9</td>
+<td>-1</td>
+<td>-6</td>
+</tr>
+<tr>
+<td>1010</td>
+<td>10</td>
+<td>-2</td>
+<td>-5</td>
+</tr>
+<tr>
+<td>1011</td>
+<td>11</td>
+<td>-3</td>
+<td>-4</td>
+</tr>
+<tr>
+<td>1100</td>
+<td>12</td>
+<td>-4</td>
+<td>-3</td>
+</tr>
+<tr>
+<td>1101</td>
+<td>13</td>
+<td>-5</td>
+<td>-2</td>
+</tr>
+<tr>
+<td>1110</td>
+<td>14</td>
+<td>-6</td>
+<td>-1</td>
+</tr>
+<tr>
+<td>1111</td>
+<td>15</td>
+<td>-7</td>
+<td>-0</td>
+</tr>
+</tbody>
+</table>
+<h2 id="补码"><a href="#补码" class="headerlink" title="补码"></a>补码</h2><p><a href="https://www.wikiwand.com/zh-cn/%E4%BA%8C%E8%A3%9C%E6%95%B8" target="_blank" rel="noopener">wiki 补码</a></p>
+<p>补码（英语：2’s complement）是一种用二进制表示有号数的方法，也是一种将数字的正负号变号的方式，常在计算机科学中使用。</p>
+<p>一个数字的补码就是将该数字作比特反相运算（即反码），再将结果加1。即：<strong>反码加1</strong> 。在补码系统中，一个负数就是用其对应<br>正数的补码来表示。</p>
+<p><strong>以下用4位的补码数字来说明补码系统的数字表示方式</strong></p>
+<ul>
+<li>在表示正数和零时，补码数字和一般二进制一样，唯一的不同是在补码系统中，正数的最高比特恒为0，因此4位的补码正数，最大数字为0111 (7)。</li>
+<li>补码数字的负数，最高比特恒为1，4位补码的数字中，最接近0的负数为1111 (-1)，以此类推，因此绝对值最大的负数是1000(-8)。</li>
+</ul>
+<p>以上的表示方式在计算机处理时格外方便，用以下的例子说明：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">    0011 ( 3)</span><br><span class="line">  + 1111 (-1)</span><br><span class="line">--------------</span><br><span class="line">   10010 ( 2)</span><br></pre></td></tr></table></figure></p>
+<p>结果10010似乎是错的，因为已经超过四个比特，不过若忽略掉（从右数起的）第5个比特，结果是0010 (2)，和我们计算的结果一样。<br>而且若可以将二进制的1111 (-1)变号为0001 (1)，以上的式子也可以计算减法：3-1 = 2。</p>
+<h3 id="运算"><a href="#运算" class="headerlink" title="运算"></a>运算</h3><p><strong>加法</strong></p>
+<p>二补数系统数字的加法和一般加法相同，而且在运算完成后就可以看出结果的正负号，不需特别的处理。</p>
+<p>正数与负数相加不会出现上溢错误，因为它们的和一定会小于加数。只有在两个同正负号的数相加时，上溢错误才有可能发生，这时候它们的和与加数的正负号相反。</p>
+<p>以15加 -5为例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> 11111 111（进位）</span><br><span class="line">  0000 1111 (15)</span><br><span class="line">+ 1111 1011 (-5)</span><br><span class="line">==================</span><br><span class="line">  0000 1010 (10)</span><br></pre></td></tr></table></figure></p>
+<p>由于加数和被加数都是8位，因此运算结果也限制在8位内。第8位相加后产生的进位不考虑（因为不存在第9比特）的1被忽略，所以其结果为10。而15 + (-5) = 10，计算结果正确。</p>
+<p>在以上计算式中，可以由进位列的最左侧二个比特得知结果是否出现溢出。溢出就是数字的绝对值太大，以致于无法在指定的二进制比特个数来表示（在此例中，是超过8位的范围）。若进位列的最左侧二个比特同为0或同为1，表示结果正确，若是一个为0，另一个为1，表示出现溢出错误。也可以对此二个比特进行异或运算，结果为1时，表示出现溢出错误。以下以7 + 3的4位加法说明溢出错误的情形。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> 0111 (进位)</span><br><span class="line">  0111 (7)</span><br><span class="line">+ 0011 (3)</span><br><span class="line">=============</span><br><span class="line">  1010 (−6)</span><br></pre></td></tr></table></figure>
+<p>结果不正确！<br>在此例中，进位列的最左侧二个比特为01，因此出现溢出错误。溢出的原因是7 + 3的结果(10)超过补码系统4位所可以表示的数字范围 -8~7。</p>
+<p>故为防止溢出错误，二补数在进行加法运算时通常讲符号位进行复制后追加到最高位之前，即设二补数B的位数为WIDTH，则B′={B[WIDTH-1],B}。应注意此处B′的位数为WIDTH+1。 如上两例用此方法进行计算：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">  11 1111 111（进位）</span><br><span class="line">   0 0000 1111 (15)</span><br><span class="line">  +1 1111 1011 (-5)</span><br><span class="line"> ==================</span><br><span class="line">(1)0 0000 1010 (10)</span><br></pre></td></tr></table></figure>
+<p>由于WIDTH+1=8+1=9，故而第十位的1同样由于溢出而被省略，结果仍为10。两负数(符号位为1)相加时同理。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">   111 (进位)</span><br><span class="line"> 0 0111 (7)</span><br><span class="line">+0 0011 (3)</span><br><span class="line">=============</span><br><span class="line"> 0 1010 (10)</span><br></pre></td></tr></table></figure>
+<p>结果正确！<br>由于WIDTH+1=4+1=5，故第五位的0仍为符号位，得结果正数10(十进制)。</p>
+<p><strong>减法</strong></p>
+<p>减法通常转化为加法进行运算，将减数取补之后，再与被减数进行加法运算，即可得出差。</p>
+<p><strong>乘法</strong></p>
+<p>乘法在计算机的世界里其实就是不断的做加法。</p>
+<p>例如:3*5=3+3+3+3+3=15</p>
+<p><strong>除法</strong></p>
+<p>除法就是相减。</p>
+<p>例如:10/3=10-3-3-3=1mod3 而减法又可做二的补数相加，所以所有四则运算的基础都是由加法而来。</p>
+<h3 id="补码的工作原理"><a href="#补码的工作原理" class="headerlink" title="补码的工作原理"></a>补码的工作原理</h3><p>为什么补码能这么巧妙实现了正负数的加减运算？<br>答案是：指定n比特字长，那么就只有2n个可能的值，加减法运算都存在上溢出与下溢出的情况，实际上都等价于模2n的加减法运算。<br>这对于n比特无符号整数类型或是n比特有符号整数类型都同样适用。</p>
+<p>例如，8位无符号整数的值的范围是0到255.因此4+254将上溢出，结果是2，即(4+254) \equiv 258 \equiv 2 \pmod{256}。</p>
+<p>例如，8位有符号整数的值的范围，如果规定为−128到127,则126+125将上溢出，结果是−5，即(126+125) \equiv 251 \equiv -5 \pmod{256}。</p>
+<p>对于8位字长的有符号整数类型，以28即256为模，则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-128 &amp; \equiv 128 \pmod&#123;256&#125; \\</span><br><span class="line">-127 &amp; \equiv 129 \pmod&#123;256&#125; \\</span><br><span class="line"></span><br><span class="line">-2 &amp; \equiv 254 \pmod&#123;256&#125; \\</span><br><span class="line">-1 &amp; \equiv 255 \pmod&#123;256&#125; \\</span><br></pre></td></tr></table></figure>
+<p>所以模256下的加减法，用0, 1, 2,…, 254,255表示其值，或者用−128, −127,…, −1, 0, 1, 2,…,127是完全等价的。−128与128，−127与129，…，−2与254，−1与255可以互换而加减法的结果不变。从而，把8位（octet）的高半部分（即二进制的1000 0000到1111 1111）解释为−128到−1，同样也实现了模256的加减法，而且所需要的CPU加法运算器的电路实现与8位无符号整数并无不同。</p>
+<p>实际上对于8比特的存储单元，把它的取值[00000000,…, 11111111]解释为[0, 255],或者[-1, 254]，或者[-2, 253]，或者[-128, 127]，或者[-200, 55]，甚至或者[500, 755]，对于加法硬件实现并无不同。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2018/12/07/binary-operation/" title="二进制运算" target="_blank" rel="external">https://rovast.github.io/2018/12/07/binary-operation/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">Web Developer</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2018/12/07/software-collection/" title="软件合集"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2018/12/06/nginx-proxy-on-mac/" title="mac 上配置 nginx 端口转发访问 angular 项目"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: '2xvr0rI4HA5Vn1CcgtMPxMac-gzGzoHsz',
+  appKey: 'F2QrebTLqLwYwoJVJucLOjvX'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'abf475e647ab8d9e8787',
+    clientSecret: '8d99d6970c3df2ce36dd552e5204243e537dd3f4',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>RFC793 TCP 协议 | rovast</title>
+  <meta name="description" content="PREFACE（引言）  INTRODUCTION （简介） 1.1  Motivation （动机）1.2  Scope （范围）1.3  About This Document （关于此文档）1.4  Interfaces （接口）1.5  Operation （操作）  PHILOSOPHY （设计理念） 2.1  Elements of the Internetwork System （网">
+<meta name="keywords" content="RFC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RFC793 TCP 协议">
+<meta property="og:url" content="https://rovast.github.io/2019/05/17/rfc793-transmission-control-protocol/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="PREFACE（引言）  INTRODUCTION （简介） 1.1  Motivation （动机）1.2  Scope （范围）1.3  About This Document （关于此文档）1.4  Interfaces （接口）1.5  Operation （操作）  PHILOSOPHY （设计理念） 2.1  Elements of the Internetwork System （网">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-28T08:49:18.081Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RFC793 TCP 协议">
+<meta name="twitter:description" content="PREFACE（引言）  INTRODUCTION （简介） 1.1  Motivation （动机）1.2  Scope （范围）1.3  About This Document （关于此文档）1.4  Interfaces （接口）1.5  Operation （操作）  PHILOSOPHY （设计理念） 2.1  Elements of the Internetwork System （网">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2019/05/17/rfc793-transmission-control-protocol/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Web Developer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/流程/">流程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.33px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.67px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/docker/" style="font-size: 13.33px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.33px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/makefile/" style="font-size: 13px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13px;">php</a> <a href="/tags/soar/" style="font-size: 13.33px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.33px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.33px;">wiki</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.33px;">杂项</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 13.67px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/云原生/">云原生</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/11/28/build-your-own-ui-for-skywalking/" class="title">借助 skywalking 搭建自己的 APM 数据展示平台</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-11-28T09:27:41.000Z" itemprop="datePublished">2020-11-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/11/28/hello-world/" class="title">Hello World</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-11-28T08:49:18.064Z" itemprop="datePublished">2020-11-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/杂项/">杂项</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/12/02/install-php72-ubuntu/" class="title">Install php7.2 on Ubuntu 18.04 LTS</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-12-02T01:54:24.000Z" itemprop="datePublished">2019-12-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/杂项/">杂项</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/28/install-docker/" class="title">docker 安装</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-28T09:06:18.000Z" itemprop="datePublished">2019-11-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/基础/">基础</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/06/time-complexity/" class="title">时间复杂度</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-06T01:35:45.000Z" itemprop="datePublished">2019-11-06</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#INTRODUCTION"><span class="toc-number">1.</span> <span class="toc-text">INTRODUCTION</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Motivation"><span class="toc-number">1.1.</span> <span class="toc-text">Motivation</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-rfc793-transmission-control-protocol" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      RFC793 TCP 协议
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/05/17/rfc793-transmission-control-protocol/" class="article-date">
+	  <time datetime="2019-05-17T01:51:05.000Z" itemprop="datePublished">2019-05-17</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/翻译/">翻译</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/RFC/">RFC</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2019/05/17/rfc793-transmission-control-protocol/" class="leancloud_visitors" data-flag-title="RFC793 TCP 协议">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/05/17/rfc793-transmission-control-protocol/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1.3k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 5(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <blockquote><p>PREFACE（引言）</p>
+<ol>
+<li><p>INTRODUCTION （简介）</p>
+<p>1.1  Motivation （动机）<br>1.2  Scope （范围）<br>1.3  About This Document （关于此文档）<br>1.4  Interfaces （接口）<br>1.5  Operation （操作）</p>
+</li>
+<li><p>PHILOSOPHY （设计理念）</p>
+<p>2.1  Elements of the Internetwork System （网络系统要素）<br>2.2  Model of Operation （操作模型）<br>2.3  The Host Environment （HOST 环境）<br>2.4  Interfaces （接口）<br>2.5  Relation to Other Protocols （和其他协议的关系）<br>2.6  Reliable Communication （可靠通信）<br>2.7  Connection Establishment and Clearing （链接的建立和清除）<br>2.8  Data Communication （数据通信）<br>2.9  Precedence and Security （优先权和安全性）<br>2.10 Robustness Principle （健壮性原则）</p>
+</li>
+<li><p>FUNCTIONAL SPECIFICATION （功能规范）</p>
+<p>3.1  Header Format （Header 格式）<br>3.2  Terminology （专业术语）<br>3.3  Sequence Numbers （序号说明）<br>3.4  Establishing a connection （建立一个链接）<br>3.5  Closing a Connection （断开一个链接）<br>3.6  Precedence and Security （优先级和安全性）<br>3.7  Data Communication （数据通信）<br>3.8  Interfaces （接口）<br>3.9  Event Processing （事件处理）</p>
+</li>
+</ol>
+<p>GLOSSARY （术语表）</p>
+<p>REFERENCES （引用）</p>
+</blockquote>
+<hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">                                PREFACE</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">This document describes the DoD Standard Transmission Control Protocol</span><br><span class="line">(TCP).  There have been nine earlier editions of the ARPA TCP</span><br><span class="line">specification on which this standard is based, and the present text</span><br><span class="line">draws heavily from them.  There have been many contributors to this work</span><br><span class="line">both in terms of concepts and in terms of text.  This edition clarifies</span><br><span class="line">several details and removes the end-of-letter buffer-size adjustments,</span><br><span class="line">and redescribes the letter mechanism as a push function.</span><br><span class="line"></span><br><span class="line">                                                           Jon Postel</span><br><span class="line"></span><br><span class="line">                                                           Editor</span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="INTRODUCTION"><a href="#INTRODUCTION" class="headerlink" title="INTRODUCTION"></a>INTRODUCTION</h1><p>The Transmission Control Protocol (TCP) is intended for use as a highly<br>reliable host-to-host protocol between hosts in packet-switched computer<br>communication networks, and in interconnected systems of such networks.</p>
+<blockquote>
+<p>传输控制协议(TCP)的目的，是在 包交换计算机通信网络 和 此类网络的互连系统中，<br>为主机间的通信提供可靠的协议。</p>
+</blockquote>
+<p>This document describes the functions to be performed by the<br>Transmission Control Protocol, the program that implements it, and its<br>interface to programs or users that require its services.</p>
+<blockquote>
+<p>本文档描述传输控制协议要执行的功能、实现该协议的程序、以及需要其服务的程序或用户的接口。</p>
+</blockquote>
+<h2 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h2><p>Computer communication systems are playing an increasingly important<br>role in military, government, and civilian environments.  This<br>document focuses its attention primarily on military computer<br>communication requirements, especially robustness in the presence of<br>communication unreliability and availability in the presence of<br>congestion, but many of these problems are found in the civilian and<br>government sector as well.</p>
+<blockquote>
+<p>计算机通信系统在军事、政府和民用环境中发挥着越来越重要的作用。<br>本文件主要关注军用计算机通信需求，特别是在通信不可靠和存在拥塞时的健壮性和可用性，但其中许多问题也存在于民用和政府部门。</p>
+</blockquote>
+<p>As strategic and tactical computer communication networks are<br>developed and deployed, it is essential to provide means of<br>interconnecting them and to provide standard interprocess<br>communication protocols which can support a broad range of<br>applications.  In anticipation of the need for such standards, the<br>Deputy Undersecretary of Defense for Research and Engineering has<br>declared the Transmission Control Protocol (TCP) described herein to<br>be a basis for DoD-wide inter-process communication protocol<br>standardization.</p>
+<blockquote>
+<p>随着战略和战术计算机通信网络的发展和部署，提供相互连接的手段和支持广泛应用的标准进程间通信协议至关重要。<br>考虑到需要这样的标准，负责研究和工程的国防部副部长声明了本文描述的传输控制协议(TCP)，这份协议将作为全局性进程间通信协议标准化的基础。</p>
+</blockquote>
+<p>TCP is a connection-oriented, end-to-end reliable protocol designed to<br>fit into a layered hierarchy of protocols which support multi-network<br>applications.  The TCP provides for reliable inter-process<br>communication between pairs of processes in host computers attached to<br>distinct but interconnected computer communication networks.  Very few<br>assumptions are made as to the reliability of the communication<br>protocols below the TCP layer.  TCP assumes it can obtain a simple,<br>potentially unreliable datagram service from the lower level<br>protocols.  In principle, the TCP should be able to operate above a<br>wide spectrum of communication systems ranging from hard-wired<br>connections to packet-switched or circuit-switched networks.</p>
+<blockquote>
+<p>TCP 是一种面向连接的端到端可靠协议，它被设计成适合于支持多网络应用程序的分层协议层次结构。<br>有一些计算机链接到不同的网络，但是这些网络之间是互通的。TCP 给这些计算机提供了可靠的内部进程通信。<br>TCP 下层通信的可靠性是未知的，TCP 假定它可以提供一个简单的，可能不可靠的数据报文服务。<br>原则上，TCP应该能够在从硬线连接到分组交换或电路交换网络的广泛通信系统频谱之上运行。（大概的意思就是 TCP 应该可以各种硬件之上运行，和运行无关）。</p>
+</blockquote>
+<p>TCP is based on concepts first described by Cerf and Kahn in [1].  The<br>TCP fits into a layered protocol architecture just above a basic<br>Internet Protocol [2] which provides a way for the TCP to send and<br>receive variable-length segments of information enclosed in internet<br>datagram “envelopes”.  The internet datagram provides a means for<br>addressing source and destination TCPs in different networks.  The<br>internet protocol also deals with any fragmentation or reassembly of<br>the TCP segments required to achieve transport and delivery through<br>multiple networks and interconnecting gateways.  The internet protocol<br>also carries information on the precedence, security classification<br>and compartmentation of the TCP segments, so this information can be<br>communicated end-to-end across multiple networks.</p>
+<blockquote>
+<p>TCP 是基于 Cerf 和 Kahn 在 [1] 中第一次描述的概念。<br>TCP 协议是适合分层控制协议的架构的，就在基础的 IP 协议之上（IP 协议为 TCP 提供了一种发送和接收不定长数据的方式。）<br>internet数据报提供了一种在不同网络中寻址源 tcp 和目标 tcp 的方法。</p>
+</blockquote>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2019/05/17/rfc793-transmission-control-protocol/" title="RFC793 TCP 协议" target="_blank" rel="external">https://rovast.github.io/2019/05/17/rfc793-transmission-control-protocol/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">Web Developer</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/06/11/use-kcp/" title="使用 KCP 来加速流量"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/05/03/php-class/" title="php-class"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: '2xvr0rI4HA5Vn1CcgtMPxMac-gzGzoHsz',
+  appKey: 'F2QrebTLqLwYwoJVJucLOjvX'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'abf475e647ab8d9e8787',
+    clientSecret: '8d99d6970c3df2ce36dd552e5204243e537dd3f4',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>

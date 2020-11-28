@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>phpstorm 集成 phpCodeSniffer | rovast</title>
+  <meta name="description" content="本文主要指导如何在 phpstorm 中集成 phpCodeSniffer（简称：phpCS）  安装 phpCS 如何在 phpStorm 中加载 phpCS 如何加载自定义的 phpCS 的 xml 规则文件 如何在 php 文件中实时提示 如何根据规则实时修正  phpStorm 官方指导文档：https://www.jetbrains.com/help/phpstorm/using-php">
+<meta name="keywords" content="PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="phpstorm 集成 phpCodeSniffer">
+<meta property="og:url" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="本文主要指导如何在 phpstorm 中集成 phpCodeSniffer（简称：phpCS）  安装 phpCS 如何在 phpStorm 中加载 phpCS 如何加载自定义的 phpCS 的 xml 规则文件 如何在 php 文件中实时提示 如何根据规则实时修正  phpStorm 官方指导文档：https://www.jetbrains.com/help/phpstorm/using-php">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/load-phpcs.png">
+<meta property="og:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/load-rules.png">
+<meta property="og:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/load-rule-file.png">
+<meta property="og:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/warning.png">
+<meta property="og:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/fix.png">
+<meta property="og:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/done.png">
+<meta property="og:updated_time" content="2020-11-28T08:49:18.079Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="phpstorm 集成 phpCodeSniffer">
+<meta name="twitter:description" content="本文主要指导如何在 phpstorm 中集成 phpCodeSniffer（简称：phpCS）  安装 phpCS 如何在 phpStorm 中加载 phpCS 如何加载自定义的 phpCS 的 xml 规则文件 如何在 php 文件中实时提示 如何根据规则实时修正  phpStorm 官方指导文档：https://www.jetbrains.com/help/phpstorm/using-php">
+<meta name="twitter:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/load-phpcs.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Web Developer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/流程/">流程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.33px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.67px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/docker/" style="font-size: 13.33px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.33px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/makefile/" style="font-size: 13px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13px;">php</a> <a href="/tags/soar/" style="font-size: 13.33px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.33px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.33px;">wiki</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.33px;">杂项</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 13.67px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/云原生/">云原生</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/11/28/build-your-own-ui-for-skywalking/" class="title">借助 skywalking 搭建自己的 APM 数据展示平台</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-11-28T09:27:41.000Z" itemprop="datePublished">2020-11-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/11/28/hello-world/" class="title">Hello World</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-11-28T08:49:18.064Z" itemprop="datePublished">2020-11-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/杂项/">杂项</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/12/02/install-php72-ubuntu/" class="title">Install php7.2 on Ubuntu 18.04 LTS</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-12-02T01:54:24.000Z" itemprop="datePublished">2019-12-02</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/杂项/">杂项</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/28/install-docker/" class="title">docker 安装</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-28T09:06:18.000Z" itemprop="datePublished">2019-11-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/基础/">基础</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/11/06/time-complexity/" class="title">时间复杂度</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-11-06T01:35:45.000Z" itemprop="datePublished">2019-11-06</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装-phpCS"><span class="toc-number">1.</span> <span class="toc-text">安装 phpCS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#在-phpStorm-中加载-phpCS"><span class="toc-number">2.</span> <span class="toc-text">在 phpStorm 中加载 phpCS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#加载自定义-xml-规则文件"><span class="toc-number">3.</span> <span class="toc-text">加载自定义 xml 规则文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实时验证-PHP-文件"><span class="toc-number">4.</span> <span class="toc-text">实时验证 PHP 文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自动修正"><span class="toc-number">5.</span> <span class="toc-text">自动修正</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-phpstorm-load-phpCodeSniffer" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      phpstorm 集成 phpCodeSniffer
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/08/14/phpstorm-load-phpCodeSniffer/" class="article-date">
+	  <time datetime="2019-08-14T10:14:02.000Z" itemprop="datePublished">2019-08-14</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/工具/">工具</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/PHP/">PHP</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2019/08/14/phpstorm-load-phpCodeSniffer/" class="leancloud_visitors" data-flag-title="phpstorm 集成 phpCodeSniffer">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/08/14/phpstorm-load-phpCodeSniffer/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 529(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 2(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>本文主要指导如何在 phpstorm 中集成 phpCodeSniffer（简称：phpCS）</p>
+<ul>
+<li>安装 phpCS</li>
+<li>如何在 phpStorm 中加载 phpCS</li>
+<li>如何加载自定义的 phpCS 的 xml 规则文件</li>
+<li>如何在 php 文件中实时提示</li>
+<li>如何根据规则实时修正</li>
+</ul>
+<p>phpStorm 官方指导文档：<a href="https://www.jetbrains.com/help/phpstorm/using-php-code-sniffer.html" target="_blank" rel="noopener">https://www.jetbrains.com/help/phpstorm/using-php-code-sniffer.html</a></p>
+<h2 id="安装-phpCS"><a href="#安装-phpCS" class="headerlink" title="安装 phpCS"></a>安装 phpCS</h2><p>安装 phpCS 有多种途径，可以参考 <a href="https://github.com/squizlabs/PHP_CodeSniffer#installation" target="_blank" rel="noopener">https://github.com/squizlabs/PHP_CodeSniffer#installation</a></p>
+<p>我们使用 composer 方式安装，为了便于在所有项目中使用 phpCS，我们使用全局方式安装。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">composer global require <span class="string">"squizlabs/php_codesniffer=*"</span> -vvv</span><br></pre></td></tr></table></figure>
+<p>安装完成后，会多出两个指令 <code>phpcs</code> 和 <code>phpcbf</code></p>
+<h2 id="在-phpStorm-中加载-phpCS"><a href="#在-phpStorm-中加载-phpCS" class="headerlink" title="在 phpStorm 中加载 phpCS"></a>在 phpStorm 中加载 phpCS</h2><img src="/2019/08/14/phpstorm-load-phpCodeSniffer/load-phpcs.png" title="load-phpcs.png">
+<p>按照截图的路径 <code>File &gt; Settings &gt; Language &amp; Framework &gt; PHP &gt; Quality Tools &gt; Code Sniffer</code>，选择 Local 后选择刚才的安装路径。</p>
+<blockquote>
+<p>如果不清楚刚才安装的全局路径，Linux 下可使用 <code>whereis phpcs</code> 查看路径。其他系统可自行搜索 “composer 全局 bin 目录” 获取更多帮助。</p>
+</blockquote>
+<blockquote>
+<p>或者，你也可以用 <code>composer global config bin-dir --absolute</code> 来查看 composer 的 bin 目录`</p>
+</blockquote>
+<h2 id="加载自定义-xml-规则文件"><a href="#加载自定义-xml-规则文件" class="headerlink" title="加载自定义 xml 规则文件"></a>加载自定义 xml 规则文件</h2><img src="/2019/08/14/phpstorm-load-phpCodeSniffer/load-rules.png" title="load-rules.png">
+<p>首先，需要开启 phpCodeSniffer 的验证提示，如截图所示。其次，在截图右下角，选择 custom 来加载自定义的 xml 文件。</p>
+<img src="/2019/08/14/phpstorm-load-phpCodeSniffer/load-rule-file.png" title="load-rule-file.png">
+<p>加载完毕后，即可正常对打开的 PHP 文件进行实时检测。</p>
+<h2 id="实时验证-PHP-文件"><a href="#实时验证-PHP-文件" class="headerlink" title="实时验证 PHP 文件"></a>实时验证 PHP 文件</h2><p>进行上述配置后，对打开的 PHP 文件会进行实时检测。</p>
+<img src="/2019/08/14/phpstorm-load-phpCodeSniffer/warning.png" title="warning.png">
+<p>如图所示，对于不符合规范的代码，会进行波浪线显示，鼠标悬浮后可以看到详细说明。</p>
+<h2 id="自动修正"><a href="#自动修正" class="headerlink" title="自动修正"></a>自动修正</h2><p>光标放置在波浪线处，按下组合键 <code>alt</code> + <code>enter</code>，选择 <code>PHP Code Beautifier and Fixer</code> 即可修正。</p>
+<img src="/2019/08/14/phpstorm-load-phpCodeSniffer/fix.png" title="fix.png">
+<p>修正后</p>
+<img src="/2019/08/14/phpstorm-load-phpCodeSniffer/done.png" title="done.png">
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>结合 phpCS，我们可以在开发时实时检测团队代码规范，便于在提交前进行规范统一。</p>
+<p>集成在 IDE 中的 phpCS 可以对打开的文件进行实时检测，如果需要对整个项目或者是指定的文件夹进行检测，可以直接使用 <code>phpcs</code> 命令进行检测，使用 <code>phpcbf</code> 进行修正。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/" title="phpstorm 集成 phpCodeSniffer" target="_blank" rel="external">https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">Web Developer</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/08/15/some-tricks-in-ab-benchmark/" title="记录一个 ab 工具使用的小坑"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/08/13/start-sonar/" title="sonar 初探"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: '2xvr0rI4HA5Vn1CcgtMPxMac-gzGzoHsz',
+  appKey: 'F2QrebTLqLwYwoJVJucLOjvX'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'abf475e647ab8d9e8787',
+    clientSecret: '8d99d6970c3df2ce36dd552e5204243e537dd3f4',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>
