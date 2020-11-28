@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://rovast.github.io/about/index.html</loc>
+    
+    <lastmod>2020-11-28T13:59:48.750Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://rovast.github.io/2020/11/28/makefile-tutorials/</loc>
     
     <lastmod>2020-11-28T13:41:13.439Z</lastmod>
@@ -23,14 +30,14 @@
   </url>
   
   <url>
-    <loc>https://rovast.github.io/repository/index.html</loc>
+    <loc>https://rovast.github.io/links/index.html</loc>
     
     <lastmod>2020-11-28T08:49:18.091Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://rovast.github.io/links/index.html</loc>
+    <loc>https://rovast.github.io/repository/index.html</loc>
     
     <lastmod>2020-11-28T08:49:18.091Z</lastmod>
     
@@ -40,13 +47,6 @@
     <loc>https://rovast.github.io/tags/index.html</loc>
     
     <lastmod>2020-11-28T08:49:18.091Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://rovast.github.io/about/index.html</loc>
-    
-    <lastmod>2020-11-28T08:49:18.090Z</lastmod>
     
   </url>
   
