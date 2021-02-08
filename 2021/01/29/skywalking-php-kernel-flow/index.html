@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>SkyWalking PHP 内核代码剖析 | rovast</title>
+  <meta name="description" content="一、总体流程PHP 重要几个生命周期说明，先后顺序为 PHP_MI、PHP_RI、PHP_EXECUTE、PHP_RS、PHP_MS，每个模块的作用如下  PHP_MI，模块初始化阶段，主要进行 PHP 框架、Zend 引擎的初始化工作。重要的几个工作如下： 全局状态信息的初始化，如 SG、CG、EG等 启动 Zend 引擎，内存池启动、注册虚拟机的各项执行句柄 解析 php.ini 配置文件 注">
+<meta name="keywords" content="Web PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SkyWalking PHP 内核代码剖析">
+<meta property="og:url" content="https://rovast.github.io/2021/01/29/skywalking-php-kernel-flow/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="一、总体流程PHP 重要几个生命周期说明，先后顺序为 PHP_MI、PHP_RI、PHP_EXECUTE、PHP_RS、PHP_MS，每个模块的作用如下  PHP_MI，模块初始化阶段，主要进行 PHP 框架、Zend 引擎的初始化工作。重要的几个工作如下： 全局状态信息的初始化，如 SG、CG、EG等 启动 Zend 引擎，内存池启动、注册虚拟机的各项执行句柄 解析 php.ini 配置文件 注">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://rovast.github.io/assets/image-20210118185219149.png">
+<meta property="og:image" content="https://rovast.github.io/assets/image-20210118191216694.png">
+<meta property="og:image" content="https://rovast.github.io/assets/image-20210118194441556.png">
+<meta property="og:image" content="https://rovast.github.io/assets/lifecycle.png">
+<meta property="og:image" content="https://rovast.github.io/assets/image-20210118193135548.png">
+<meta property="og:image" content="https://rovast.github.io/assets/image-20210118200055531.png">
+<meta property="og:image" content="https://rovast.github.io/assets/image-20210118200231152.png">
+<meta property="og:image" content="https://rovast.github.io/assets/image-20210118200521291.png">
+<meta property="og:image" content="https://rovast.github.io/assets/image-20210118200709516.png">
+<meta property="og:image" content="https://rovast.github.io/assets/lifecycle2.png">
+<meta property="og:updated_time" content="2021-01-29T09:11:23.061Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SkyWalking PHP 内核代码剖析">
+<meta name="twitter:description" content="一、总体流程PHP 重要几个生命周期说明，先后顺序为 PHP_MI、PHP_RI、PHP_EXECUTE、PHP_RS、PHP_MS，每个模块的作用如下  PHP_MI，模块初始化阶段，主要进行 PHP 框架、Zend 引擎的初始化工作。重要的几个工作如下： 全局状态信息的初始化，如 SG、CG、EG等 启动 Zend 引擎，内存池启动、注册虚拟机的各项执行句柄 解析 php.ini 配置文件 注">
+<meta name="twitter:image" content="https://rovast.github.io/assets/image-20210118185219149.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2021/01/29/skywalking-php-kernel-flow/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">字节搬运工</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/流程/">流程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.33px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.67px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/docker/" style="font-size: 13.33px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.33px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/makefile/" style="font-size: 13px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13px;">php</a> <a href="/tags/soar/" style="font-size: 13.33px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.33px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.33px;">wiki</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.33px;">杂项</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 13.67px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/08/understanding-shell-script-idiom-redirect/" class="title">理解 shell 脚本中的常见用法2&gt;&amp;1</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-08T01:39:02.000Z" itemprop="datePublished">2021-02-08</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/01/cors-on-mac/" class="title">MacOS非安全模式打开Chrome</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-01T00:02:18.000Z" itemprop="datePublished">2021-02-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/29/ant-g2-brush-timerange/" class="title">Antv G2 修改 Brush 默认行为为返回时间戳范围</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-29T01:12:46.000Z" itemprop="datePublished">2021-01-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/29/skywalking-php-kernel-flow/" class="title">SkyWalking PHP 内核代码剖析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-29T01:04:15.000Z" itemprop="datePublished">2021-01-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/27/debug-php-src-on-mac/" class="title">在 Mac 上使用 Clion 调试 PHP 源码</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-26T19:39:39.000Z" itemprop="datePublished">2020-12-27</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一、总体流程"><span class="toc-number">1.</span> <span class="toc-text">一、总体流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二、PHP-MI-阶段，自定义函数执行器替换Zend内核执行器"><span class="toc-number">2.</span> <span class="toc-text">二、PHP_MI 阶段，自定义函数执行器替换Zend内核执行器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-代码命名约定"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 代码命名约定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-拦截的函数分类和意义"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 拦截的函数分类和意义</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三、PHP-RI-阶段，请求初始化，注册-sky-agent，构造原始-segment"><span class="toc-number">3.</span> <span class="toc-text">三、PHP_RI 阶段，请求初始化，注册 sky-agent，构造原始 segment</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-主要流程"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 主要流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-traceId-生成规则，三段格式-instance-pid-second"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 traceId 生成规则，三段格式 instance.pid.second</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-header-里的-HTTP-SW8-数据含义"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 header 里的 HTTP_SW8 数据含义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-RI-周期主要流程如下"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 RI 周期主要流程如下</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#四、PHP-EXECUTE-阶段，拦截代码执行语句，分析后恢复执行"><span class="toc-number">4.</span> <span class="toc-text">四、PHP_EXECUTE 阶段，拦截代码执行语句，分析后恢复执行</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-ZEND-API-void-sky-execute-ex-zend-execute-data-execute-data"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 ZEND_API void sky_execute_ex(zend_execute_data *execute_data)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-ZEND-API-void-sky-execute-internal-zend-execute-data-execute-data-zval-return-value"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 ZEND_API void sky_execute_internal(zend_execute_data execute_data, zval return_value)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-CURL-HOOK"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 CURL HOOK</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#五、PHP-RS-请求结束阶段，发送-segment-信息至-sidecar"><span class="toc-number">5.</span> <span class="toc-text">五、PHP_RS 请求结束阶段，发送 segment 信息至 sidecar</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#六、PHP-MS-模块结束阶段"><span class="toc-number">6.</span> <span class="toc-text">六、PHP_MS 模块结束阶段</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#七、全景，整个大脑图"><span class="toc-number">7.</span> <span class="toc-text">七、全景，整个大脑图</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-skywalking-php-kernel-flow" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SkyWalking PHP 内核代码剖析
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/01/29/skywalking-php-kernel-flow/" class="article-date">
+	  <time datetime="2021-01-29T01:04:15.000Z" itemprop="datePublished">2021-01-29</time>
+	</a>
+</span>
+        
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/01/29/skywalking-php-kernel-flow/" class="leancloud_visitors" data-flag-title="SkyWalking PHP 内核代码剖析">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/01/29/skywalking-php-kernel-flow/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1.8k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 7(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="一、总体流程"><a href="#一、总体流程" class="headerlink" title="一、总体流程"></a>一、总体流程</h2><p>PHP 重要几个生命周期说明，先后顺序为 PHP_MI、PHP_RI、PHP_EXECUTE、PHP_RS、PHP_MS，每个模块的作用如下</p>
+<ul>
+<li>PHP_MI，模块初始化阶段，主要进行 PHP 框架、Zend 引擎的初始化工作。重要的几个工作如下：<ul>
+<li>全局状态信息的初始化，如 SG、CG、EG等</li>
+<li>启动 Zend 引擎，内存池启动、注册虚拟机的各项执行句柄</li>
+<li>解析 php.ini 配置文件</li>
+<li>注册拓展，包括静态编译拓展和动态编译拓展</li>
+<li><strong>回调拓展定义的 MI 函数，即 <code>PHP_MINIT_FUNCTION</code> </strong></li>
+</ul>
+</li>
+<li>PHP_RI，请求初始化阶段，CLI 模式下，该函数执行一次。如果是 php-fpm 模式下，会在 PHP_RI 和 PHP_RS 之间循环。该阶段需要关注的有如下事宜：<ul>
+<li>激活 zend 引擎，包括：重置垃圾回收器、初始化编译器、初始化执行器、初始化词法扫描器</li>
+<li><strong>回调各拓展定义的 RI 函数，即 <code>PHP_RINIT_FUNCTION</code></strong></li>
+</ul>
+</li>
+<li>PHP_EXECUTE，脚本执行阶段。通过拦截 zend 引擎的 execute 函数，我们可以捕获用户执行的每一条语句，我们可以在此阶段，进行 MySQL、Redis、CURL等代码的捕获，从而生成对应的 span，进而构建 trace。</li>
+<li>PHP_RS，请求关闭阶段。该阶段主要进行请求资源的释放动作，同时这个是 fpm 请求的最后一个阶段，我们可以在此阶段，把本次请求获取的 segment 信息上报至 sidecar</li>
+<li>PHP_MS，模块关闭阶段。各项资源的释放</li>
+</ul>
+<p>SkyWalking PHP 内核的主要处理流程整理如下：</p>
+<p><img src="/assets/image-20210118185219149.png" alt="image-20210118185219149"></p>
+<h2 id="二、PHP-MI-阶段，自定义函数执行器替换Zend内核执行器"><a href="#二、PHP-MI-阶段，自定义函数执行器替换Zend内核执行器" class="headerlink" title="二、PHP_MI 阶段，自定义函数执行器替换Zend内核执行器"></a>二、PHP_MI 阶段，自定义函数执行器替换Zend内核执行器</h2><p><img src="/assets/image-20210118191216694.png" alt="image-20210118191216694"></p>
+<p>该阶段的入口函数 <strong><code>PHP_MINIT_FUNCTION (skywalking)</code></strong></p>
+<h3 id="2-1-代码命名约定"><a href="#2-1-代码命名约定" class="headerlink" title="2.1 代码命名约定"></a>2.1 代码命名约定</h3><p>该阶段主要是进行 Zend 执行器的 assign 动作，变量的命名有如下规则：</p>
+<ul>
+<li><code>ori_</code> 打头的，是 Zend 引擎的原函数，这里做备份，便于 hack 后，恢复原来的执行</li>
+<li><code>zend_</code> 打头的，就是 Zend 引擎的内置函数</li>
+<li><code>sky_</code> 打头的，是我们计划在对应阶段进行的自定义动作。一般在自定义动作的最后，都会使用 <code>ori_</code> 来交还函数控制权，恢复原来正常流程函数的执行动作</li>
+</ul>
+<p>部分代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">PHP_MINIT_FUNCTION (skywalking) &#123;</span><br><span class="line">  <span class="comment">// .....</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 用户自定义函数执行器(php脚本定义的类、函数)</span></span><br><span class="line">  ori_execute_ex = zend_execute_ex;</span><br><span class="line">  zend_execute_ex = sky_execute_ex;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 内部函数执行器(c语言定义的类、函数)</span></span><br><span class="line">  ori_execute_internal = zend_execute_internal;</span><br><span class="line">  zend_execute_internal = sky_execute_internal;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// ......</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-2-拦截的函数分类和意义"><a href="#2-2-拦截的函数分类和意义" class="headerlink" title="2.2 拦截的函数分类和意义"></a>2.2 拦截的函数分类和意义</h3><p>其拦截的函数主要分三类：</p>
+<ul>
+<li>zend_execute_ex，拦截用户态函数，即我们平时写的 .php 文件里面的代码。这里可以捕获到 class name 类名、function name 函数名</li>
+<li>zend_execute_internal，拦截 PHP 内置的函数和类等，比如 PDO、mysqli 等</li>
+<li>CURL相关的函数句柄，这样我们就可以捕获函数的上下游 http 调用信息。其拦截的函数包括：curl_exec、curl_setopt、curl_setopt_array、curl_close</li>
+</ul>
+<h2 id="三、PHP-RI-阶段，请求初始化，注册-sky-agent，构造原始-segment"><a href="#三、PHP-RI-阶段，请求初始化，注册-sky-agent，构造原始-segment" class="headerlink" title="三、PHP_RI 阶段，请求初始化，注册 sky-agent，构造原始 segment"></a>三、PHP_RI 阶段，请求初始化，注册 sky-agent，构造原始 segment</h2><p>入口函数 <code>PHP_RINIT_FUNCTION(skywalking)</code></p>
+<h3 id="3-1-主要流程"><a href="#3-1-主要流程" class="headerlink" title="3.1 主要流程"></a>3.1 主要流程</h3><p>PHP_RI 阶段在每一个 fpm 请求时都会触发一次，在此阶段，主要进行以下两件事</p>
+<ul>
+<li><code>static int sky_register()</code>，通过 unix sock 通信，注册 agent，同时根据返回的握手信息来确定 app、service、instance信息</li>
+<li><code>static void request_init()</code> ，构造 segement 信息，这里包含了以下重要信息<ul>
+<li>生成 traceId</li>
+<li>根据 header 的 sw8 字段来解析上游信息，进而构造 span 信心，refs 信息</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-2-traceId-生成规则，三段格式-instance-pid-second"><a href="#3-2-traceId-生成规则，三段格式-instance-pid-second" class="headerlink" title="3.2 traceId 生成规则，三段格式 instance.pid.second"></a>3.2 traceId 生成规则，三段格式 instance.pid.second</h3><p>其核心代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">generate_context</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> sys_pid = getpid();</span><br><span class="line">  <span class="keyword">long</span> second = get_second();</span><br><span class="line">  second = second * <span class="number">10000</span> + sky_increment_id; <span class="comment">//创建traceid的因子</span></span><br><span class="line">  <span class="keyword">char</span> *makeTraceId;</span><br><span class="line">  makeTraceId = (<span class="keyword">char</span> *) emalloc(<span class="keyword">sizeof</span>(<span class="keyword">char</span>) * <span class="number">180</span>); <span class="comment">//分配traceId所需要的内存</span></span><br><span class="line"></span><br><span class="line">  bzero(makeTraceId, <span class="keyword">sizeof</span>(<span class="keyword">char</span>) * <span class="number">180</span>);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">sprintf</span>(makeTraceId, <span class="string">"%d.%d.%ld"</span>, application_instance, sys_pid, second);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// .....</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中 sky_increment_id 是 0~9999。MSP 平台中显示的 TraceId 信息，类似如下：</p>
+<p><img src="/assets/image-20210118194441556.png" alt="image-20210118194441556"></p>
+<p>我们来简短分析下，按点「.」分割</p>
+<ul>
+<li><code>1</code>。因为在 sky_register 阶段，application_instance 固定为 1</li>
+<li><code>393</code>，即 pid</li>
+<li><code>16109522148050</code> 这个就是时间戳 + sky_increment_id 构成的了</li>
+</ul>
+<h3 id="3-3-header-里的-HTTP-SW8-数据含义"><a href="#3-3-header-里的-HTTP-SW8-数据含义" class="headerlink" title="3.3 header 里的 HTTP_SW8 数据含义"></a>3.3 header 里的 HTTP_SW8 数据含义</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">generate_context</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// .......</span></span><br><span class="line">  <span class="comment">// 获取 header HTTP_SW8 信息</span></span><br><span class="line">  sw = zend_hash_str_find(Z_ARRVAL_P(carrier), <span class="string">"HTTP_SW8"</span>, <span class="keyword">sizeof</span>(<span class="string">"HTTP_SW8"</span>) - <span class="number">1</span>); <span class="comment">//$SERVER['HTTP_SW8'];</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// .......</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 按中横线（-）分割为 sw8_N 数组</span></span><br><span class="line">  php_explode(zend_string_init(ZEND_STRL(<span class="string">"-"</span>), <span class="number">0</span>), Z_STR_P(sw), &amp;temp, <span class="number">10</span>);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// ......</span></span><br><span class="line">  <span class="comment">// 对分割后的数组，进行解码，其 index 为 1,2,4,5,6,7</span></span><br><span class="line">  zval_b64_decode(&amp;sw8_1decode, Z_STRVAL_P(sw8_1));</span><br><span class="line">  zval_b64_decode(&amp;sw8_2decode, Z_STRVAL_P(sw8_2));</span><br><span class="line">  zval_b64_decode(&amp;sw8_4decode, Z_STRVAL_P(sw8_4));</span><br><span class="line">  zval_b64_decode(&amp;sw8_5decode, Z_STRVAL_P(sw8_5));</span><br><span class="line">  zval_b64_decode(&amp;sw8_6decode, Z_STRVAL_P(sw8_6));</span><br><span class="line">  zval_b64_decode(&amp;sw8_7decode, Z_STRVAL_P(sw8_7));</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// .......</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们去网关日志里，取一个样本分析，得到的原始 header 信息如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1-QzBBODNDMzEtMTYxMDk1MzUyODM0MC0xMTc3OTctQS0xMjcw-QzBBODNDMzEtMTYxMDk1MzUyODM0MC0xMTc3OTctQS0xMjcw-1-xxxxxxxxxxxx-YjcyOWU0MzUtNjA5Zi00YzMwLWI4MjctNjZmMmUyYWZjNmM2-xxxxxxxxxx==-xxxxx.service</span><br></pre></td></tr></table></figure>
+<p>我们按中横线(-)分割，得到</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">QzBBODNDMzEtMTYxMDk1MzUyODM0MC0xMTc3OTctQS0xMjcw // Trace Id base64</span><br><span class="line">QzBBODNDMzEtMTYxMDk1MzUyODM0MC0xMTc3OTctQS0xMjcw // Parent trace segment Id</span><br><span class="line">1                                                // Parent span Id</span><br><span class="line">xxxxxxxxxxxx                                     // Parent service</span><br><span class="line">YjcyOWU0MzUtNjA5Zi00YzMwLWI4MjctNjZmMmUyYWZjNmM2 // Parent service instance</span><br><span class="line">xxxxxxxxxx==                                     // Parent endpoint</span><br><span class="line">xxxxx.service                                    // Target address used at client side of this request</span><br></pre></td></tr></table></figure>
+<p>我们对其中 1,2,4,5,6,7 进行 base64 解码，得到</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1</span><br><span class="line">C0A83C31-1610953528340-117797-A-1270 // Trace Id base64</span><br><span class="line">C0A83C31-1610953528340-117797-A-1270 // Parent trace segment Id</span><br><span class="line">1                                    // Parent span Id</span><br><span class="line">xxxxxxxxxxxxx                        // Parent service</span><br><span class="line">b729e435-609f-4c30-b827-66f2e2afc6c6 // Parent service instance</span><br><span class="line">xxxxxxxxxxxxxxxxxxxxxxxxx            // Parent endpoint</span><br><span class="line">xxxxxxxxxx.service                   // Target address used at client side of this request</span><br></pre></td></tr></table></figure>
+<h3 id="3-4-RI-周期主要流程如下"><a href="#3-4-RI-周期主要流程如下" class="headerlink" title="3.4 RI 周期主要流程如下"></a>3.4 RI 周期主要流程如下</h3><p><img src="/assets/lifecycle.png" alt="lifecycle"></p>
+<h2 id="四、PHP-EXECUTE-阶段，拦截代码执行语句，分析后恢复执行"><a href="#四、PHP-EXECUTE-阶段，拦截代码执行语句，分析后恢复执行" class="headerlink" title="四、PHP_EXECUTE 阶段，拦截代码执行语句，分析后恢复执行"></a>四、PHP_EXECUTE 阶段，拦截代码执行语句，分析后恢复执行</h2><p><img src="/assets/image-20210118193135548.png" alt="image-20210118193135548"></p>
+<p>在 MI 阶段，我们替换了 zend 引擎的函数执行指向，所以所有语句的执行会被我们接管。我们在执行完自己需要的动作后，还原原来的执行即可。</p>
+<p>需要注意的是，我们接管的函数会被多次触发，每执行一条 opline，就会被触发一次(存疑，待指正)。</p>
+<h3 id="4-1-ZEND-API-void-sky-execute-ex-zend-execute-data-execute-data"><a href="#4-1-ZEND-API-void-sky-execute-ex-zend-execute-data-execute-data" class="headerlink" title="4.1 ZEND_API void sky_execute_ex(zend_execute_data *execute_data)"></a>4.1 ZEND_API void sky_execute_ex(zend_execute_data *execute_data)</h3><p>核心的流程如下</p>
+<ol>
+<li>获取当前代码执行的信息，包括：类名、函数名</li>
+<li>对类名和函数名进行判断，看是否需要拦截。目前拦截的是 Predis SDK</li>
+<li>如果需要拦截，根据拦截信息构造 span</li>
+<li>把构造好的 span 插入到当前 segment 的 spans 数组里</li>
+<li>恢复函数原来的执行，调用 <code>ori_</code> 即可</li>
+</ol>
+<p><img src="/assets/image-20210118200055531.png" alt="image-20210118200055531"></p>
+<h3 id="4-2-ZEND-API-void-sky-execute-internal-zend-execute-data-execute-data-zval-return-value"><a href="#4-2-ZEND-API-void-sky-execute-internal-zend-execute-data-execute-data-zval-return-value" class="headerlink" title="4.2 ZEND_API void sky_execute_internal(zend_execute_data execute_data, zval return_value)"></a>4.2 ZEND_API void sky_execute_internal(zend_execute_data <em>execute_data, zval </em>return_value)</h3><p>其核心流程和上面 4.1 分析的类似，其不同就在于这里拦截的是 PHP 内置的一些类，即编译时就安装的类。流程主要包括</p>
+<ol>
+<li>获取类名和函数名</li>
+<li>根据类名判断是否需要拦截，目前需要拦截：PDO、PDOStatement、mysqli、Yar_Client、Reids、Memecached</li>
+<li>构造 span，插入到当前 segment 的 spans 数组里</li>
+<li>恢复函数执行</li>
+</ol>
+<p><img src="/assets/image-20210118200231152.png" alt="image-20210118200231152"></p>
+<h3 id="4-3-CURL-HOOK"><a href="#4-3-CURL-HOOK" class="headerlink" title="4.3 CURL HOOK"></a>4.3 CURL HOOK</h3><p>这里主要是调用链的传递，如果发现有 curl 请求，则根据规则生成当前的 sw8 信息，塞到 http header 的 sw8 字段里，传递给下游。</p>
+<p>更多的流程，以后补充。</p>
+<p><img src="/assets/image-20210118200521291.png" alt="image-20210118200521291"></p>
+<h2 id="五、PHP-RS-请求结束阶段，发送-segment-信息至-sidecar"><a href="#五、PHP-RS-请求结束阶段，发送-segment-信息至-sidecar" class="headerlink" title="五、PHP_RS 请求结束阶段，发送 segment 信息至 sidecar"></a>五、PHP_RS 请求结束阶段，发送 segment 信息至 sidecar</h2><p>PHP_RS 阶段主要做两件事儿：</p>
+<ol>
+<li><p>通过 unix sock 发送本请求构建的 segment 信息至 sidecar</p>
+</li>
+<li><p>释放当前请求里的全局状态存储。由于其他的 int、char、boolean 类型的不涉及到内存管理，所以就是四个 zval 的释放</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ZEND_BEGIN_MODULE_GLOBALS(skywalking)</span><br><span class="line">    <span class="keyword">char</span> *sock_path;</span><br><span class="line">    <span class="keyword">char</span> *app_code; <span class="comment">//app_name eg:skywalking.app_code = MyProjectName</span></span><br><span class="line">    <span class="keyword">char</span> *app_code_env_key; <span class="comment">//app_name 环境变量地址：环境变量-&gt;默认KEY：APM_APP_CODE</span></span><br><span class="line">    zend_bool enable;</span><br><span class="line">    zval UpstreamSegment; <span class="comment">//全局上报数据段</span></span><br><span class="line">    zval context;</span><br><span class="line">    zval curl_header; <span class="comment">//curl header数据</span></span><br><span class="line">    zval curl_header_send; <span class="comment">//记录当前R周期 是否已经send过curl_header</span></span><br><span class="line">    <span class="keyword">int</span>  version;</span><br><span class="line">ZEND_END_MODULE_GLOBALS(skywalking)</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><img src="/assets/image-20210118200709516.png" alt="image-20210118200709516"></p>
+<h2 id="六、PHP-MS-模块结束阶段"><a href="#六、PHP-MS-模块结束阶段" class="headerlink" title="六、PHP_MS 模块结束阶段"></a>六、PHP_MS 模块结束阶段</h2><p>这个阶段没啥好说的，没啥特殊操作</p>
+<h2 id="七、全景，整个大脑图"><a href="#七、全景，整个大脑图" class="headerlink" title="七、全景，整个大脑图"></a>七、全景，整个大脑图</h2><p><img src="/assets/lifecycle2.png" alt="lifecycle2"></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2021/01/29/skywalking-php-kernel-flow/" title="SkyWalking PHP 内核代码剖析" target="_blank" rel="external">https://rovast.github.io/2021/01/29/skywalking-php-kernel-flow/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">字节搬运工</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2021/01/29/ant-g2-brush-timerange/" title="Antv G2 修改 Brush 默认行为为返回时间戳范围"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2020/12/27/debug-php-src-on-mac/" title="在 Mac 上使用 Clion 调试 PHP 源码"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: '2xvr0rI4HA5Vn1CcgtMPxMac-gzGzoHsz',
+  appKey: 'F2QrebTLqLwYwoJVJucLOjvX'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'abf475e647ab8d9e8787',
+    clientSecret: '8d99d6970c3df2ce36dd552e5204243e537dd3f4',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>

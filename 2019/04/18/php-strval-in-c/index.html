@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>docker+gdb 调试 PHP 源码，看 strval 函数 C 实现 | rovast</title>
+  <meta name="description" content="php strval 函数的作用很简单，就是你给他一个值，他给你返回字符串类型。 算是一个比较简单的函数了，我们来通过 gdb 来一探究竟。 通过本文，你可以窥探下  gdb 的简单使用 gdb gui 模式初探 看看平时写的 PHP 代码在 C 语言里的样子 对使用 gdb 调试 php 代码有个初步了解 对了，文末有一些截图，不要错过  采购食材 电脑一台 docker 和 docker-co">
+<meta name="keywords" content="PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker+gdb 调试 PHP 源码，看 strval 函数 C 实现">
+<meta property="og:url" content="https://rovast.github.io/2019/04/18/php-strval-in-c/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="php strval 函数的作用很简单，就是你给他一个值，他给你返回字符串类型。 算是一个比较简单的函数了，我们来通过 gdb 来一探究竟。 通过本文，你可以窥探下  gdb 的简单使用 gdb gui 模式初探 看看平时写的 PHP 代码在 C 语言里的样子 对使用 gdb 调试 php 代码有个初步了解 对了，文末有一些截图，不要错过  采购食材 电脑一台 docker 和 docker-co">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://rovast.github.io/2019/04/18/php-strval-in-c/0.jpg">
+<meta property="og:image" content="https://rovast.github.io/2019/04/18/php-strval-in-c/1.jpg">
+<meta property="og:image" content="https://rovast.github.io/2019/04/18/php-strval-in-c/2.jpg">
+<meta property="og:updated_time" content="2020-11-28T08:49:18.067Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="docker+gdb 调试 PHP 源码，看 strval 函数 C 实现">
+<meta name="twitter:description" content="php strval 函数的作用很简单，就是你给他一个值，他给你返回字符串类型。 算是一个比较简单的函数了，我们来通过 gdb 来一探究竟。 通过本文，你可以窥探下  gdb 的简单使用 gdb gui 模式初探 看看平时写的 PHP 代码在 C 语言里的样子 对使用 gdb 调试 php 代码有个初步了解 对了，文末有一些截图，不要错过  采购食材 电脑一台 docker 和 docker-co">
+<meta name="twitter:image" content="https://rovast.github.io/2019/04/18/php-strval-in-c/0.jpg">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2019/04/18/php-strval-in-c/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">字节搬运工</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/流程/">流程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.33px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.67px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/docker/" style="font-size: 13.33px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.33px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/makefile/" style="font-size: 13px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13px;">php</a> <a href="/tags/soar/" style="font-size: 13.33px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.33px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.33px;">wiki</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.33px;">杂项</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 13.67px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/08/understanding-shell-script-idiom-redirect/" class="title">理解 shell 脚本中的常见用法2&gt;&amp;1</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-08T01:39:02.000Z" itemprop="datePublished">2021-02-08</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/01/cors-on-mac/" class="title">MacOS非安全模式打开Chrome</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-01T00:02:18.000Z" itemprop="datePublished">2021-02-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/29/ant-g2-brush-timerange/" class="title">Antv G2 修改 Brush 默认行为为返回时间戳范围</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-29T01:12:46.000Z" itemprop="datePublished">2021-01-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/29/skywalking-php-kernel-flow/" class="title">SkyWalking PHP 内核代码剖析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-29T01:04:15.000Z" itemprop="datePublished">2021-01-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/27/debug-php-src-on-mac/" class="title">在 Mac 上使用 Clion 调试 PHP 源码</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-26T19:39:39.000Z" itemprop="datePublished">2020-12-27</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#采购食材"><span class="toc-number">1.</span> <span class="toc-text">采购食材</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#备菜环节"><span class="toc-number">2.</span> <span class="toc-text">备菜环节</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1、使用-docker-拉取环境"><span class="toc-number">2.1.</span> <span class="toc-text">1、使用 docker 拉取环境</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2、进入容器"><span class="toc-number">2.2.</span> <span class="toc-text">2、进入容器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#开火（请在容器内操作）"><span class="toc-number">3.</span> <span class="toc-text">开火（请在容器内操作）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1、新建测试文件"><span class="toc-number">3.1.</span> <span class="toc-text">1、新建测试文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2、开始调试，进入-gdb"><span class="toc-number">3.2.</span> <span class="toc-text">2、开始调试，进入 gdb</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3、打一些断点（敲命令时可以用-tab-补全）"><span class="toc-number">3.3.</span> <span class="toc-text">3、打一些断点（敲命令时可以用 tab 补全）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4、执行，查看断点值"><span class="toc-number">3.4.</span> <span class="toc-text">4、执行，查看断点值</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#消化"><span class="toc-number">4.</span> <span class="toc-text">消化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#附录"><span class="toc-number">5.</span> <span class="toc-text">附录</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-php-strval-in-c" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      docker+gdb 调试 PHP 源码，看 strval 函数 C 实现
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/04/18/php-strval-in-c/" class="article-date">
+	  <time datetime="2019-04-18T10:49:43.000Z" itemprop="datePublished">2019-04-18</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/编程/">编程</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/PHP/">PHP</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2019/04/18/php-strval-in-c/" class="leancloud_visitors" data-flag-title="docker+gdb 调试 PHP 源码，看 strval 函数 C 实现">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/04/18/php-strval-in-c/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1.8k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 9(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>php strval 函数的作用很简单，就是你给他一个值，他给你返回字符串类型。</p>
+<p>算是一个比较简单的函数了，我们来通过 gdb 来一探究竟。</p>
+<p>通过本文，你可以窥探下</p>
+<ul>
+<li>gdb 的简单使用</li>
+<li>gdb gui 模式初探</li>
+<li>看看平时写的 PHP 代码在 C 语言里的样子</li>
+<li>对使用 gdb 调试 php 代码有个初步了解</li>
+<li>对了，文末有一些截图，不要错过</li>
+</ul>
+<h2 id="采购食材"><a href="#采购食材" class="headerlink" title="采购食材"></a>采购食材</h2><ul>
+<li>电脑一台</li>
+<li>docker 和 docker-compose</li>
+</ul>
+<blockquote>
+<p>gdb 也好， PHP 也好，都打包成 docker 镜像啦，开袋即食，甚好。</p>
+</blockquote>
+<h2 id="备菜环节"><a href="#备菜环节" class="headerlink" title="备菜环节"></a>备菜环节</h2><h3 id="1、使用-docker-拉取环境"><a href="#1、使用-docker-拉取环境" class="headerlink" title="1、使用 docker 拉取环境"></a>1、使用 docker 拉取环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 拉取准备好的环境</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/rovast/docker-examples.git</span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入项目</span></span><br><span class="line"><span class="built_in">cd</span> docker-examples/gdb-php-src/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动，会经历一个漫长又不太漫长的等待，看你网速</span></span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关于容器内的环境，大家可以看看 <a href="https://github.com/rovast/docker-autobuild/blob/master/gdb-php-src/7.0.0/Dockerfile" target="_blank" rel="noopener">dockerfile</a></p>
+<p>其实很简单，就是基于 gcc 官方镜像构建，然后增加了 vim gdb，并且下载了 php7.0.0 的源码，按照 debug 参数进行编译</p>
+</blockquote>
+<p>显示如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Creating network &quot;gdb-php-src_default&quot; with the default driver</span><br><span class="line">Creating gdb-php-src ... done</span><br></pre></td></tr></table></figure>
+<h3 id="2、进入容器"><a href="#2、进入容器" class="headerlink" title="2、进入容器"></a>2、进入容器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it gdb-php-src bash</span><br><span class="line"></span><br><span class="line"><span class="comment">### 显示下面的东西，表示你已经进入到容器内了 ####</span></span><br><span class="line">root@71a98d1bc1a6:/home<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p>我们看看容器内的环境（php 以及 gdb）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">### 我们在容器内看看环境</span></span><br><span class="line">root@71a98d1bc1a6:/home<span class="comment"># ls</span></span><br><span class="line">php-7.0.0  start.md</span><br><span class="line"></span><br><span class="line">root@71a98d1bc1a6:/home<span class="comment"># gdb -v</span></span><br><span class="line">GNU gdb (Debian 7.12-6) 7.12.0.20161007-git</span><br><span class="line">Copyright (C) 2016 Free Software Foundation, Inc.</span><br><span class="line">License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;</span><br><span class="line">This is free software: you are free to change and redistribute it.</span><br><span class="line">There is NO WARRANTY, to the extent permitted by law.  Type <span class="string">"show copying"</span></span><br><span class="line">and <span class="string">"show warranty"</span> <span class="keyword">for</span> details.</span><br><span class="line">This GDB was configured as <span class="string">"x86_64-linux-gnu"</span>.</span><br><span class="line">Type <span class="string">"show configuration"</span> <span class="keyword">for</span> configuration details.</span><br><span class="line">For bug reporting instructions, please see:</span><br><span class="line">&lt;http://www.gnu.org/software/gdb/bugs/&gt;.</span><br><span class="line">Find the GDB manual and other documentation resources online at:</span><br><span class="line">&lt;http://www.gnu.org/software/gdb/documentation/&gt;.</span><br><span class="line">For <span class="built_in">help</span>, <span class="built_in">type</span> <span class="string">"help"</span>.</span><br><span class="line">Type <span class="string">"apropos word"</span> to search <span class="keyword">for</span> commands related to <span class="string">"word"</span>.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">root@71a98d1bc1a6:/home<span class="comment"># php -v</span></span><br><span class="line">PHP 7.0.0 (cli) (built: Apr 17 2019 13:33:30) ( NTS DEBUG )</span><br><span class="line">Copyright (c) 1997-2015 The PHP Group</span><br><span class="line">Zend Engine v3.0.0, Copyright (c) 1998-2015 Zend Technologies</span><br><span class="line">root@71a98d1bc1a6:/home<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h2 id="开火（请在容器内操作）"><a href="#开火（请在容器内操作）" class="headerlink" title="开火（请在容器内操作）"></a>开火（请在容器内操作）</h2><h3 id="1、新建测试文件"><a href="#1、新建测试文件" class="headerlink" title="1、新建测试文件"></a>1、新建测试文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@71a98d1bc1a6:/home<span class="comment"># vi test.php</span></span><br></pre></td></tr></table></figure>
+<p>输入以下内容<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">strval(<span class="number">1234</span>);</span><br></pre></td></tr></table></figure></p>
+<p>这个文件干的事情就比较简单了，就是把 -1234[整形] 转换为 -1234[字符串]</p>
+<h3 id="2、开始调试，进入-gdb"><a href="#2、开始调试，进入-gdb" class="headerlink" title="2、开始调试，进入 gdb"></a>2、开始调试，进入 gdb</h3><p>接下来车速较快，各位按步骤跟上</p>
+<p>输入 <code>gdb php</code>，开始调试</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">root@71a98d1bc1a6:/home<span class="comment"># gdb php</span></span><br><span class="line">GNU gdb (Debian 7.12-6) 7.12.0.20161007-git</span><br><span class="line">Copyright (C) 2016 Free Software Foundation, Inc.</span><br><span class="line">License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;</span><br><span class="line">This is free software: you are free to change and redistribute it.</span><br><span class="line">There is NO WARRANTY, to the extent permitted by law.  Type <span class="string">"show copying"</span></span><br><span class="line">and <span class="string">"show warranty"</span> <span class="keyword">for</span> details.</span><br><span class="line">This GDB was configured as <span class="string">"x86_64-linux-gnu"</span>.</span><br><span class="line">Type <span class="string">"show configuration"</span> <span class="keyword">for</span> configuration details.</span><br><span class="line">For bug reporting instructions, please see:</span><br><span class="line">&lt;http://www.gnu.org/software/gdb/bugs/&gt;.</span><br><span class="line">Find the GDB manual and other documentation resources online at:</span><br><span class="line">&lt;http://www.gnu.org/software/gdb/documentation/&gt;.</span><br><span class="line">For <span class="built_in">help</span>, <span class="built_in">type</span> <span class="string">"help"</span>.</span><br><span class="line">Type <span class="string">"apropos word"</span> to search <span class="keyword">for</span> commands related to <span class="string">"word"</span>...</span><br><span class="line">Reading symbols from php...done.</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+<h3 id="3、打一些断点（敲命令时可以用-tab-补全）"><a href="#3、打一些断点（敲命令时可以用-tab-补全）" class="headerlink" title="3、打一些断点（敲命令时可以用 tab 补全）"></a>3、打一些断点（敲命令时可以用 tab 补全）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(gdb) b zend_long_to_str</span><br><span class="line">Breakpoint 1 at 0x810423: file /home/php-7.0.0/Zend/zend_operators.c, line 2743.</span><br><span class="line">(gdb) b zend_print_ulong_to_buf</span><br><span class="line">Breakpoint 2 at 0x5f387b: zend_print_ulong_to_buf. (13 locations)</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+<p>这里在关键函数 <code>zend_long_to_str</code> 和 <code>zend_print_ulong_to_buf</code> 打了断点。</p>
+<p><code>b</code> 在 gdb 中是 breakpoint 缩写，后面可以加函数名，或者当前文件的行号都是可以的</p>
+<h3 id="4、执行，查看断点值"><a href="#4、执行，查看断点值" class="headerlink" title="4、执行，查看断点值"></a>4、执行，查看断点值</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">(gdb) r test.php <span class="comment"># 执行我们刚才的那个 PHP 文件</span></span><br><span class="line">Starting program: /usr/<span class="built_in">local</span>/bin/php test.php</span><br><span class="line">[Thread debugging using libthread_db enabled]</span><br><span class="line">Using host libthread_db library <span class="string">"/lib/x86_64-linux-gnu/libthread_db.so.1"</span>.</span><br><span class="line">warning: File <span class="string">"/usr/local/lib64/libstdc++.so.6.0.25-gdb.py"</span> auto-loading has been declined by your `auto-load safe-path<span class="string">' set to "$debugdir:$datadir/auto-load".</span></span><br><span class="line"><span class="string">To enable execution of this file add</span></span><br><span class="line"><span class="string">	add-auto-load-safe-path /usr/local/lib64/libstdc++.so.6.0.25-gdb.py</span></span><br><span class="line"><span class="string">line to your configuration file "/root/.gdbinit".</span></span><br><span class="line"><span class="string">To completely disable this security protection add</span></span><br><span class="line"><span class="string">	set auto-load safe-path /</span></span><br><span class="line"><span class="string">line to your configuration file "/root/.gdbinit".</span></span><br><span class="line"><span class="string">For more information about this security protection see the</span></span><br><span class="line"><span class="string">"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:</span></span><br><span class="line"><span class="string">	info "(gdb)Auto-loading safe path"</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Breakpoint 1, zend_long_to_str (num=-1234) at /home/php-7.0.0/Zend/zend_operators.c:2743</span></span><br><span class="line"><span class="string">2743		char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, num);</span></span><br><span class="line"><span class="string">(gdb)</span></span><br></pre></td></tr></table></figure>
+<p> 看的好像不明了嘛， <code>ctrl</code> + <code>x</code> 后再按 <code>a</code> 进入 gui 模式看看</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">   ┌──/home/php-7.0.0/Zend/zend_operators.c────────────────────────────────────────────────────────────────────────────────────────────────┐</span><br><span class="line">   │2731    ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC) /* &#123;&#123;&#123; */                                   │</span><br><span class="line">   │2732    &#123;                                                                                                                              │</span><br><span class="line">   │2733            zend_string *str;                                                                                                      │</span><br><span class="line">   │2734                                                                                                                                   │</span><br><span class="line">   │2735            str = zend_strpprintf(0, <span class="string">"%.*G"</span>, (int) EG(precision), (double)Z_DVAL_P(op));                                           │</span><br><span class="line">   │2736            ZVAL_NEW_STR(op, str);                                                                                                 │</span><br><span class="line">   │2737    &#125;                                                                                                                              │</span><br><span class="line">   │2738    /* &#125;&#125;&#125; */                                                                                                                      │</span><br><span class="line">   │2739                                                                                                                                   │</span><br><span class="line">   │2740    ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num) /* &#123;&#123;&#123; */                                                  │</span><br><span class="line">   │2741    &#123;                                                                                                                              │</span><br><span class="line">   │2742            char buf[MAX_LENGTH_OF_LONG + 1];                                                                                      │</span><br><span class="line">B+&gt;│2743            char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, num);                                                        │</span><br><span class="line">   │2744            <span class="built_in">return</span> zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);                                                          │</span><br><span class="line">   │2745    &#125;                                                                                                                              │</span><br><span class="line">   │2746    /* &#125;&#125;&#125; */                                                                                                                      │</span><br><span class="line">   │2747                                                                                                                                   │</span><br><span class="line">   │2748    ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* &#123;&#123;&#123; */ &#123;   │</span><br><span class="line">   │2749        <span class="built_in">return</span> is_numeric_string_ex(ZSTR_VAL(str), ZSTR_LEN(str), lval, dval, -1, NULL);                                           │</span><br><span class="line">   │2750    &#125;                                                                                                                              │</span><br><span class="line">   │2751    /* &#125;&#125;&#125; */                                                                                                                      │</span><br><span class="line">   │2752                                                                                                                                   │</span><br><span class="line">   │2753    ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allo│</span><br><span class="line">   │2754    &#123;                                                                                                                              │</span><br><span class="line">   │2755            const char *ptr;                                                                                                       │</span><br><span class="line">   │2756            int digits = 0, dp_or_e = 0;                                                                                           │</span><br><span class="line">   │2757            double local_dval = 0.0;                                                                                               │</span><br><span class="line">   └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘</span><br><span class="line">multi-thre Thread 0x7ffff7fe37 In: zend_long_to_str                                                                      L2743 PC: 0x810423</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+<p>有点意思了，函数在 2743 行断住了，我们来看看 num 的值</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p num</span><br><span class="line"><span class="variable">$1</span> = -1234</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+<p>对嘛，这个就是我们要处理的值，我们全速运行到 <code>zend_print_long_to_buf</code> 里看看</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) c</span><br><span class="line">Continuing.</span><br></pre></td></tr></table></figure>
+<p>显示如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">(gdb) c</span><br><span class="line">  ┌──/home/php-7.0.0/Zend/zend_operators.h────────────────────────────────────────────────────────────────────────────────────────────────┐</span><br><span class="line">   │781             <span class="keyword">else</span>                                                                                                   \               │</span><br><span class="line">   │782             ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(opcode)                                                                           │</span><br><span class="line">   │783                                                                                                                                    │</span><br><span class="line">   │784     <span class="comment">#define ZEND_TRY_UNARY_OBJECT_OPERATION(opcode)                                                            \                   │</span></span><br><span class="line">   │785             <span class="keyword">if</span> (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT)                                                             \               │</span><br><span class="line">   │786                     &amp;&amp; UNEXPECTED(Z_OBJ_HANDLER_P(op1, do_operation))                                                  \           │</span><br><span class="line">   │787                     &amp;&amp; EXPECTED(SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, NULL))) &#123; \                     │</span><br><span class="line">   │788                     <span class="built_in">return</span> SUCCESS;                                                                                    \           │</span><br><span class="line">   │789             &#125;                                                                                                                      │</span><br><span class="line">   │790                                                                                                                                    │</span><br><span class="line">   │791     /* buf points to the END of the buffer */                                                                                      │</span><br><span class="line">   │792     static zend_always_inline char *zend_print_ulong_to_buf(char *buf, zend_ulong num) &#123;                                           │</span><br><span class="line">B+&gt;│793             *buf = <span class="string">'\0'</span>;                                                                                                           │</span><br><span class="line">   │794             <span class="keyword">do</span> &#123;                                                                                                                   │</span><br><span class="line">   │795                     *--buf = (char) (num % 10) + <span class="string">'0'</span>;                                                                              │</span><br><span class="line">   │796                     num /= 10;                                                                                                     │</span><br><span class="line">   │797             &#125; <span class="keyword">while</span> (num &gt; 0);                                                                                                     │</span><br><span class="line">   │798             <span class="built_in">return</span> buf;                                                                                                            │</span><br><span class="line">   │799     &#125;                                                                                                                              │</span><br><span class="line">   │800                                                                                                                                    │</span><br><span class="line">   │801     /* buf points to the END of the buffer */                                                                                      │</span><br><span class="line">   │802     static zend_always_inline char *zend_print_long_to_buf(char *buf, zend_long num) &#123;                                             │</span><br><span class="line">   │803             <span class="keyword">if</span> (num &lt; 0) &#123;                                                                                                         │</span><br><span class="line">   │804                 char *result = zend_print_ulong_to_buf(buf, ~((zend_ulong) num) + 1);                                              │</span><br><span class="line">   │805                 *--result = <span class="string">'-'</span>;                                                                                                   │</span><br><span class="line">   │806                     <span class="built_in">return</span> result;                                                                                                 │</span><br><span class="line">   │807             &#125; <span class="keyword">else</span> &#123;                                                                                                               │</span><br><span class="line">   └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘</span><br><span class="line">multi-thre Thread 0x7ffff7fe37 In: zend_print_ulong_to_buf                                                               L793  PC: 0x8041fd</span><br></pre></td></tr></table></figure>
+<p>接下来，我们来进行一些单步调试，看看内存里的值</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Breakpoint 1, zend_long_to_str (num=-1234) at /home/php-7.0.0/Zend/zend_operators.c:2743</span><br><span class="line">(gdb) c  <span class="comment">#-------------&gt; 表示继续执行</span></span><br><span class="line">Continuing.</span><br><span class="line"></span><br><span class="line">Breakpoint 2, zend_print_ulong_to_buf (buf=0x7fffffffafe4 <span class="string">""</span>, num=1234) at /home/php-7.0.0/Zend/zend_operators.h:793</span><br><span class="line">(gdb) b 798  <span class="comment">#-------------&gt; 798行打个断点</span></span><br><span class="line">Breakpoint 6 at 0x5f38e2: /home/php-7.0.0/Zend/zend_operators.h:798. (13 locations)</span><br><span class="line">(gdb) c </span><br><span class="line">Continuing.</span><br><span class="line"></span><br><span class="line">Breakpoint 6, zend_print_ulong_to_buf (buf=0x7fffffffafe0 <span class="string">"1234"</span>, num=0) at /home/php-7.0.0/Zend/zend_operators.h:798</span><br><span class="line">(gdb) p buf  <span class="comment">#-------------&gt; 查看 buf 的值</span></span><br><span class="line"><span class="variable">$2</span> = 0x7fffffffafe0 <span class="string">"1234"</span></span><br><span class="line">(gdb) x/10c buf  <span class="comment">#-------------&gt; 查看 buf 位置开始，连续 10 个以 char 为单位的内存值</span></span><br><span class="line">0x7fffffffafe0: 49 <span class="string">'1'</span>  50 <span class="string">'2'</span>  51 <span class="string">'3'</span>  52 <span class="string">'4'</span>  0 <span class="string">'\000'</span>        0 <span class="string">'\000'</span>        0 <span class="string">'\000'</span>        0 <span class="string">'\000'</span></span><br><span class="line">0x7fffffffafe8: 0 <span class="string">'\000'</span>        65 <span class="string">'A'</span></span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+<p>我们看到，函数返回的 buf 是字符串类型的 ‘1234’</p>
+<blockquote>
+<p>我们看看函数 <code>zend_print_ulong_to_buf</code>，其实就是从高位到低位，按个取模（除以10，取整数部分），然后塞到 buf 缓冲区。</p>
+<p>比较有意思的是，buf 初始化的时候指向的是缓冲区的末尾，所以填充的时候高位在最后，然后逐步往前填充低位。</p>
+<p>最后结束的时候，buf 就是我们需要的字符串类容了</p>
+</blockquote>
+<h2 id="消化"><a href="#消化" class="headerlink" title="消化"></a>消化</h2><p>其实，本文就是使用 gdb 调试了 PHP 代码，仅此而已。</p>
+<p>更多的是给大家提供了一个直接上手玩玩的机会，你所需要的只是个 docker，然后动动手调试，很有意思。</p>
+<p><strong>动手试试吧，甚至，去看 C 源码吧！</strong></p>
+<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><p>放图的时间到了</p>
+<img src="/2019/04/18/php-strval-in-c/0.jpg" title="设置截图">
+<hr>
+<img src="/2019/04/18/php-strval-in-c/1.jpg" title="设置截图">
+<hr>
+<img src="/2019/04/18/php-strval-in-c/2.jpg" title="设置截图">
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2019/04/18/php-strval-in-c/" title="docker+gdb 调试 PHP 源码，看 strval 函数 C 实现" target="_blank" rel="external">https://rovast.github.io/2019/04/18/php-strval-in-c/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">字节搬运工</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/05/03/php-class/" title="php-class"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/04/08/Copy-on-write/" title="【转】写入时复制"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: '2xvr0rI4HA5Vn1CcgtMPxMac-gzGzoHsz',
+  appKey: 'F2QrebTLqLwYwoJVJucLOjvX'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'abf475e647ab8d9e8787',
+    clientSecret: '8d99d6970c3df2ce36dd552e5204243e537dd3f4',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>

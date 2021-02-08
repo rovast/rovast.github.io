@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>ubuntu 桌面版使用备忘 | rovast</title>
+  <meta name="description" content="本文记录了使用 ubuntu 桌面版过程中的一些常见问题和初始化步骤。 桌面美化挪动关闭按钮至左侧首先安装 gnome-tweak-tool 1sudo apt install gnome-tweak-tool 安装完成后，打开软件：  选择“窗口”菜单 更改“标题栏按钮 - 放置”，设置为“左”即可  更改顶部 bar 显示方式为 unity 风格安装 unite gnome 拓展（怎么安装，参">
+<meta name="keywords" content="ubuntu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ubuntu 桌面版使用备忘">
+<meta property="og:url" content="https://rovast.github.io/2019/06/13/getting-star-with-ubuntu-desktop/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="本文记录了使用 ubuntu 桌面版过程中的一些常见问题和初始化步骤。 桌面美化挪动关闭按钮至左侧首先安装 gnome-tweak-tool 1sudo apt install gnome-tweak-tool 安装完成后，打开软件：  选择“窗口”菜单 更改“标题栏按钮 - 放置”，设置为“左”即可  更改顶部 bar 显示方式为 unity 风格安装 unite gnome 拓展（怎么安装，参">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://rovast.github.io/2019/06/13/getting-star-with-ubuntu-desktop/bar.png">
+<meta property="og:image" content="https://rovast.github.io/2019/06/13/getting-star-with-ubuntu-desktop/albert.png">
+<meta property="og:image" content="https://rovast.github.io/2019/06/13/getting-star-with-ubuntu-desktop/gitmoji.png">
+<meta property="og:updated_time" content="2020-11-28T08:49:18.051Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ubuntu 桌面版使用备忘">
+<meta name="twitter:description" content="本文记录了使用 ubuntu 桌面版过程中的一些常见问题和初始化步骤。 桌面美化挪动关闭按钮至左侧首先安装 gnome-tweak-tool 1sudo apt install gnome-tweak-tool 安装完成后，打开软件：  选择“窗口”菜单 更改“标题栏按钮 - 放置”，设置为“左”即可  更改顶部 bar 显示方式为 unity 风格安装 unite gnome 拓展（怎么安装，参">
+<meta name="twitter:image" content="https://rovast.github.io/2019/06/13/getting-star-with-ubuntu-desktop/bar.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2019/06/13/getting-star-with-ubuntu-desktop/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">字节搬运工</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/流程/">流程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.33px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.67px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/docker/" style="font-size: 13.33px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.33px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/makefile/" style="font-size: 13px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13px;">php</a> <a href="/tags/soar/" style="font-size: 13.33px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.33px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.33px;">wiki</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.33px;">杂项</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 13.67px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/08/understanding-shell-script-idiom-redirect/" class="title">理解 shell 脚本中的常见用法2&gt;&amp;1</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-08T01:39:02.000Z" itemprop="datePublished">2021-02-08</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/01/cors-on-mac/" class="title">MacOS非安全模式打开Chrome</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-01T00:02:18.000Z" itemprop="datePublished">2021-02-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/29/ant-g2-brush-timerange/" class="title">Antv G2 修改 Brush 默认行为为返回时间戳范围</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-29T01:12:46.000Z" itemprop="datePublished">2021-01-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/29/skywalking-php-kernel-flow/" class="title">SkyWalking PHP 内核代码剖析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-29T01:04:15.000Z" itemprop="datePublished">2021-01-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/27/debug-php-src-on-mac/" class="title">在 Mac 上使用 Clion 调试 PHP 源码</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-26T19:39:39.000Z" itemprop="datePublished">2020-12-27</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#桌面美化"><span class="toc-number">1.</span> <span class="toc-text">桌面美化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#挪动关闭按钮至左侧"><span class="toc-number">1.1.</span> <span class="toc-text">挪动关闭按钮至左侧</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#更改顶部-bar-显示方式为-unity-风格"><span class="toc-number">1.2.</span> <span class="toc-text">更改顶部 bar 显示方式为 unity 风格</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用思源宋体"><span class="toc-number">1.3.</span> <span class="toc-text">使用思源宋体</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#gnome-相关"><span class="toc-number">2.</span> <span class="toc-text">gnome 相关</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装-gnome-shell-extension"><span class="toc-number">2.1.</span> <span class="toc-text">安装 gnome shell extension</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#常用应用"><span class="toc-number">3.</span> <span class="toc-text">常用应用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#albert（类似-MacOS-的-alfred）"><span class="toc-number">3.1.</span> <span class="toc-text">albert（类似 MacOS 的 alfred）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#微信、企业微信、微信开发者工具"><span class="toc-number">3.2.</span> <span class="toc-text">微信、企业微信、微信开发者工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#钉钉"><span class="toc-number">3.3.</span> <span class="toc-text">钉钉</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Typora（跨平台-markdown-编辑器）"><span class="toc-number">3.4.</span> <span class="toc-text">Typora（跨平台 markdown 编辑器）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#开发环境"><span class="toc-number">4.</span> <span class="toc-text">开发环境</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#nginx"><span class="toc-number">4.1.</span> <span class="toc-text">nginx</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#安装"><span class="toc-number">4.1.1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#配置"><span class="toc-number">4.1.2.</span> <span class="toc-text">配置</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#开发工具"><span class="toc-number">5.</span> <span class="toc-text">开发工具</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#phpstorm"><span class="toc-number">5.1.</span> <span class="toc-text">phpstorm</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#webstorm"><span class="toc-number">5.2.</span> <span class="toc-text">webstorm</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#git-emoji"><span class="toc-number">5.3.</span> <span class="toc-text">git emoji</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-getting-star-with-ubuntu-desktop" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ubuntu 桌面版使用备忘
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/06/13/getting-star-with-ubuntu-desktop/" class="article-date">
+	  <time datetime="2019-06-13T01:53:06.000Z" itemprop="datePublished">2019-06-13</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/杂项/">杂项</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/ubuntu/">ubuntu</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2019/06/13/getting-star-with-ubuntu-desktop/" class="leancloud_visitors" data-flag-title="ubuntu 桌面版使用备忘">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/06/13/getting-star-with-ubuntu-desktop/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 4(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>本文记录了使用 ubuntu 桌面版过程中的一些常见问题和初始化步骤。</p>
+<h2 id="桌面美化"><a href="#桌面美化" class="headerlink" title="桌面美化"></a>桌面美化</h2><h3 id="挪动关闭按钮至左侧"><a href="#挪动关闭按钮至左侧" class="headerlink" title="挪动关闭按钮至左侧"></a>挪动关闭按钮至左侧</h3><p>首先安装 <code>gnome-tweak-tool</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install gnome-tweak-tool</span><br></pre></td></tr></table></figure>
+<p>安装完成后，打开软件：</p>
+<ul>
+<li>选择“窗口”菜单</li>
+<li>更改“标题栏按钮 - 放置”，设置为“左”即可</li>
+</ul>
+<h3 id="更改顶部-bar-显示方式为-unity-风格"><a href="#更改顶部-bar-显示方式为-unity-风格" class="headerlink" title="更改顶部 bar 显示方式为 unity 风格"></a>更改顶部 bar 显示方式为 unity 风格</h3><p>安装 <code>unite</code> gnome 拓展（怎么安装，参考 gnome 章节），然后启用即可。</p>
+<img src="/2019/06/13/getting-star-with-ubuntu-desktop/bar.png" title="bar">
+<h3 id="使用思源宋体"><a href="#使用思源宋体" class="headerlink" title="使用思源宋体"></a>使用思源宋体</h3><p>进入 <code>https://github.com/adobe-fonts/source-han-serif/tree/release</code> ，下载</p>
+<p><code>OTF/SimplifiedChinese/SourceHanSerifSC-Regular.otf</code></p>
+<p>下载完成后双击打开安装即可。</p>
+<p>安装完成后，可以在 <code>gnome-tweak</code> 中设置字体。</p>
+<hr>
+<h2 id="gnome-相关"><a href="#gnome-相关" class="headerlink" title="gnome 相关"></a>gnome 相关</h2><h3 id="安装-gnome-shell-extension"><a href="#安装-gnome-shell-extension" class="headerlink" title="安装 gnome shell extension"></a>安装 gnome shell extension</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install gnome-shell-extensions</span><br><span class="line">sudo apt install chrome-gnome-shell</span><br></pre></td></tr></table></figure>
+<p>然后安装 chrome 拓展 <code>GNOME Shell integration</code></p>
+<blockquote>
+<p>我一般使用  chromium-browser 安装拓展，貌似之前用 chrome 有问题</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install  chromium-browser</span><br></pre></td></tr></table></figure>
+<p>之后在 <a href="https://extensions.gnome.org/" target="_blank" rel="noopener">https://extensions.gnome.org/</a> 就能愉快的安装拓展了。</p>
+<hr>
+<h2 id="常用应用"><a href="#常用应用" class="headerlink" title="常用应用"></a>常用应用</h2><h3 id="albert（类似-MacOS-的-alfred）"><a href="#albert（类似-MacOS-的-alfred）" class="headerlink" title="albert（类似 MacOS 的 alfred）"></a>albert（类似 MacOS 的 alfred）</h3><img src="/2019/06/13/getting-star-with-ubuntu-desktop/albert.png" title="albert">
+<p>参考文章 <a href="https://software.opensuse.org/download.html?project=home:manuelschneid3r&amp;package=albert" target="_blank" rel="noopener">《安装软件包 albert》</a></p>
+<p>执行的操作为：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo sh -c <span class="string">"echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_18.04/ /' &gt; /etc/apt/sources.list.d/home:manuelschneid3r.list"</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install albert</span><br></pre></td></tr></table></figure></p>
+<p><strong>设置</strong></p>
+<ul>
+<li>hotkey 设置为 <code>alt</code> + ‘space’</li>
+<li>extensions 打开 <code>applications</code> <code>calculator</code></li>
+</ul>
+<h3 id="微信、企业微信、微信开发者工具"><a href="#微信、企业微信、微信开发者工具" class="headerlink" title="微信、企业微信、微信开发者工具"></a>微信、企业微信、微信开发者工具</h3><p>主要参考 <a href="https://github.com/wszqkzqk/deepin-wine-ubuntu" target="_blank" rel="noopener">wszqkzqk/deepin-wine-ubuntu</a></p>
+<ol>
+<li>安装一些依赖环境</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -qO- https://raw.githubusercontent.com/wszqkzqk/deepin-wine-ubuntu/master/online_install.sh | bash -e</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li><p>去 <a href="https://mirrors.aliyun.com/deepin/pool/non-free/d/" target="_blank" rel="noopener">阿里云镜像</a> 下载所需安装包</p>
+</li>
+<li><p>使用 <code>dpkg</code> 指令安装</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装软件</span></span><br><span class="line">sudo dpkg -i package.deb</span><br><span class="line"></span><br><span class="line"><span class="comment"># 出现软件安装依赖问题，使用此指令 fix</span></span><br><span class="line">sudo apt-get install -f</span><br></pre></td></tr></table></figure>
+<p><strong>托盘通知</strong> 需要安装 Gnome Shell 插件：<a href="https://extensions.gnome.org/extension/1031/topicons/" target="_blank" rel="noopener">TopIcons Plus</a>，参考 gnome 章节</p>
+<h3 id="钉钉"><a href="#钉钉" class="headerlink" title="钉钉"></a>钉钉</h3><p>钉钉使用的是 <a href="https://github.com/nashaofu/dingtalk" target="_blank" rel="noopener">nashaofu/dingtalk</a> 的包。</p>
+<ol>
+<li>去 <a href="https://github.com/nashaofu/dingtalk/releases" target="_blank" rel="noopener">release 页面</a> 下载对应 deb 包</li>
+<li><code>dkpg -i</code> 安装即可</li>
+</ol>
+<p><strong>注意</strong> 正确选择符合自己操作系统版本的 deb 包。</p>
+<h3 id="Typora（跨平台-markdown-编辑器）"><a href="#Typora（跨平台-markdown-编辑器）" class="headerlink" title="Typora（跨平台 markdown 编辑器）"></a>Typora（跨平台 markdown 编辑器）</h3><p><a href="https://typora.io/#linux" target="_blank" rel="noopener">官方安装说明</a></p>
+<p>一些使用小窍门</p>
+<ul>
+<li>你可以在网页上复制你喜欢的文章，然后到编辑器第 view 模式下粘贴，在切换到 source 模式下，就能看到转义好的 markdown 了<blockquote>
+<p>而且， <strong>图片路径</strong> 会自动加上</p>
+</blockquote>
+</li>
+</ul>
+<hr>
+<h2 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h2><h3 id="nginx"><a href="#nginx" class="headerlink" title="nginx"></a>nginx</h3><h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><p>我们采取编译安装的方式安装 nginx。先去官网下载压缩包，解压。</p>
+<p>在执行 <code>configure</code> 前，需要安装一些依赖</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev</span><br></pre></td></tr></table></figure>
+<p>紧接着，正常安装即可，我安装的时候没有增加额外的配置，直接用的默认配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./configure</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+<p>安装完，相关路径如下</p>
+<ul>
+<li>可执行文件目录 <code>/usr/local/nginx/sbin</code></li>
+<li>配置目录 <code>/usr/local/nginx/conf</code></li>
+</ul>
+<blockquote>
+<p>为了方便使用 <code>nginx</code> 指令，我们可以在 <code>/usr/local/bin</code> 下创建软连接。</p>
+</blockquote>
+<h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><p>为了方便使用，我们进行一下小配置。</p>
+<p>我们在 <code>/usr/local/nginx/conf/nginx.conf</code> 的结尾处增加 <code>include servers/*;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    # HTTPS server</span><br><span class="line">    #</span><br><span class="line">    #server &#123;</span><br><span class="line">    #    listen       443 ssl;</span><br><span class="line">    #    server_name  localhost;</span><br><span class="line"></span><br><span class="line">    #    ssl_certificate      cert.pem;</span><br><span class="line">    #    ssl_certificate_key  cert.key;</span><br><span class="line"></span><br><span class="line">    #    ssl_session_cache    shared:SSL:1m;</span><br><span class="line">    #    ssl_session_timeout  5m;</span><br><span class="line"></span><br><span class="line">    #    ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">    #    ssl_prefer_server_ciphers  on;</span><br><span class="line"></span><br><span class="line">    #    location / &#123;</span><br><span class="line">    #        root   html;</span><br><span class="line">    #        index  index.html index.htm;</span><br><span class="line">    #    &#125;</span><br><span class="line">    #&#125;</span><br><span class="line"></span><br><span class="line">     include servers/*;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，我们只需要在 <code>/usr/local/nginx/conf/servers</code> 目录下配置站点信息即可。</p>
+<p>我们新建下 <code>/usr/local/nginx/conf/servers</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir /usr/<span class="built_in">local</span>/nginx/conf/servers</span><br></pre></td></tr></table></figure>
+<h2 id="开发工具"><a href="#开发工具" class="headerlink" title="开发工具"></a>开发工具</h2><h3 id="phpstorm"><a href="#phpstorm" class="headerlink" title="phpstorm"></a>phpstorm</h3><p>正常的操作是直接在官方上下载压缩包，解压即可。有意思的是，直接使用浏览器下载速度反而一般，这里我们获取到下载地址，使用 <code>wget</code> 下载，速度反而快。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://download.jetbrains.8686c.com/webide/PhpStorm-2019.1.2.tar.gz</span><br></pre></td></tr></table></figure>
+<p>下载完成后，正常解压，在 <code>bin</code> 目录下执行脚本即可。</p>
+<h3 id="webstorm"><a href="#webstorm" class="headerlink" title="webstorm"></a>webstorm</h3><p>同 phpstorm 的操作，只是下载地址不同罢了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://download.jetbrains.8686c.com/webstorm/WebStorm-2019.1.3.tar.gz</span><br></pre></td></tr></table></figure>
+<h3 id="git-emoji"><a href="#git-emoji" class="headerlink" title="git emoji"></a>git emoji</h3><p>花里胡哨的提交你的 git 代码</p>
+<ul>
+<li>github 地址 <a href="https://github.com/carloscuesta/gitmoji-cli" target="_blank" rel="noopener">carloscuesta/gitmoji-cli</a></li>
+</ul>
+<img src="/2019/06/13/getting-star-with-ubuntu-desktop/gitmoji.png" title="gitmoji">
+<p><strong>安装</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm i -g gitmoji-cli</span><br></pre></td></tr></table></figure>
+<p><strong>配置 emoji 展示方式</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ gitmoji -g</span><br><span class="line">? Enable automatic <span class="string">"git add ."</span> No</span><br><span class="line">? Choose Issue Format github</span><br><span class="line">? Select how emojis should be used <span class="keyword">in</span> commits 😄</span><br><span class="line">? Enable signed commits No</span><br></pre></td></tr></table></figure>
+<p><strong>设定 alias</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">alias</span> gmc=<span class="string">"gitmoji -c"</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2019/06/13/getting-star-with-ubuntu-desktop/" title="ubuntu 桌面版使用备忘" target="_blank" rel="external">https://rovast.github.io/2019/06/13/getting-star-with-ubuntu-desktop/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">字节搬运工</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/06/14/fix-ios-keyboard-in-webpage/" title="fix-ios-keyboard-in-webpage"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/06/11/use-kcp/" title="使用 KCP 来加速流量"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: '2xvr0rI4HA5Vn1CcgtMPxMac-gzGzoHsz',
+  appKey: 'F2QrebTLqLwYwoJVJucLOjvX'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'abf475e647ab8d9e8787',
+    clientSecret: '8d99d6970c3df2ce36dd552e5204243e537dd3f4',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>借助 skywalking 搭建自己的 APM 数据展示平台 | rovast</title>
+  <meta name="description" content="SkyWalking: an APM(application performance monitor) system, especially designed for microservices, cloud native and container-based (Docker, Kubernetes, Mesos) architectures. README.mdgithub.com/apac">
+<meta name="keywords" content="Web PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="借助 skywalking 搭建自己的 APM 数据展示平台">
+<meta property="og:url" content="https://rovast.github.io/2020/11/28/build-your-own-ui-for-skywalking/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="SkyWalking: an APM(application performance monitor) system, especially designed for microservices, cloud native and container-based (Docker, Kubernetes, Mesos) architectures. README.mdgithub.com/apac">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://rovast.github.io/2020/11/28/build-your-own-ui-for-skywalking/logo.jpeg">
+<meta property="og:image" content="https://rovast.github.io/2020/11/28/build-your-own-ui-for-skywalking/jiagou.jpeg">
+<meta property="og:image" content="https://rovast.github.io/2020/11/28/build-your-own-ui-for-skywalking/ui.jpg">
+<meta property="og:updated_time" content="2020-11-28T11:10:56.931Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="借助 skywalking 搭建自己的 APM 数据展示平台">
+<meta name="twitter:description" content="SkyWalking: an APM(application performance monitor) system, especially designed for microservices, cloud native and container-based (Docker, Kubernetes, Mesos) architectures. README.mdgithub.com/apac">
+<meta name="twitter:image" content="https://rovast.github.io/2020/11/28/build-your-own-ui-for-skywalking/logo.jpeg">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2020/11/28/build-your-own-ui-for-skywalking/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">字节搬运工</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/流程/">流程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.33px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.67px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/docker/" style="font-size: 13.33px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.33px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/makefile/" style="font-size: 13px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13px;">php</a> <a href="/tags/soar/" style="font-size: 13.33px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.33px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.33px;">wiki</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.33px;">杂项</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 13.67px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/08/understanding-shell-script-idiom-redirect/" class="title">理解 shell 脚本中的常见用法2&gt;&amp;1</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-08T01:39:02.000Z" itemprop="datePublished">2021-02-08</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/02/01/cors-on-mac/" class="title">MacOS非安全模式打开Chrome</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-02-01T00:02:18.000Z" itemprop="datePublished">2021-02-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/29/ant-g2-brush-timerange/" class="title">Antv G2 修改 Brush 默认行为为返回时间戳范围</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-29T01:12:46.000Z" itemprop="datePublished">2021-01-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/01/29/skywalking-php-kernel-flow/" class="title">SkyWalking PHP 内核代码剖析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-01-29T01:04:15.000Z" itemprop="datePublished">2021-01-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/27/debug-php-src-on-mac/" class="title">在 Mac 上使用 Clion 调试 PHP 源码</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-26T19:39:39.000Z" itemprop="datePublished">2020-12-27</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Skywalking-架构简介，寻找接入点"><span class="toc-number">1.</span> <span class="toc-text">Skywalking 架构简介，寻找接入点</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#几个官方库"><span class="toc-number">1.1.</span> <span class="toc-text">几个官方库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SW-查询协议-——-获取数据的桥梁"><span class="toc-number">1.2.</span> <span class="toc-text">SW 查询协议 —— 获取数据的桥梁</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#官网项目本地调试"><span class="toc-number">2.</span> <span class="toc-text">官网项目本地调试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#本地运行一览"><span class="toc-number">2.1.</span> <span class="toc-text">本地运行一览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务抓包格式化"><span class="toc-number">2.2.</span> <span class="toc-text">服务抓包格式化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#分析查询协议"><span class="toc-number">3.</span> <span class="toc-text">分析查询协议</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#快速了解查询语句含义"><span class="toc-number">3.1.</span> <span class="toc-text">快速了解查询语句含义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#查询协议"><span class="toc-number">3.2.</span> <span class="toc-text">查询协议</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-build-your-own-ui-for-skywalking" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      借助 skywalking 搭建自己的 APM 数据展示平台
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2020/11/28/build-your-own-ui-for-skywalking/" class="article-date">
+	  <time datetime="2020-11-28T09:27:41.000Z" itemprop="datePublished">2020-11-28</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/云原生/">云原生</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2020/11/28/build-your-own-ui-for-skywalking/" class="leancloud_visitors" data-flag-title="借助 skywalking 搭建自己的 APM 数据展示平台">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2020/11/28/build-your-own-ui-for-skywalking/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1.4k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 6(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <img src="/2020/11/28/build-your-own-ui-for-skywalking/logo.jpeg" width="500" height="400">
+<blockquote><p>SkyWalking: an APM(application performance monitor) system, especially designed for microservices, cloud native and container-based (Docker, Kubernetes, Mesos) architectures.</p>
+<footer><strong>README.md</strong><cite><a href="https://github.com/apache/skywalking" target="_blank" rel="noopener">github.com/apache/skywalking</a></cite></footer></blockquote>
+<p>skywaking(本文后续简称 SW) 在如今的 APM 体系建设中逐渐展露头角，国内几乎所有的一线大厂都借助 skywaling 进行了自己的 APM 体系建设。<br>大厂的建设方案在诸多的大会中都有提及，尤其在刚过去的 《Apache SkyWalking DevCon 2020》，更是带来了诸多的精彩分享。</p>
+<p>本文不会就 APM 架构或理论进行详细阐述，更多聚焦在实战环节，围绕下述几点展开：</p>
+<ol>
+<li>分析 SW 架构，确定接入方案</li>
+<li>如何在本地调式官方的 UI 项目</li>
+<li>快速了解 SW 查询协议 GraphQL </li>
+</ol>
+<h1 id="Skywalking-架构简介，寻找接入点"><a href="#Skywalking-架构简介，寻找接入点" class="headerlink" title="Skywalking 架构简介，寻找接入点"></a>Skywalking 架构简介，寻找接入点</h1><h2 id="几个官方库"><a href="#几个官方库" class="headerlink" title="几个官方库"></a>几个官方库</h2><p>在正式分析之前，我们来看下 SW 比较重要的三个官方项目</p>
+<ul>
+<li>主库 <a href="https://github.com/apache/skywalking" target="_blank" rel="noopener">https://github.com/apache/skywalking</a></li>
+<li>UI 库 <a href="https://github.com/apache/skywalking-rocketbot-ui" target="_blank" rel="noopener">https://github.com/apache/skywalking-rocketbot-ui</a></li>
+<li>查询协议库 <a href="https://github.com/apache/skywalking-query-protocol" target="_blank" rel="noopener">https://github.com/apache/skywalking-query-protocol</a></li>
+</ul>
+<h2 id="SW-查询协议-——-获取数据的桥梁"><a href="#SW-查询协议-——-获取数据的桥梁" class="headerlink" title="SW 查询协议 —— 获取数据的桥梁"></a>SW 查询协议 —— 获取数据的桥梁</h2><p>接下来，我们看下主库的架构图，即 SW 体系的整体架构图：</p>
+<img src="/2020/11/28/build-your-own-ui-for-skywalking/jiagou.jpeg" width="500" height="400">
+<p>我们关注的 UI 接入部分，在图的左上角，其中 UI 和 CLI 通过查询协议来和 SW 的后端服务进行交互。正如查询协议库所说：</p>
+<blockquote><p>Query Protocol defines the communication protocol in query stage.<br><strong>SkyWalking native UI</strong> and <strong>CLI</strong> use this protocol to <strong>fetch data from the backend</strong> consistently, don’t need to worry about the backend update.</p>
+<footer><strong>README.md</strong><cite><a href="https://github.com/apache/skywalking-query-protocol" target="_blank" rel="noopener">github.com/apache/skywalking-query-protocol</a></cite></footer></blockquote>
+<p>其中重点我们加粗表示了，即：SW 的官方 UI 和 CLI 工具都是通过查询协议和后端服务进行数据交互。</p>
+<p>SW 的查询协议通俗简单的理解：定义了一系列 GraphQL 查询定义。甚至可以进一步粗暴的理解，就是一堆定义好的 HTTP API。所以只要了解官方的 API 定义，即可发挥 SW 的数据宝藏威力，<br>打造属于自己的 APM 展示平台。</p>
+<p>快速搭建的第一步，就是参考官方的 UI 项目，一方面我们可以参考它的 UI 组件实现。另一方面，我们可以抓包，参考它的 GraphQL 请求。</p>
+<h1 id="官网项目本地调试"><a href="#官网项目本地调试" class="headerlink" title="官网项目本地调试"></a>官网项目本地调试</h1><h2 id="本地运行一览"><a href="#本地运行一览" class="headerlink" title="本地运行一览"></a>本地运行一览</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置后端的请求地址为 SW 官方的北京机房演示地址</span></span><br><span class="line">➜  skywalking-rocketbot-ui git:(master) <span class="built_in">export</span> SW_PROXY_TARGET=http://122.112.182.72:8080/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动服务，之后访问 8080 端口</span></span><br><span class="line">➜  skywalking-rocketbot-ui git:(master) npm run serve</span><br></pre></td></tr></table></figure>
+<p>访问 <a href="http://localhost:8080/topology" target="_blank" rel="noopener">http://localhost:8080/topology</a></p>
+<img src="/2020/11/28/build-your-own-ui-for-skywalking/ui.jpg">
+<p>我们看到，服务已成功在本地运行，且可以通过 VueDev Tools 来查看对应的组件实现和传值。对我们自己去实现对应的显示组件，提供了极高的参考意义。</p>
+<blockquote>
+<p>关于如何这个环境变量的设置，大家可以顺着 packages.json 去捋一下 run server 的整个流程</p>
+</blockquote>
+<h2 id="服务抓包格式化"><a href="#服务抓包格式化" class="headerlink" title="服务抓包格式化"></a>服务抓包格式化</h2><p>我们还是以这个拓扑为例，抓一个包，简单看下 GraphQL 请求</p>
+<figure class="highlight json"><figcaption><span>requestPayload</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: <span class="string">"query queryTopo($duration: Duration!) &#123;\n  topo: getGlobalTopology(duration: $duration) &#123;\n    nodes &#123;\n      id\n      name\n      type\n      isReal\n    &#125;\n    calls &#123;\n      id\n      source\n      detectPoints\n      target\n    &#125;\n  &#125;&#125;"</span>,</span><br><span class="line">  <span class="attr">"variables"</span>: &#123;</span><br><span class="line">    <span class="attr">"serviceId"</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="attr">"duration"</span>: &#123;</span><br><span class="line">      <span class="attr">"start"</span>: <span class="string">"2020-11-27 0912"</span>,</span><br><span class="line">      <span class="attr">"end"</span>: <span class="string">"2020-11-27 0927"</span>,</span><br><span class="line">      <span class="attr">"step"</span>: <span class="string">"MINUTE"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们进一步格式化 graphQL 的 query 请求<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">query queryTopo($duration: Duration!) &#123;</span><br><span class="line">  topo: getGlobalTopology(duration: $duration) &#123;</span><br><span class="line">    nodes &#123;</span><br><span class="line">      id</span><br><span class="line">      name</span><br><span class="line">      type</span><br><span class="line">      isReal</span><br><span class="line">    &#125;</span><br><span class="line">    calls &#123;</span><br><span class="line">      id</span><br><span class="line">      source</span><br><span class="line">      detectPoints</span><br><span class="line">      target</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>格式化过后，更方便我们进行对应分析。</p>
+<h1 id="分析查询协议"><a href="#分析查询协议" class="headerlink" title="分析查询协议"></a>分析查询协议</h1><h2 id="快速了解查询语句含义"><a href="#快速了解查询语句含义" class="headerlink" title="快速了解查询语句含义"></a>快速了解查询语句含义</h2><p>GraphQL 的更多用法，本文不提及。文本就上述抓到的协议进行简单说明，便于之前不了解 GraphQL 的同学能够快速了解 SW 查询协议。</p>
+<ol>
+<li>查看 Query，确定查询语句，其中 <code>$</code> 开头的就是形参，在 <code>variables</code> 里会具体传值</li>
+<li>那上述例子，<code>$duration</code> 的具体值，就是 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"start"</span>: <span class="string">"2020-11-27 0912"</span>,</span><br><span class="line">  <span class="attr">"end"</span>: <span class="string">"2020-11-27 0927"</span>,</span><br><span class="line">  <span class="attr">"step"</span>: <span class="string">"MINUTE"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>那问题来了，我怎么知道 <code>$duration</code> 是由 <code>start</code> <code>end</code> <code>step</code> 组成？他们的值类型是什么？在哪里定义？这就要看之前我们提到的 SW 查询协议。</p>
+<h2 id="查询协议"><a href="#查询协议" class="headerlink" title="查询协议"></a>查询协议</h2><p>接着上面的分析，我们去查看 SW 的 Query Protocol.</p>
+<blockquote>
+<p>到这里大家看到，其实 Query Protocol 就是查询的定义，标准。就像我们平时开发中接触的后端标准接口一样。大家在接触这些看似<br>高大上的 Query Protocol 时，不要被唬到，其实就是相同技术在不同场合的不同叫法罢了。</p>
+</blockquote>
+<p>本例中的拓扑，我们可以查看 <a href="https://github.com/apache/skywalking-query-protocol/blob/master/topology.graphqls" target="_blank" rel="noopener">https://github.com/apache/skywalking-query-protocol/blob/master/topology.graphqls</a> 定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">extend type Query &#123;</span><br><span class="line">    # Query the global topology</span><br><span class="line">    getGlobalTopology(duration: Duration!): Topology</span><br><span class="line">    # Query the topology, based on the given service</span><br><span class="line">    getServiceTopology(serviceId: ID!, duration: Duration!): Topology</span><br><span class="line">    # Query the topology, based on the given services.</span><br><span class="line">    # `#getServiceTopology` could be replaced by this.</span><br><span class="line">    getServicesTopology(serviceIds: [ID!]!, duration: Duration!): Topology</span><br><span class="line">    # Query the instance topology, based on the given clientServiceId and serverServiceId</span><br><span class="line">    getServiceInstanceTopology(clientServiceId: ID!, serverServiceId: ID!, duration: Duration!): ServiceInstanceTopology</span><br><span class="line">    # Query the topology, based on the given endpoint</span><br><span class="line">    getEndpointTopology(endpointId: ID!, duration: Duration!): Topology</span><br><span class="line">    # v2 of getEndpointTopology</span><br><span class="line">    getEndpointDependencies(endpointId: ID!, duration: Duration!): EndpointTopology</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们看到其中就有 <code>getGlobalTopology</code>，再看看我们之前的抓包，我能看下第二行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">query queryTopo($duration: Duration!) &#123;</span><br><span class="line">  topo: getGlobalTopology(duration: $duration) &#123;</span><br><span class="line">    nodes &#123;</span><br><span class="line">      id</span><br><span class="line">      name</span><br><span class="line">      type</span><br><span class="line">      isReal</span><br><span class="line">    &#125;</span><br><span class="line">    calls &#123;</span><br><span class="line">      id</span><br><span class="line">      source</span><br><span class="line">      detectPoints</span><br><span class="line">      target</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第二行内容 <code>topo: getGlobalTopology(duration: $duration) {</code></p>
+<ul>
+<li>topo 是查询结果的别名，查询到 response 会放到 topo 字段下</li>
+<li>getGlobalTopology 的定义就是 <code>getGlobalTopology(duration: Duration!): Topology</code></li>
+</ul>
+<p>其中 <code>Duration</code> 定义，我们在 <a href="https://github.com/apache/skywalking-query-protocol/blob/master/common.graphqls" target="_blank" rel="noopener">https://github.com/apache/skywalking-query-protocol/blob/master/common.graphqls</a> 得到</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">input Duration &#123;</span><br><span class="line">    start: String!</span><br><span class="line">    end: String!</span><br><span class="line">    step: Step!</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>就像套娃一样，你也可以找到 <code>Step</code> 的定义</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本文聊了我们如何找到自定义 UI 的切入点，同时就如何参考官方的一些开发细节进行了阐述。希望能给大家自定义数据展示平台一些参考。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2020/11/28/build-your-own-ui-for-skywalking/" title="借助 skywalking 搭建自己的 APM 数据展示平台" target="_blank" rel="external">https://rovast.github.io/2020/11/28/build-your-own-ui-for-skywalking/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">字节搬运工</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2020/11/28/makefile-tutorials/" title="makefile 简明教程"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2020/11/28/hello-world/" title="Hello World"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: '2xvr0rI4HA5Vn1CcgtMPxMac-gzGzoHsz',
+  appKey: 'F2QrebTLqLwYwoJVJucLOjvX'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'abf475e647ab8d9e8787',
+    clientSecret: '8d99d6970c3df2ce36dd552e5204243e537dd3f4',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>
