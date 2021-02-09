@@ -18,18 +18,18 @@
   
   
   <title>理解 shell 脚本中的常见用法2&gt;&amp;1 | rovast</title>
-  <meta name="description" content="在我们接触的 shell 脚本中，对 2&amp;gt;&amp;amp;1 一定不陌生，比如 ls foo &amp;gt; /dev/null 2&amp;gt;&amp;amp;1。 本文就来解释下 2&amp;gt;&amp;amp;1 究竟做了什么，并且是如何起作用的。 一、I/O 重定向简介「重定向」是计算机用来把命令的输出从一个地方，输出到另一个地方。举个例子，默认情况下，我们使用 cat 指令可以把一个文件的内容打印到终端： 1234$">
+  <meta name="description" content="原文：https://www.brianstorti.com/understanding-shell-script-idiom-redirect/ 在我们接触的 shell 脚本中，对 2&amp;gt;&amp;amp;1 一定不陌生，比如 ls foo &amp;gt; /dev/null 2&amp;gt;&amp;amp;1。 本文就来解释下 2&amp;gt;&amp;amp;1 究竟做了什么，并且是如何起作用的。 一、I/O 重定向简介「重">
 <meta name="keywords" content="Web PHP">
 <meta property="og:type" content="article">
 <meta property="og:title" content="理解 shell 脚本中的常见用法2&gt;&amp;1">
 <meta property="og:url" content="https://rovast.github.io/2021/02/08/understanding-shell-script-idiom-redirect/index.html">
 <meta property="og:site_name" content="rovast">
-<meta property="og:description" content="在我们接触的 shell 脚本中，对 2&amp;gt;&amp;amp;1 一定不陌生，比如 ls foo &amp;gt; /dev/null 2&amp;gt;&amp;amp;1。 本文就来解释下 2&amp;gt;&amp;amp;1 究竟做了什么，并且是如何起作用的。 一、I/O 重定向简介「重定向」是计算机用来把命令的输出从一个地方，输出到另一个地方。举个例子，默认情况下，我们使用 cat 指令可以把一个文件的内容打印到终端： 1234$">
+<meta property="og:description" content="原文：https://www.brianstorti.com/understanding-shell-script-idiom-redirect/ 在我们接触的 shell 脚本中，对 2&amp;gt;&amp;amp;1 一定不陌生，比如 ls foo &amp;gt; /dev/null 2&amp;gt;&amp;amp;1。 本文就来解释下 2&amp;gt;&amp;amp;1 究竟做了什么，并且是如何起作用的。 一、I/O 重定向简介「重">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2021-02-08T09:42:32.034Z">
+<meta property="og:updated_time" content="2021-02-08T09:50:07.143Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="理解 shell 脚本中的常见用法2&gt;&amp;1">
-<meta name="twitter:description" content="在我们接触的 shell 脚本中，对 2&amp;gt;&amp;amp;1 一定不陌生，比如 ls foo &amp;gt; /dev/null 2&amp;gt;&amp;amp;1。 本文就来解释下 2&amp;gt;&amp;amp;1 究竟做了什么，并且是如何起作用的。 一、I/O 重定向简介「重定向」是计算机用来把命令的输出从一个地方，输出到另一个地方。举个例子，默认情况下，我们使用 cat 指令可以把一个文件的内容打印到终端： 1234$">
+<meta name="twitter:description" content="原文：https://www.brianstorti.com/understanding-shell-script-idiom-redirect/ 在我们接触的 shell 脚本中，对 2&amp;gt;&amp;amp;1 一定不陌生，比如 ls foo &amp;gt; /dev/null 2&amp;gt;&amp;amp;1。 本文就来解释下 2&amp;gt;&amp;amp;1 究竟做了什么，并且是如何起作用的。 一、I/O 重定向简介「重">
   <!-- Canonical links -->
   <link rel="canonical" href="https://rovast.github.io/2021/02/08/understanding-shell-script-idiom-redirect/index.html">
   
@@ -59,7 +59,7 @@
           <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
         </a>
         <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
-        <h3 id="title" class="hidden-xs hidden-sm hidden-md">字节搬运工</h3>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">但行好事</h3>
         <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
       </div>
       
@@ -383,14 +383,15 @@
 		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1k(字)</span>
 	
 	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 3(分)</span>
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 4(分)</span>
 	
 
       </div>
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <p>在我们接触的 shell 脚本中，对 <code>2&gt;&amp;1</code> 一定不陌生，比如 <code>ls foo &gt; /dev/null 2&gt;&amp;1</code>。</p>
+        <p>原文：<a href="https://www.brianstorti.com/understanding-shell-script-idiom-redirect/" target="_blank" rel="noopener">https://www.brianstorti.com/understanding-shell-script-idiom-redirect/</a></p>
+<p>在我们接触的 shell 脚本中，对 <code>2&gt;&amp;1</code> 一定不陌生，比如 <code>ls foo &gt; /dev/null 2&gt;&amp;1</code>。</p>
 <p>本文就来解释下 <code>2&gt;&amp;1</code> 究竟做了什么，并且是如何起作用的。</p>
 <h2 id="一、I-O-重定向简介"><a href="#一、I-O-重定向简介" class="headerlink" title="一、I/O 重定向简介"></a>一、I/O 重定向简介</h2><p>「重定向」是计算机用来把命令的输出从一个地方，输出到另一个地方。举个例子，默认情况下，我们使用 <code>cat</code> 指令可以把一个文件的内容打印到终端：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ cat foo.txt</span><br><span class="line">foo</span><br><span class="line">bar</span><br><span class="line">baz</span><br></pre></td></tr></table></figure>
@@ -450,7 +451,7 @@
         </a>
       </div>
       <div class="media-body">
-        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">字节搬运工</small></a></h3>
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">但行好事</small></a></h3>
         <div>该用户很懒，没有介绍自己。</div>
       </div>
     </figure>
