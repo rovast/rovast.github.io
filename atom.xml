@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://rovast.github.io/"/>
-  <updated>2021-02-08T09:50:07.143Z</updated>
+  <updated>2021-03-13T15:22:19.881Z</updated>
   <id>https://rovast.github.io/</id>
   
   <author>
@@ -15,6 +15,75 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Linux客户端设置 socks5+kcptun</title>
+    <link href="https://rovast.github.io/2021/03/13/server-set-proxy-use-socks5/"/>
+    <id>https://rovast.github.io/2021/03/13/server-set-proxy-use-socks5/</id>
+    <published>2021-03-13T07:08:40.000Z</published>
+    <updated>2021-03-13T15:22:19.881Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="/assets/ss-kcp.jpg" alt="ss-kcp"></p><p><img src="/assets/kcptun.jpg" alt="kcptun"></p><p>之前更多使用 Linux 服务器作为服务器来提供代理服务，这里使用 Linux 机器作为客户端，链接远端代理服务器，使用纯终端来设置代理，加速访问。</p><p>同时，参考 《pm2 简明使用教程》来配合进行守护进程使用</p><h2 id="安软件"><a href="#安软件" class="headerlink" title="安软件"></a>安软件</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> shadowsocks</span></span><br><span class="line">pip3 install shadowsocks</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> kcptun</span></span><br><span class="line">wget https://github.com/xtaci/kcptun/releases/download/v20210103/kcptun-linux-amd64-20210103.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> cow，用于转换 socks5 协议至 http 和 https</span></span><br><span class="line">wget https://github.com/cyfdecyf/cow/releases/download/0.9.8/cow-linux64-0.9.8.gz</span><br></pre></td></tr></table></figure><h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><ol><li><p>kcptun.json</p><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"localaddr"</span>: <span class="string">":1080"</span>,</span><br><span class="line">    <span class="attr">"remoteaddr"</span>: <span class="string">"REMOTE_SERVER:29900"</span>,</span><br><span class="line">    <span class="attr">"key"</span>: <span class="string">"111111"</span>,</span><br><span class="line">    <span class="attr">"crypt"</span>: <span class="string">"aes"</span>,</span><br><span class="line">    <span class="attr">"mode"</span>: <span class="string">"fast"</span>,</span><br><span class="line">    <span class="attr">"conn"</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"autoexpire"</span>: <span class="number">60</span>,</span><br><span class="line">    <span class="attr">"mtu"</span>: <span class="number">1350</span>,</span><br><span class="line">    <span class="attr">"sndwnd"</span>: <span class="number">512</span>,</span><br><span class="line">    <span class="attr">"rcvwnd"</span>: <span class="number">512</span>,</span><br><span class="line">    <span class="attr">"datashard"</span>: <span class="number">70</span>,</span><br><span class="line">    <span class="attr">"parityshard"</span>: <span class="number">3</span>,</span><br><span class="line">    <span class="attr">"dscp"</span>: <span class="number">46</span>,</span><br><span class="line">    <span class="attr">"nocomp"</span>: <span class="literal">false</span>,</span><br><span class="line">    <span class="attr">"acknodelay"</span>: <span class="literal">false</span>,</span><br><span class="line">    <span class="attr">"nodelay"</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="attr">"interval"</span>: <span class="number">40</span>,</span><br><span class="line">    <span class="attr">"resend"</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="attr">"nc"</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="attr">"sockbuf"</span>: <span class="number">4194304</span>,</span><br><span class="line">    <span class="attr">"keepalive"</span>: <span class="number">10</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li><li><p>ss.json</p><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"server"</span>:<span class="string">"127.0.0.1"</span>,</span><br><span class="line">    <span class="attr">"server_port"</span>:<span class="number">1080</span>,</span><br><span class="line">    <span class="attr">"local_address"</span>: <span class="string">"127.0.0.1"</span>,</span><br><span class="line">    <span class="attr">"local_port"</span>:<span class="number">1087</span>,</span><br><span class="line">    <span class="attr">"password"</span>:<span class="string">"9SehN7C3GQ9h9Cyt"</span>,</span><br><span class="line">    <span class="attr">"timeout"</span>:<span class="number">300</span>,</span><br><span class="line">    <span class="attr">"method"</span>:<span class="string">"chacha20"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li><li><p><code>~/.cow/rc</code></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">listen = http://127.0.0.1:4411</span><br><span class="line">proxy = socks5://127.0.0.1:1087</span><br></pre></td></tr></table></figure></li></ol><h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> socks5 协议转为 http 和 https</span></span><br><span class="line">/home/rovast/applications/cow-linux64-0.9.8</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 开启 kcptun</span></span><br><span class="line">/home/rovast/applications/kcptun/client_linux_amd64 -c /home/rovast/applications/kcptun/kcptun.json</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 开启 ss</span></span><br><span class="line">/usr/bin/ss-local -c /home/rovast/applications/shadowsocks/ss.json</span><br></pre></td></tr></table></figure><h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><ul><li><a href="https://github.com/xtaci/kcptun" target="_blank" rel="noopener">https://github.com/xtaci/kcptun</a></li></ul>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&lt;img src=&quot;/assets/ss-kcp.jpg&quot; alt=&quot;ss-kcp&quot;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/assets/kcptun.jpg&quot; alt=&quot;kcptun&quot;&gt;&lt;/p&gt;
+&lt;p&gt;之前更多使用 Linux 服务器作为服务器来提供代理服务，这里使用 L
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>pm2 简明使用教程</title>
+    <link href="https://rovast.github.io/2021/03/13/pm2-usage/"/>
+    <id>https://rovast.github.io/2021/03/13/pm2-usage/</id>
+    <published>2021-03-13T07:04:30.000Z</published>
+    <updated>2021-03-13T15:08:03.867Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>npm install pm2@latest -g</p><h2 id="书写配置文件"><a href="#书写配置文件" class="headerlink" title="书写配置文件"></a>书写配置文件</h2><p>使用配置文件来启动，便于统一管理</p><p><code>~/.config/pm2/ecosystem.config.yaml</code></p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apps:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">script</span>     <span class="string">:</span> <span class="string">/home/rovast/applications/code-server-3.9.1-linux-amd64/bin/code-server</span></span><br><span class="line"><span class="attr">    interpreter:</span> <span class="string">none</span></span><br><span class="line">    <span class="string">name</span>       <span class="string">:</span> <span class="string">'code-server'</span></span><br><span class="line">    <span class="string">instances</span>  <span class="string">:</span> <span class="number">1</span></span><br><span class="line">    <span class="string">exec_mode</span>  <span class="string">:</span> <span class="string">fork</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">script</span>     <span class="string">:</span> <span class="string">/home/rovast/applications/cow-linux64-0.9.8</span></span><br><span class="line"><span class="attr">    interpreter:</span> <span class="string">none</span></span><br><span class="line">    <span class="string">name</span>       <span class="string">:</span> <span class="string">'cow'</span></span><br><span class="line">    <span class="string">instances</span>  <span class="string">:</span> <span class="number">1</span></span><br><span class="line">    <span class="string">exec_mode</span>  <span class="string">:</span> <span class="string">fork</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">script</span>     <span class="string">:</span> <span class="string">/home/rovast/applications/kcptun/client_linux_amd64</span> <span class="bullet">-c</span> <span class="string">/home/rovast/applications/kcptun/kcptun.json</span></span><br><span class="line"><span class="attr">    interpreter:</span> <span class="string">none</span></span><br><span class="line">    <span class="string">name</span>       <span class="string">:</span> <span class="string">'kcptun-client'</span></span><br><span class="line">    <span class="string">instances</span>  <span class="string">:</span> <span class="number">1</span></span><br><span class="line">    <span class="string">exec_mode</span>  <span class="string">:</span> <span class="string">fork</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">script</span>     <span class="string">:</span> <span class="string">/usr/bin/ss-local</span> <span class="bullet">-c</span> <span class="string">/home/rovast/applications/shadowsocks/ss.json</span></span><br><span class="line"><span class="attr">    interpreter:</span> <span class="string">none</span></span><br><span class="line">    <span class="string">name</span>       <span class="string">:</span> <span class="string">'shadowsocks-client'</span></span><br><span class="line">    <span class="string">instances</span>  <span class="string">:</span> <span class="number">1</span></span><br><span class="line">    <span class="string">exec_mode</span>  <span class="string">:</span> <span class="string">fork</span></span><br></pre></td></tr></table></figure><blockquote><p>interpreter 设置为 none，用默认行为启动二进制文件。以上是服务器设置客户端代理的脚本，供参考</p></blockquote><h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pm2 start ~/.config/pm2/ecosystem.config.yaml</span><br></pre></td></tr></table></figure><h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p><a href="https://app.pm2.io/" target="_blank" rel="noopener">https://app.pm2.io/</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;安装&quot;&gt;&lt;a href=&quot;#安装&quot; class=&quot;headerlink&quot; title=&quot;安装&quot;&gt;&lt;/a&gt;安装&lt;/h2&gt;&lt;p&gt;npm install pm2@latest -g&lt;/p&gt;
+&lt;h2 id=&quot;书写配置文件&quot;&gt;&lt;a href=&quot;#书写配置文件&quot; class=
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>【转】人人都有认知障</title>
+    <link href="https://rovast.github.io/2021/02/20/renrendouyourenzhizhangai/"/>
+    <id>https://rovast.github.io/2021/02/20/renrendouyourenzhizhangai/</id>
+    <published>2021-02-19T21:16:50.000Z</published>
+    <updated>2021-02-20T05:21:49.235Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote><p>原文链接：<a href="https://mp.weixin.qq.com/s/eO7mVliAl8CwYnGV1FwtJg" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/eO7mVliAl8CwYnGV1FwtJg</a></p></blockquote><blockquote><p>原文标题：《人人都有认知障》</p></blockquote><blockquote><p>原文公众号：caoz的梦呓</p></blockquote><p>以前记得看过这么一个段子，当然我是没办法求证真伪的，说大清后期有个皇上，有一天跟大臣聊天，问大臣，你早上上朝之前吃的什么啊，大臣如实回复，早上吃了俩鸡子（也就是鸡蛋），皇上就很惊讶，这么奢侈啊，你的俸禄够花么，为什么皇上很惊讶呢，因为内务府的太监跟皇上报账一个鸡蛋要好几两银子，而实际上一个鸡蛋也就几文钱。大臣心知肚明但也不便点破，就说我们吃的是寻常鸡蛋，比不上皇家特供的高级，所以没那么贵。</p><p>故事真假不知，但我觉得这比各种清宫戏反而真实一些，其实这种情况并不罕见，正如晋惠帝那句流传千古的话，何不食肉糜。生在深宫大院，帝王人家，不知柴米油盐，是很寻常的，一个太监就能蒙蔽圣听。其实当今社会，对于富裕的年轻一代或者富裕国家的国民，去理解挣扎在温饱线的时代或者贫困国家的人民生活，何不食肉糜这种认知还真不是段子，一直一直一直都有，只是换个说法而已。包括现在很多年轻人开始怀念几十年前所谓没有内卷的年代，真是都没挨饿过。</p><p>类似的故事还有，说辛亥革命后，旗人贵族没落了，需要出来自己讨生计，有个贵族遗少也出来自己想办法赚钱养活自己，走在街上饿了，花几个钱买了街边现烤的烧饼，一吃之下大惊，原来新出炉的烧饼这么脆这么好吃，以前都是让仆人出去买，每次吃到的都是冷冰冰硬梆梆的。深宫大院说起来要啥有啥，吃穿不愁，但恰恰远离了烟火气。一些寻常百姓唾手可得的东西，他们反而是难以理解。</p><p>贵族不懂百姓，当然百姓也不懂贵族，这才有相声里提到的吕剧唱词，”东宫的娘娘烙大饼，西宫的娘娘卷大葱。” 旧社会普通百姓对富贵人家的想象，也就局限于此了。</p><p>说的这些，其实不同阶层，不同社会地位，不同地域，乃至不同行业的人，对彼此的认知都会有很大的误区，不同地域也是，一个地区约定俗成的东西，在另一个地区可能就是闻所未闻。</p><p>经常有一种观点，认为高认知碾压低认知，说你如果达到某个阶层，掌握某个认知，就可以碾压那些阶层之下的人，可以任意收割或者利用他们。</p><p>但我发现，其实并不是，高学历，高智商人群被低学历，低背景人群诈骗收割的案例也很多。最近爆出来的阿里女员工被诈骗的新闻，其实真的不是孤例。很多人认为这些人认知不够，但扪心自问，我们自己又高明到哪里去，在投资领域我犯过的错误也数不胜数，认知不足交过的学费算下来也是挺大的数字了。</p><p>现在业内都知道，所谓下沉市场价值巨大，我在星球里说过，对如何挖掘下沉市场，我是没任何感知的。因为我从小就没在农村住过一天，虽然小时候家里也很穷，但属于城市平民，所以对所谓乡村生活，乡村人际，乡村的过年气氛，就完全无感，我看到有读者说，现在年味越来越淡，只有小时候乡下过年那才叫过年，这话我就不爱听，我城里长大的就不配过年是怎么的。</p><p>另外，我还说过一点，我没有故乡的概念，我虽然是天津出生的，但是随着父亲工作单位调动，6岁之前在山东德州，是出扒鸡的德州，不是出牛仔的德州。那么6岁之前是没任何印象的，6岁后父母迁回天津，事业单位，属于水利部下的勘测设计院，当时还叫水电部，那么住的小区是单位家属区，整个设计院的人分别来自山东德州和河南三门峡，换句话说，家属院里就没有本土的天津人。当然，我们家祖籍也不是天津，是河北，解放前我爷爷迁居到天津的，可是河北老家我也一次都没去过。所以不好意思，我小时候在天津的时候，就没觉得自己是天津人，天津人也没拿我当本地人，但我也没觉得自己是河北人，是山东人。所以所谓叶落归根，荣归故里，很惭愧，我也是完全没感觉的。</p><p>没有故土概念，也没有乡村生活经历，城里亲戚关系也没那么深厚，对很多这方面的感知基本没有，所以我知道很多人会用这样的认知感来做营销，做市场运营，做低成本获客，但这种我就不会碰，因为我的认知跟不上。</p><p>以前草根创业者，很多是本色的认知感，比如李兴平，做的非常成功；后来精英们做下沉，靠数据反馈迭代，我是很佩服张一鸣和黄峥这种，我是做不来。但确实，跨越阶层，跨越群体的认知，是产生很多商业机会，以及个人价值增长的所在。 这句话我加粗一下，希望读者仔细想想。</p><p>比如说，为什么我常说，技术人员懂一点商业，会非常有价值，看看中国和美国的福布斯榜单，多少大佬是程序员出身。懂草根的精英，和懂精英的草根，也都是非常容易创建商业奇迹的人。</p><p>比如说，出海企业，能够理解海外市场，并掌握中国研发资源的人，就会非常有优势。</p><p>跨越不同族群，不同阶层的时候，你会发现，A群体中非常渴望的诉求，认为非常难以实现的事情，在B群体里其实是非常简单，容易获取的资源，但B群体并不知道A群体存在这样的诉求，如果有一个人，比如他是A群体的人，突然有机会接触了B群体，掌握了B群体的认知，发现存在非常简单，容易获取这样的资源，他拿到资源转过头来，回到A群体贩售，这就是很多商业成功案例的本质逻辑。</p><p>我看到包括生财有术，包括我自己星球里很多读者分享的赚钱案例，相当高的比例都可以用这个逻辑来套用，几乎都能符合。</p><p>很多草根创业者小有成就后，都愿意花钱读个emba，试图让自己融入另一个阶层，也是存在这样的一种理念。</p><p>但这里存在一个问题，最近我发现很多创业者，或者一些还不错的草根创业者，存在这样一个问题，他们脱胎于A群体，开始接触B群体，靠B群体的认知，转过头来，在A群体解决了一些关键诉求，实现了很好的商业转化，这不挺成功的么，然后他们就开始觉得，A群体太low了，什么都不懂，自己要怎样，脱胎换骨，成为B群体中的一员，但是这里问题来了，彻底脱离了A群体后，他们其实就失去了自己的价值了。</p><p>这就是今天要说的主题，能够纵横跨越阶层，跨越族群的认知，充分利用起来，可以具有极大的商业价值，但如果你彻底放弃了某个群体和阶层的认知，你以为你脱胎换骨，其实你是自废武功。你说增进认知，学习更多难道有错么？当然没错。但究竟什么才是你的价值，既懂A，又懂B才是你的价值。放弃A，追求B，你什么都不是。</p><p>底层逆袭的人，往往会忽视底层认知的价值，当你脱离了所谓低级趣味的时候，你可能已经失去了很重要的价值资源。而这样的人，还真挺多的。</p><p>类似的案例还有很多，中国改革开放，第一批睁眼看世界的人，既懂中国，又懂西方，就很容易抓住时代的机遇，抓住很多稀缺的机会，成就一番事业，这些人慢慢成为中年人，觉得自己孩子早点接受西方教育，不是比自己更有优势么？结果问题来了，下一代人确实很懂西方，但不懂中国，反而失去了独特的价值。</p><p>认知障无处不在，所谓高阶人士，其实也存在很多认知障，就好比说，一路开挂的学霸是教不了学渣的，因为他们无法理解学渣的困境和苦恼，反而是从学渣逆袭诚学霸的，拥有跨越阶层的思维，才能更有针对性的辅导学渣。就好比说，纯粹大公司成长起来的技术高手很难去早期创业公司带团队，因为他们很难理解资源极为苛刻，人力极为平庸的情况下，如何做好产品，但反而是那些从巨头草创早期就加入，一路成长的高手，更能理解从创业到成长为巨头的挑战，这些都可以认为是跨越阶层的认知，具有独特的价值。</p><p>但切记，同时拥有多个阶层的认知才是你的价值所在，不要顾此失彼，为了追求所谓阶层上升，阶层融入，轻易放弃曾经的认知能力。最近发现有不少创业者，在做这样自废武功的事情，遂有感慨成此文。</p><p>一定要找到自己的独特价值，无论面对什么阶层，什么样的人，你总会在某个细分领域的认知具有优势，你找到这个点，然后再通过学习和领悟对方阶层的认知，从中挖掘匹配的需求点，就是你的独特价值。</p><p>我的知识星球，年终免费福利课，复盘人生关键决策，有效期只剩不到10天，最后提醒，3月1日凌晨准时下架。</p><p>懒得发链接了，星球用户去看置顶帖，其他读者忽略即可。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;blockquote&gt;
+&lt;p&gt;原文链接：&lt;a href=&quot;https://mp.weixin.qq.com/s/eO7mVliAl8CwYnGV1FwtJg&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;https://mp.weixin.qq.com/s/e
+      
+    
+    </summary>
+    
+      <category term="随想" scheme="https://rovast.github.io/categories/%E9%9A%8F%E6%83%B3/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>理解 shell 脚本中的常见用法2&gt;&amp;1</title>
@@ -416,84 +485,6 @@
     
     
       <category term="杂项" scheme="https://rovast.github.io/tags/%E6%9D%82%E9%A1%B9/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>phpstorm 集成 phpCodeSniffer</title>
-    <link href="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/"/>
-    <id>https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/</id>
-    <published>2019-08-14T10:14:02.000Z</published>
-    <updated>2020-11-28T08:49:18.079Z</updated>
-    
-    <content type="html"><![CDATA[<p>本文主要指导如何在 phpstorm 中集成 phpCodeSniffer（简称：phpCS）</p><ul><li>安装 phpCS</li><li>如何在 phpStorm 中加载 phpCS</li><li>如何加载自定义的 phpCS 的 xml 规则文件</li><li>如何在 php 文件中实时提示</li><li>如何根据规则实时修正</li></ul><p>phpStorm 官方指导文档：<a href="https://www.jetbrains.com/help/phpstorm/using-php-code-sniffer.html" target="_blank" rel="noopener">https://www.jetbrains.com/help/phpstorm/using-php-code-sniffer.html</a></p><h2 id="安装-phpCS"><a href="#安装-phpCS" class="headerlink" title="安装 phpCS"></a>安装 phpCS</h2><p>安装 phpCS 有多种途径，可以参考 <a href="https://github.com/squizlabs/PHP_CodeSniffer#installation" target="_blank" rel="noopener">https://github.com/squizlabs/PHP_CodeSniffer#installation</a></p><p>我们使用 composer 方式安装，为了便于在所有项目中使用 phpCS，我们使用全局方式安装。</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">composer global require <span class="string">"squizlabs/php_codesniffer=*"</span> -vvv</span><br></pre></td></tr></table></figure><p>安装完成后，会多出两个指令 <code>phpcs</code> 和 <code>phpcbf</code></p><h2 id="在-phpStorm-中加载-phpCS"><a href="#在-phpStorm-中加载-phpCS" class="headerlink" title="在 phpStorm 中加载 phpCS"></a>在 phpStorm 中加载 phpCS</h2><img src="/2019/08/14/phpstorm-load-phpCodeSniffer/load-phpcs.png" title="load-phpcs.png"><p>按照截图的路径 <code>File &gt; Settings &gt; Language &amp; Framework &gt; PHP &gt; Quality Tools &gt; Code Sniffer</code>，选择 Local 后选择刚才的安装路径。</p><blockquote><p>如果不清楚刚才安装的全局路径，Linux 下可使用 <code>whereis phpcs</code> 查看路径。其他系统可自行搜索 “composer 全局 bin 目录” 获取更多帮助。</p></blockquote><blockquote><p>或者，你也可以用 <code>composer global config bin-dir --absolute</code> 来查看 composer 的 bin 目录`</p></blockquote><h2 id="加载自定义-xml-规则文件"><a href="#加载自定义-xml-规则文件" class="headerlink" title="加载自定义 xml 规则文件"></a>加载自定义 xml 规则文件</h2><img src="/2019/08/14/phpstorm-load-phpCodeSniffer/load-rules.png" title="load-rules.png"><p>首先，需要开启 phpCodeSniffer 的验证提示，如截图所示。其次，在截图右下角，选择 custom 来加载自定义的 xml 文件。</p><img src="/2019/08/14/phpstorm-load-phpCodeSniffer/load-rule-file.png" title="load-rule-file.png"><p>加载完毕后，即可正常对打开的 PHP 文件进行实时检测。</p><h2 id="实时验证-PHP-文件"><a href="#实时验证-PHP-文件" class="headerlink" title="实时验证 PHP 文件"></a>实时验证 PHP 文件</h2><p>进行上述配置后，对打开的 PHP 文件会进行实时检测。</p><img src="/2019/08/14/phpstorm-load-phpCodeSniffer/warning.png" title="warning.png"><p>如图所示，对于不符合规范的代码，会进行波浪线显示，鼠标悬浮后可以看到详细说明。</p><h2 id="自动修正"><a href="#自动修正" class="headerlink" title="自动修正"></a>自动修正</h2><p>光标放置在波浪线处，按下组合键 <code>alt</code> + <code>enter</code>，选择 <code>PHP Code Beautifier and Fixer</code> 即可修正。</p><img src="/2019/08/14/phpstorm-load-phpCodeSniffer/fix.png" title="fix.png"><p>修正后</p><img src="/2019/08/14/phpstorm-load-phpCodeSniffer/done.png" title="done.png"><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>结合 phpCS，我们可以在开发时实时检测团队代码规范，便于在提交前进行规范统一。</p><p>集成在 IDE 中的 phpCS 可以对打开的文件进行实时检测，如果需要对整个项目或者是指定的文件夹进行检测，可以直接使用 <code>phpcs</code> 命令进行检测，使用 <code>phpcbf</code> 进行修正。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;本文主要指导如何在 phpstorm 中集成 phpCodeSniffer（简称：phpCS）&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;安装 phpCS&lt;/li&gt;
-&lt;li&gt;如何在 phpStorm 中加载 phpCS&lt;/li&gt;
-&lt;li&gt;如何加载自定义的 phpCS 的 xml 规则文件&lt;
-      
-    
-    </summary>
-    
-      <category term="工具" scheme="https://rovast.github.io/categories/%E5%B7%A5%E5%85%B7/"/>
-    
-    
-      <category term="PHP" scheme="https://rovast.github.io/tags/PHP/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>sonar 初探</title>
-    <link href="https://rovast.github.io/2019/08/13/start-sonar/"/>
-    <id>https://rovast.github.io/2019/08/13/start-sonar/</id>
-    <published>2019-08-13T07:50:16.000Z</published>
-    <updated>2020-11-28T08:49:18.083Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><blockquote><p>参考文档 <a href="https://docs.sonarqube.org/latest/setup/get-started-2-minutes/" target="_blank" rel="noopener">https://docs.sonarqube.org/latest/setup/get-started-2-minutes/</a></p></blockquote><p>sonar 由两部分组成：sonarqube 和 sonar-scanner-cli。前者是 web 端，后者是 CLI 端。下载地址如下：</p><ul><li><a href="https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-7.9.1.zip" target="_blank" rel="noopener">https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-7.9.1.zip</a></li><li><a href="https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.0.0.1744-linux.zip" target="_blank" rel="noopener">https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.0.0.1744-linux.zip</a></li></ul><p>另外，运行 sonar 需要 jvm 环境，自行安装。ubuntu 可执行 <code>apt install openjdk-11-jdk</code></p><h2 id="运行-web-端"><a href="#运行-web-端" class="headerlink" title="运行 web 端"></a>运行 web 端</h2><h3 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h3><p>解压 sonarqube-7.9.1.zip 后，进入 sonarqube-7.9.1 目录，执行下述指令启动，之后访问 <a href="http://localhost:9000" target="_blank" rel="noopener">http://localhost:9000</a> </p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/linux-x86-64/sonar.sh console</span><br></pre></td></tr></table></figure><p>另外，如果需要修改配置，修改 <code>conf/sonar.properties</code> 文件即可，其中 92 行附近可以修改运行内存</p><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sonar.web.javaOpts=-Xmx5000m -Xms5000m -XX:+HeapDumpOnOutOfMemoryError</span><br></pre></td></tr></table></figure><h3 id="登录系统"><a href="#登录系统" class="headerlink" title="登录系统"></a>登录系统</h3><p>访问 <a href="http://localhost:9000，登录信息" target="_blank" rel="noopener">http://localhost:9000，登录信息</a></p><ul><li>用户名  admin</li><li>密码  admin</li></ul><h3 id="创建项目"><a href="#创建项目" class="headerlink" title="创建项目"></a>创建项目</h3><p>点击右上角加号，创建项目，输入项目名称、token 信息后，会显示一个指令，用户</p><img src="/2019/08/13/start-sonar/1565679757086.png" title="1565679757086.png"><h2 id="进行代码扫描"><a href="#进行代码扫描" class="headerlink" title="进行代码扫描"></a>进行代码扫描</h2><p>之前我们安装了 <code>sonar-scanner-cli-4.0.0.1744-linux.zip</code>，解压后，增加 <code>bin</code> 到环境变量</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/home/rovast/Software/sonar-scanner-4.0.0.1744-linux/bin</span><br></pre></td></tr></table></figure><p>然后使其生效 <code>source ~/.bashrc</code> 或者 <code>source ~/.zshrc</code></p><p>根据上一步的提示，进入到需要扫描的项目录，执行</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sonar-scanner \</span><br><span class="line">  -Dsonar.projectKey=laravel-framework \</span><br><span class="line">  -Dsonar.sources=. \</span><br><span class="line">  -Dsonar.host.url=http://localhost:9000 \</span><br><span class="line">  -Dsonar.login=0273f96b7dd12e0790ab2350b4c497fcedff6b36</span><br></pre></td></tr></table></figure><p>等待运行结束后，web 端会自动加载对应报告进行分析</p><h2 id="查看分析报告"><a href="#查看分析报告" class="headerlink" title="查看分析报告"></a>查看分析报告</h2><img src="/2019/08/13/start-sonar/1565682032497.png" title="1565682032497.png"><img src="/2019/08/13/start-sonar/1565682259708.png" title="1565682259708.png"><h2 id="自定义检测规则"><a href="#自定义检测规则" class="headerlink" title="自定义检测规则"></a>自定义检测规则</h2><p>参考 <a href="https://docs.sonarqube.org/latest/analysis/languages/php/" target="_blank" rel="noopener">https://docs.sonarqube.org/latest/analysis/languages/php/</a></p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总结起来，sonar 的特点就是功能强大。</p><ul><li>支持的语言丰富，主流的开发语言基本都支持了</li><li>web 界面友好，可以很清晰地查看报告和分析</li><li>分析的指标丰富：安全性、技术负债、覆盖度、主流规则等等</li><li>marketplace</li></ul><p>除了上述有点外，sonar 也有一些其他方面待考量的地方</p><ul><li>sonar 是基于 java 开发，如果需要拓展其中的规则，需要了解 java 体系</li><li>sonar 本身是一个成熟的产品，如果基于这个来自定义工作流，难度较大</li><li>sonar 资源占用较大</li></ul><p>所以如果需要一套成熟的代码检测相关工具，sonar 是个不错的选择。</p><p>sonar 和 phpCodeSinffer 对比</p><ul><li><a href="https://github.com/SonarSource/sonarqube" target="_blank" rel="noopener">https://github.com/SonarSource/sonarqube</a></li><li><a href="https://github.com/squizlabs/PHP_CodeSniffer" target="_blank" rel="noopener">https://github.com/squizlabs/PHP_CodeSniffer</a></li></ul><p>最大的区别</p><ul><li>sonar 是一个产品提供了完善的解决方案</li><li>phpCodeSniffer 是一个工具，专注于 php 语法检查</li></ul><p>拓展性</p><ul><li>sonar 是成套的解决方案，可定制化程序较低。需要在 sonar 现有的 rules 中组合自己的 rule，或者在 marketPlace 中找到合适的组件。</li><li>如果需要开发完全自定义的规则，可参考 <a href="https://docs.sonarqube.org/latest/analysis/languages/php/" target="_blank" rel="noopener">https://docs.sonarqube.org/latest/analysis/languages/php/</a> ，使用 java 开发对应的规则</li><li><p>如果基于 sonar 来构建自己的工作流，可行性较低。因为他本身是个产品，所有功能都集成了，有自己的一套思想</p></li><li><p>phpCodeSniffer 是基于 PHP 的一套语法检测工具</p></li><li>phpCodeSniffer 预留了语法检查的接口和类。如果需要自定义规则，实现对应的接口或类即可，较为简单</li><li>如果基于 phpCS 来构建自己工作流，较为现实。毕竟它只是个工具</li><li>另外，phpCS 有基于 IDE 的一些插件，可以集成到编辑器中实时检查</li></ul><p>总结</p><ul><li>如果只是做语法检查，并且希望高度自定义，推荐使用 phpCodeSniffer</li><li>如果对定制化程度没有要求，希望有个工具开箱即用，并且也无后续定制需求，可使用 sonar</li><li>【推荐】使用 phpCS，这样便于后期和也无框架高度集成，便于做更多贴合框架和业务的检测。比如业务级别调用规范等</li></ul>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h2 id=&quot;安装&quot;&gt;&lt;a href=&quot;#安装&quot; class=&quot;headerlink&quot; title=&quot;安装&quot;&gt;&lt;/a&gt;安装&lt;/h2&gt;&lt;blockquote&gt;
-&lt;p&gt;参考文档 &lt;a href=&quot;https://docs.sonarqube.org/latest/setup/get
-      
-    
-    </summary>
-    
-    
-      <category term="杂项" scheme="https://rovast.github.io/tags/%E6%9D%82%E9%A1%B9/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>记一次 C# aes 加密转 php</title>
-    <link href="https://rovast.github.io/2019/06/28/c-sharp-aes-to-php-note/"/>
-    <id>https://rovast.github.io/2019/06/28/c-sharp-aes-to-php-note/</id>
-    <published>2019-06-28T03:35:53.000Z</published>
-    <updated>2020-11-28T08:49:18.044Z</updated>
-    
-    <content type="html"><![CDATA[<p>记录一次 C#  转 PHP 中遇到的一个问题。</p><p>描述：aes-128-cbc 的 c# 转 php</p><p>c# 代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">using System;</span><br><span class="line">using System.Security.Cryptography;</span><br><span class="line">using System.Text;</span><br><span class="line"></span><br><span class="line">namespace Rextester &#123;</span><br><span class="line">    class Program &#123;</span><br><span class="line">        public static string EncryptAES (string key, string content) &#123;</span><br><span class="line">            // 关键代码</span><br><span class="line">            using (var aes = new RijndaelManaged ()) &#123;</span><br><span class="line">                aes.BlockSize = 128;</span><br><span class="line">                aes.IV = iv;</span><br><span class="line">                aes.Key = key;</span><br><span class="line">                aes.Mode = CipherMode.CBC;</span><br><span class="line">                aes.Padding = PaddingMode.PKCS7;</span><br><span class="line">                var cryptoTransform = aes.CreateEncryptor ();</span><br><span class="line">                var resultArray = cryptoTransform.TransformFinalBlock (content, 0, content.Length);</span><br><span class="line">                aes.Clear ();</span><br><span class="line">                return Convert.ToBase64String (result, 0, result.Length);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        public static void Main (string[] args) &#123;</span><br><span class="line">            Console.Write (EncryptAES (&quot;abcd&quot;, &quot;1234&quot;));</span><br><span class="line">            Console.Read ();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p>PHP 代码<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">myEncrypt</span><span class="params">($key, $content)</span></span>&#123;</span><br><span class="line">    <span class="comment">// AES-128-CBC AES-192-CBC AES-256-CBC</span></span><br><span class="line">    <span class="keyword">return</span> base64_encode(openssl_encrypt($content,<span class="string">'AES-128-CBC'</span>, base64_encode(md5($key,<span class="keyword">true</span>)), OPENSSL_RAW_DATA, $iv));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">myEncrypt(<span class="string">'abcd'</span>, <span class="string">'efg'</span>);</span><br></pre></td></tr></table></figure></p><p>注意点说明</p><ol><li><p><code>OPENSSL_RAW_DATA</code> 对应的是 PKCS7</p></li><li><p><code>AES-128-CBC</code> 两个语言处理不一致</p></li></ol><ul><li>对于 PHP 而言，因为所使用的是 aes-128-cbc，所以 key length 需要是 128bits 才行。所以 php 会自动截取 $key，即 <code>substr($key, 0, 16)</code>;</li><li>对于刚才的 C# 而言，可不一样了，如果 key length 大于 128bits，他会自动填充0，最后变为 aes-cbc-192，此时，php对应的方法也要改。</li></ul>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;记录一次 C#  转 PHP 中遇到的一个问题。&lt;/p&gt;
-&lt;p&gt;描述：aes-128-cbc 的 c# 转 php&lt;/p&gt;
-&lt;p&gt;c# 代码&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;
-      
-    
-    </summary>
-    
-      <category term="杂项" scheme="https://rovast.github.io/categories/%E6%9D%82%E9%A1%B9/"/>
-    
     
   </entry>
   
