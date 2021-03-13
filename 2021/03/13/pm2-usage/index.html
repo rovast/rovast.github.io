@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="安装npm install pm2@latest -g 书写配置文件使用配置文件来启动，便于统一管理 ~/.config/pm2/ecosystem.config.yaml 123456789101112131415161718192021apps:  - script     : /home/rovast/applications/code-server-3.9.1-linux-amd64/bi">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2021-03-13T15:08:03.867Z">
+<meta property="og:updated_time" content="2021-03-13T23:01:31.684Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="pm2 简明使用教程">
 <meta name="twitter:description" content="安装npm install pm2@latest -g 书写配置文件使用配置文件来启动，便于统一管理 ~/.config/pm2/ecosystem.config.yaml 123456789101112131415161718192021apps:  - script     : /home/rovast/applications/code-server-3.9.1-linux-amd64/bi">
@@ -334,7 +334,7 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#书写配置文件"><span class="toc-number">2.</span> <span class="toc-text">书写配置文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#启动"><span class="toc-number">3.</span> <span class="toc-text">启动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#监控"><span class="toc-number">4.</span> <span class="toc-text">监控</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-number">1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#书写配置文件"><span class="toc-number">2.</span> <span class="toc-text">书写配置文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#启动"><span class="toc-number">3.</span> <span class="toc-text">启动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#监控"><span class="toc-number">4.</span> <span class="toc-text">监控</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#设置为开机自启动"><span class="toc-number">5.</span> <span class="toc-text">设置为开机自启动</span></a></li></ol>
     </nav>
   </div>
 </aside>
@@ -380,7 +380,7 @@
         <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/13/pm2-usage/#comments" class="article-comment-link">评论</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 168(字)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 221(字)</span>
 	
 	
 		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 1(分)</span>
@@ -399,6 +399,7 @@
 </blockquote>
 <h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pm2 start ~/.config/pm2/ecosystem.config.yaml</span><br></pre></td></tr></table></figure>
 <h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p><a href="https://app.pm2.io/" target="_blank" rel="noopener">https://app.pm2.io/</a></p>
+<h2 id="设置为开机自启动"><a href="#设置为开机自启动" class="headerlink" title="设置为开机自启动"></a>设置为开机自启动</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pm2 startup</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 输入完 之后有如下提示</span><br><span class="line"><span class="meta">#</span> sudo env PATH=$PATH:/home/rovast/.nvm/versions/node/v15.11.0/bin /home/rovast/.nvm/versions/node/v15.11.0/lib/node_modules/pm2/bin/pm2 startup systemd -u rovast --hp /home/rovast</span><br></pre></td></tr></table></figure>
 
       
     </div>
