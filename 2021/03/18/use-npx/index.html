@@ -17,21 +17,23 @@
   <meta http-equiv="window-target" content="_top">
   
   
-  <title>记录一次 docker 部署前端应用 npm 的问题 | rovast</title>
-  <meta name="description" content="最近在部署一个较为复杂的 web 应用，其中涉及到 mongodb redis php node cron。为了简化部署，想到了使用 docker 部署。 使用 node 时，可以使用 node 的官方 image。 其 docker-compose.yaml 可以如下配置 123456789101112version: &quot;2&quot;services:  node-build:    image: &quot;n">
-<meta name="keywords" content="node">
+  <title>【转】npx 使用教程 | rovast</title>
+  <meta name="description" content="原文 https://www.ruanyifeng.com/blog/2019/02/npx.html  npm 从5.2版开始，增加了 npx 命令。它有很多用处，本文介绍该命令的主要使用场景。  Node 自带 npm 模块，所以可以直接使用 npx 命令。万一不能用，就要手动安装一下。 1$ npm install -g npx 调用项目安装的模块npx 想要解决的主要问题，就是调用项目内">
+<meta name="keywords" content="Web PHP">
 <meta property="og:type" content="article">
-<meta property="og:title" content="记录一次 docker 部署前端应用 npm 的问题">
-<meta property="og:url" content="https://rovast.github.io/2019/03/12/docker-npm-development/index.html">
+<meta property="og:title" content="【转】npx 使用教程">
+<meta property="og:url" content="https://rovast.github.io/2021/03/18/use-npx/index.html">
 <meta property="og:site_name" content="rovast">
-<meta property="og:description" content="最近在部署一个较为复杂的 web 应用，其中涉及到 mongodb redis php node cron。为了简化部署，想到了使用 docker 部署。 使用 node 时，可以使用 node 的官方 image。 其 docker-compose.yaml 可以如下配置 123456789101112version: &quot;2&quot;services:  node-build:    image: &quot;n">
+<meta property="og:description" content="原文 https://www.ruanyifeng.com/blog/2019/02/npx.html  npm 从5.2版开始，增加了 npx 命令。它有很多用处，本文介绍该命令的主要使用场景。  Node 自带 npm 模块，所以可以直接使用 npx 命令。万一不能用，就要手动安装一下。 1$ npm install -g npx 调用项目安装的模块npx 想要解决的主要问题，就是调用项目内">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-11-28T08:49:18.050Z">
+<meta property="og:image" content="https://rovast.github.io/assets/bg2019020901.jpg">
+<meta property="og:updated_time" content="2021-03-18T02:38:17.617Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="记录一次 docker 部署前端应用 npm 的问题">
-<meta name="twitter:description" content="最近在部署一个较为复杂的 web 应用，其中涉及到 mongodb redis php node cron。为了简化部署，想到了使用 docker 部署。 使用 node 时，可以使用 node 的官方 image。 其 docker-compose.yaml 可以如下配置 123456789101112version: &quot;2&quot;services:  node-build:    image: &quot;n">
+<meta name="twitter:title" content="【转】npx 使用教程">
+<meta name="twitter:description" content="原文 https://www.ruanyifeng.com/blog/2019/02/npx.html  npm 从5.2版开始，增加了 npx 命令。它有很多用处，本文介绍该命令的主要使用场景。  Node 自带 npm 模块，所以可以直接使用 npx 命令。万一不能用，就要手动安装一下。 1$ npm install -g npx 调用项目安装的模块npx 想要解决的主要问题，就是调用项目内">
+<meta name="twitter:image" content="https://rovast.github.io/assets/bg2019020901.jpg">
   <!-- Canonical links -->
-  <link rel="canonical" href="https://rovast.github.io/2019/03/12/docker-npm-development/index.html">
+  <link rel="canonical" href="https://rovast.github.io/2021/03/18/use-npx/index.html">
   
     <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
   
@@ -334,21 +336,21 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#调用项目安装的模块"><span class="toc-number">1.</span> <span class="toc-text">调用项目安装的模块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#避免全局安装模块"><span class="toc-number">2.</span> <span class="toc-text">避免全局安装模块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#no-install-参数和-ignore-existing-参数"><span class="toc-number">3.</span> <span class="toc-text">--no-install 参数和--ignore-existing 参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用不同版本的-node"><span class="toc-number">4.</span> <span class="toc-text">使用不同版本的 node</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#p-参数"><span class="toc-number">5.</span> <span class="toc-text">-p 参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#c-参数"><span class="toc-number">6.</span> <span class="toc-text">-c 参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#执行-GitHub-源码"><span class="toc-number">7.</span> <span class="toc-text">执行 GitHub 源码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考链接"><span class="toc-number">8.</span> <span class="toc-text">参考链接</span></a></li></ol>
     </nav>
   </div>
 </aside>
 
 <main class="main" role="main">
   <div class="content">
-  <article id="post-docker-npm-development" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+  <article id="post-use-npx" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
     
     <div class="article-header">
       
         
   
     <h1 class="article-title" itemprop="name">
-      记录一次 docker 部署前端应用 npm 的问题
+      【转】npx 使用教程
     </h1>
   
 
@@ -356,22 +358,12 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/2019/03/12/docker-npm-development/" class="article-date">
-	  <time datetime="2019-03-12T05:12:00.000Z" itemprop="datePublished">2019-03-12</time>
+	<a href="/2021/03/18/use-npx/" class="article-date">
+	  <time datetime="2021-03-17T18:32:46.000Z" itemprop="datePublished">2021-03-18</time>
 	</a>
 </span>
         
-  <span class="article-category">
-    <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/Linux/">Linux</a>
-  </span>
-
         
-  <span class="article-tag">
-    <i class="icon icon-tags"></i>
-	<a class="article-tag-link" href="/tags/node/">node</a>
-  </span>
-
 
         
 	<span class="article-read hidden-xs">
@@ -384,42 +376,79 @@
 
 	<span class="article-read hidden-xs">
     	<i class="icon icon-eye-fill" aria-hidden="true"></i>
-    	<span id="/2019/03/12/docker-npm-development/" class="leancloud_visitors" data-flag-title="记录一次 docker 部署前端应用 npm 的问题">0</span>
+    	<span id="/2021/03/18/use-npx/" class="leancloud_visitors" data-flag-title="【转】npx 使用教程">0</span>
     </span>
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/03/12/docker-npm-development/#comments" class="article-comment-link">评论</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/03/18/use-npx/#comments" class="article-comment-link">评论</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 342(字)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1.2k(字)</span>
 	
 	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 1(分)</span>
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 4(分)</span>
 	
 
       </div>
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <p>最近在部署一个较为复杂的 web 应用，其中涉及到 mongodb redis php node cron。为了简化部署，想到了使用 docker 部署。</p>
-<p>使用 node 时，可以使用 node 的官方 <a href="https://hub.docker.com/_/node" target="_blank" rel="noopener">image</a>。</p>
-<p>其 docker-compose.yaml 可以如下配置</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">"2"</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line"><span class="attr">  node-build:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">"node:8"</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">"test-node"</span></span><br><span class="line"><span class="attr">    working_dir:</span> <span class="string">/home/node/app</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">NODE_ENV=production</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./:/home/node/app</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">&gt;</span></span><br><span class="line"><span class="string">      bash -c "npm install &amp;&amp; npm run build"</span></span><br></pre></td></tr></table></figure>
-<p>发现，安装好了之后，不能执行 build。是因为 build 中引入了 webpack，而 webpack 是在 devDependencies 中定义的。</p>
-<p>比较奇怪的是，在 <strong>自己的开发机</strong> 上是可以直接 npm install 安装 webpack，在 docker 容器中不可以。</p>
-<p>初步怀疑是 images 搭载的操作系统问题。最后换了个镜像，依然不行。</p>
-<p>最后发现，是 npm config 的问题。</p>
-<p>执行<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ npm config ls -l | grep pro</span><br><span class="line">https-proxy = null</span><br><span class="line">noproxy = null</span><br><span class="line">production = <span class="literal">false</span></span><br><span class="line">progress = <span class="literal">true</span></span><br><span class="line">proxy = null</span><br><span class="line">save-prod = <span class="literal">false</span></span><br></pre></td></tr></table></figure></p>
-<p>我们看到  <code>production=false</code>，在这种模式下，npm install 就会安装 devDependencies ，而 docker 容器中执行 <code>npm config ls -l | grep pro</code><br>后发现， production=true。这就是问题所在。</p>
-<p>更新 docker-compose.yaml</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">"2"</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line"><span class="attr">  node-build:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">"node:8"</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">"test-node"</span></span><br><span class="line"><span class="attr">    working_dir:</span> <span class="string">/home/node/app</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">NODE_ENV=development</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./:/home/node/app</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">&gt;</span></span><br><span class="line"><span class="string">      bash -c "npm install &amp;&amp; npm run build"</span></span><br></pre></td></tr></table></figure>
-<p>修改 NODE_ENV 为 development 即可。</p>
-<hr>
-<p>虽然看起来是很小的问题，确着实花了好长时间去排错调试。特此记录！</p>
-<p>参考资料：</p>
-<ul>
-<li><a href="https://stackoverflow.com/questions/34700610/npm-install-wont-install-devdependencies" target="_blank" rel="noopener">npm install won’t install devDependencies</a></li>
-<li><a href="https://hub.docker.com/_/node" target="_blank" rel="noopener">Docker Official Images</a></li>
+        <blockquote>
+<p>原文 <a href="https://www.ruanyifeng.com/blog/2019/02/npx.html" target="_blank" rel="noopener">https://www.ruanyifeng.com/blog/2019/02/npx.html</a></p>
+</blockquote>
+<p>npm 从5.2版开始，增加了 npx 命令。它有很多用处，本文介绍该命令的主要使用场景。</p>
+<p><img src="/assets/bg2019020901.jpg" alt="img"></p>
+<p>Node 自带 npm 模块，所以可以直接使用 npx 命令。万一不能用，就要手动安装一下。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install -g npx</span><br></pre></td></tr></table></figure>
+<h2 id="调用项目安装的模块"><a href="#调用项目安装的模块" class="headerlink" title="调用项目安装的模块"></a>调用项目安装的模块</h2><p>npx 想要解决的主要问题，就是调用项目内部安装的模块。比如，项目内部安装了测试工具 <a href="http://www.ruanyifeng.com/blog/2015/12/a-mocha-tutorial-of-examples.html" target="_blank" rel="noopener">Mocha</a>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install -D mocha</span><br></pre></td></tr></table></figure>
+<p>一般来说，调用 Mocha ，只能在项目脚本和 package.json 的<a href="http://www.ruanyifeng.com/blog/2016/10/npm_scripts.html" target="_blank" rel="noopener"><code>scripts</code></a>字段里面， 如果想在命令行下调用，必须像下面这样。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 项目的根目录下执行</span></span><br><span class="line">$ node-modules/.bin/mocha --version</span><br></pre></td></tr></table></figure>
+<p>npx 就是想解决这个问题，让项目内部安装的模块用起来更方便，只要像下面这样调用就行了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npx mocha --version</span><br></pre></td></tr></table></figure>
+<p>npx 的原理很简单，就是运行的时候，会到<code>node_modules/.bin</code>路径和环境变量<code>$PATH</code>里面，检查命令是否存在。</p>
+<p>由于 npx 会检查环境变量<code>$PATH</code>，所以系统命令也可以调用。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 等同于 ls</span></span><br><span class="line">$ npx ls</span><br></pre></td></tr></table></figure>
+<p>注意，Bash 内置的命令不在<code>$PATH</code>里面，所以不能用。比如，<code>cd</code>是 Bash 命令，因此就不能用<code>npx cd</code>。</p>
+<h2 id="避免全局安装模块"><a href="#避免全局安装模块" class="headerlink" title="避免全局安装模块"></a>避免全局安装模块</h2><p>除了调用项目内部模块，npx 还能避免全局安装的模块。比如，<code>create-react-app</code>这个模块是全局安装，npx 可以运行它，而且不进行全局安装。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npx create-react-app my-react-app</span><br></pre></td></tr></table></figure>
+<p>上面代码运行时，npx 将<code>create-react-app</code>下载到一个临时目录，使用以后再删除。所以，以后再次执行上面的命令，会重新下载<code>create-react-app</code>。</p>
+<p>下载全局模块时，npx 允许指定版本。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npx uglify-js@3.1.0 main.js -o ./dist/main.js</span><br></pre></td></tr></table></figure>
+<p>上面代码指定使用 3.1.0 版本的<code>uglify-js</code>压缩脚本。</p>
+<p>注意，只要 npx 后面的模块无法在本地发现，就会下载同名模块。比如，本地没有安装<code>http-server</code>模块，下面的命令会自动下载该模块，在当前目录启动一个 Web 服务。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npx http-server</span><br></pre></td></tr></table></figure>
+<h2 id="no-install-参数和-ignore-existing-参数"><a href="#no-install-参数和-ignore-existing-参数" class="headerlink" title="--no-install 参数和--ignore-existing 参数"></a><code>--no-install</code> 参数和<code>--ignore-existing</code> 参数</h2><p>如果想让 npx 强制使用本地模块，不下载远程模块，可以使用<code>--no-install</code>参数。如果本地不存在该模块，就会报错。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npx --no-install http-server</span><br></pre></td></tr></table></figure>
+<p>反过来，如果忽略本地的同名模块，强制安装使用远程模块，可以使用<code>--ignore-existing</code>参数。比如，本地已经全局安装了<code>create-react-app</code>，但还是想使用远程模块，就用这个参数。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npx --ignore-existing create-react-app my-react-app</span><br></pre></td></tr></table></figure>
+<h2 id="使用不同版本的-node"><a href="#使用不同版本的-node" class="headerlink" title="使用不同版本的 node"></a>使用不同版本的 node</h2><p>利用 npx 可以下载模块这个特点，可以指定某个版本的 Node 运行脚本。它的窍门就是使用 npm 的 <a href="https://www.npmjs.com/package/node" target="_blank" rel="noopener">node 模块</a>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ npx node@0.12.8 -v</span><br><span class="line">v0.12.8</span><br></pre></td></tr></table></figure>
+<p>上面命令会使用 0.12.8 版本的 Node 执行脚本。原理是从 npm 下载这个版本的 node，使用后再删掉。</p>
+<p>某些场景下，这个方法用来切换 Node 版本，要比 nvm 那样的版本管理器方便一些。</p>
+<h2 id="p-参数"><a href="#p-参数" class="headerlink" title="-p 参数"></a><code>-p</code> 参数</h2><p><code>-p</code>参数用于指定 npx 所要安装的模块，所以上一节的命令可以写成下面这样。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ npx -p node@0.12.8 node -v </span><br><span class="line">v0.12.8</span><br></pre></td></tr></table></figure>
+<p>上面命令先指定安装<a href="mailto:`node@0.12.8" target="_blank" rel="noopener">`node@0.12.8</a><code>，然后再执行</code>node -v`命令。</p>
+<p><code>-p</code>参数对于需要安装多个模块的场景很有用。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npx -p lolcatjs -p cowsay [<span class="built_in">command</span>]</span><br></pre></td></tr></table></figure>
+<h2 id="c-参数"><a href="#c-参数" class="headerlink" title="-c 参数"></a>-c 参数</h2><p>如果 npx 安装多个模块，默认情况下，所执行的命令之中，只有第一个可执行项会使用 npx 安装的模块，后面的可执行项还是会交给 Shell 解释。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ npx -p lolcatjs -p cowsay <span class="string">'cowsay hello | lolcatjs'</span></span><br><span class="line"><span class="comment"># 报错</span></span><br></pre></td></tr></table></figure>
+<p>上面代码中，<code>cowsay hello | lolcatjs</code>执行时会报错，原因是第一项<code>cowsay</code>由 npx 解释，而第二项命令<code>localcatjs</code>由 Shell 解释，但是<code>lolcatjs</code>并没有全局安装，所以报错。</p>
+<p><code>-c</code>参数可以将所有命令都用 npx 解释。有了它，下面代码就可以正常执行了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npx -p lolcatjs -p cowsay -c <span class="string">'cowsay hello | lolcatjs'</span></span><br></pre></td></tr></table></figure>
+<p><code>-c</code>参数的另一个作用，是将环境变量带入所要执行的命令。举例来说，npm 提供当前项目的一些环境变量，可以用下面的命令查看。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm run env | grep npm_</span><br></pre></td></tr></table></figure>
+<p><code>-c</code>参数可以把这些 npm 的环境变量带入 npx 命令。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npx -c <span class="string">'echo "$npm_package_name"'</span></span><br></pre></td></tr></table></figure>
+<p>上面代码会输出当前项目的项目名。</p>
+<h2 id="执行-GitHub-源码"><a href="#执行-GitHub-源码" class="headerlink" title="执行 GitHub 源码"></a>执行 GitHub 源码</h2><p>npx 还可以执行 GitHub 上面的模块源码。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 执行 Gist 代码</span></span><br><span class="line">$ npx https://gist.github.com/zkat/4bc19503fe9e9309e2bfaa2c58074d32</span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行仓库代码</span></span><br><span class="line">$ npx github:piuccio/cowsay hello</span><br></pre></td></tr></table></figure>
+<p>注意，远程代码必须是一个模块，即必须包含<code>package.json</code>和入口脚本。</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
+<li><a href="https://www.npmjs.com/package/npx" target="_blank" rel="noopener">npx</a></li>
+<li><a href="https://alligator.io/workflow/npx/" target="_blank" rel="noopener">Speed Up Your npm Workflow With npx</a></li>
+<li><a href="https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b" target="_blank" rel="noopener">Introducing npx: an npm package runner</a></li>
 </ul>
+<p>（完）</p>
 
       
     </div>
@@ -429,7 +458,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="https://rovast.github.io/2019/03/12/docker-npm-development/" title="记录一次 docker 部署前端应用 npm 的问题" target="_blank" rel="external">https://rovast.github.io/2019/03/12/docker-npm-development/</a>
+      <a href="https://rovast.github.io/2021/03/18/use-npx/" title="【转】npx 使用教程" target="_blank" rel="external">https://rovast.github.io/2021/03/18/use-npx/</a>
     </li>
     
     <li class="post-copyright-license">
@@ -475,13 +504,9 @@
   
   <ul class="pager pull-left">
     
-    <li class="prev">
-      <a href="/2019/04/04/virtualbox-problems-in-ubuntu/" title="virtualbox 在 ubuntu 中不能正常启动的解决办法"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
-    </li>
-    
     
     <li class="next">
-      <a href="/2019/03/11/linux-cron-with-flock/" title="Linux cron 避坑指南"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+      <a href="/2021/03/13/server-set-proxy-use-socks5/" title="Linux客户端设置 socks5+kcptun"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
     </li>
     
     
