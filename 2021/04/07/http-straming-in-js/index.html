@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>初探 http-straming | rovast</title>
+  <meta name="description" content="基础概念HTTP 流简单的理解为：服务端维持一个 HTTP 连接，通过这个 HTTP 连接源源不断、持续的输出内容至客户端。相较于我们常见的 HTTP 请求(一次返回)，流处理的特点在于持续返回。 我们举个简单的应用场景：股票网站的股价更新。你可以使用轮询的方式，前端设置定时器周期性的请求股价接口来刷新股价。除此之外，可以使用 HTTP Streaming 的方式，只需要维持一个 HTTP 链接，">
+<meta name="keywords" content="Web PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初探 http-straming">
+<meta property="og:url" content="https://rovast.github.io/2021/04/07/http-straming-in-js/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="基础概念HTTP 流简单的理解为：服务端维持一个 HTTP 连接，通过这个 HTTP 连接源源不断、持续的输出内容至客户端。相较于我们常见的 HTTP 请求(一次返回)，流处理的特点在于持续返回。 我们举个简单的应用场景：股票网站的股价更新。你可以使用轮询的方式，前端设置定时器周期性的请求股价接口来刷新股价。除此之外，可以使用 HTTP Streaming 的方式，只需要维持一个 HTTP 链接，">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2021-04-11T02:32:45.043Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="初探 http-straming">
+<meta name="twitter:description" content="基础概念HTTP 流简单的理解为：服务端维持一个 HTTP 连接，通过这个 HTTP 连接源源不断、持续的输出内容至客户端。相较于我们常见的 HTTP 请求(一次返回)，流处理的特点在于持续返回。 我们举个简单的应用场景：股票网站的股价更新。你可以使用轮询的方式，前端设置定时器周期性的请求股价接口来刷新股价。除此之外，可以使用 HTTP Streaming 的方式，只需要维持一个 HTTP 链接，">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2021/04/07/http-straming-in-js/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">但行好事</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/流程/">流程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.33px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.67px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/docker/" style="font-size: 13.33px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.33px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/makefile/" style="font-size: 13px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13px;">php</a> <a href="/tags/soar/" style="font-size: 13.33px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.33px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.33px;">wiki</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.33px;">杂项</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 13.67px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/04/07/http-straming-in-js/" class="title">初探 http-straming</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-04-07T02:22:37.000Z" itemprop="datePublished">2021-04-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/工具/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/20/hexo-github-action/" class="title">使用 github action 自动发布 hexo blog</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-20T14:16:03.000Z" itemprop="datePublished">2021-03-20</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/17/use-npx/" class="title">【转】npx 使用教程</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-17T18:32:46.000Z" itemprop="datePublished">2021-03-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/server-set-proxy-use-socks5/" class="title">Linux客户端设置 socks5+kcptun</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-13T07:08:40.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/工具/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/13/pm2-usage/" class="title">pm2 简明使用教程</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-13T07:04:30.000Z" itemprop="datePublished">2021-03-13</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#基础概念"><span class="toc-number">1.</span> <span class="toc-text">基础概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务端初体验"><span class="toc-number">2.</span> <span class="toc-text">服务端初体验</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#应用场景"><span class="toc-number">3.</span> <span class="toc-text">应用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP-Streaming-VS-WebSocket"><span class="toc-number">3.1.</span> <span class="toc-text">HTTP Streaming VS WebSocket</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#以容器云为例的应用场景"><span class="toc-number">3.2.</span> <span class="toc-text">以容器云为例的应用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#场景1情况下，我们需要持续获取终端的日志输出，并且数据的流向是单向的：即服务端有新的日志输出就推送至客户端"><span class="toc-number">3.2.1.</span> <span class="toc-text">场景1情况下，我们需要持续获取终端的日志输出，并且数据的流向是单向的：即服务端有新的日志输出就推送至客户端</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#场景2情况下，数据是双向交互的，我们选择使用-Websocket"><span class="toc-number">3.2.2.</span> <span class="toc-text">场景2情况下，数据是双向交互的，我们选择使用 Websocket</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#注意点"><span class="toc-number">4.</span> <span class="toc-text">注意点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">5.</span> <span class="toc-text">参考资料</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-http-straming-in-js" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      初探 http-straming
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/04/07/http-straming-in-js/" class="article-date">
+	  <time datetime="2021-04-07T02:22:37.000Z" itemprop="datePublished">2021-04-07</time>
+	</a>
+</span>
+        
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2021/04/07/http-straming-in-js/" class="leancloud_visitors" data-flag-title="初探 http-straming">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/04/07/http-straming-in-js/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1.2k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 5(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h2><p>HTTP 流简单的理解为：服务端维持一个 HTTP 连接，通过这个 HTTP 连接源源不断、持续的输出内容至客户端。相较于我们常见的 HTTP 请求(一次返回)，流处理的特点在于持续返回。</p>
+<p>我们举个简单的应用场景：股票网站的股价更新。你可以使用轮询的方式，前端设置定时器周期性的请求股价接口来刷新股价。除此之外，可以使用 HTTP Streaming 的方式，只需要维持一个 HTTP 链接，就可以由后端自行将最新的股价信息 Push 到客户端来完成实时刷新。</p>
+<p>同时需要注意，为了实现这种持续返回的效果，服务端需要在客户端返回的 Header 中设置 <code>Transfer Encoding: chunked</code> [2]。</p>
+<blockquote>
+<p>To achieve an indefinite response, the server must respond to client requests by specifying Transfer Encoding: chunked in the header. This sets up a persistent connection from server to client and allows the server to send response data in chunks of newline-delimited strings. These chunks of data can then be received and processed on-the-fly by the client.</p>
+</blockquote>
+<h2 id="服务端初体验"><a href="#服务端初体验" class="headerlink" title="服务端初体验"></a>服务端初体验</h2><p>我们使用 php fpm + nginx，来完成服务端的 http 流输出。PHP 代码如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (ob_get_level() == <span class="number">0</span>) ob_start();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> ($i = <span class="number">0</span>; $i&lt;<span class="number">10</span>; $i++)&#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"&lt;br&gt; Line to show. At"</span>.date(<span class="string">'Y-m-d H:i:s'</span>);</span><br><span class="line">    <span class="keyword">echo</span> str_pad(<span class="string">''</span>,<span class="number">4096</span>).<span class="string">"\n"</span>;</span><br><span class="line"></span><br><span class="line">    ob_flush();</span><br><span class="line">    flush();</span><br><span class="line">    sleep(<span class="number">2</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"Done."</span>;</span><br><span class="line"></span><br><span class="line">ob_end_flush();</span><br></pre></td></tr></table></figure>
+<p>我们看到其中有 <code>str_pad(&#39;&#39;,4096)</code>，为填充输出缓冲区，进而保障每次 flush 都有数据能输出到客户端。因为我们的服务经过 Nginx，而 Nginx 的 proxy_buffer_size [3] 默认是 4k，所以我们需要填充完缓冲区后，才能保证每次的 Server 端输出可以直接打到客户端。（当然了，你也可以关闭 Nginx 的缓冲区设置）</p>
+<p>其输出为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Line to show. At2021-04-11 01:54:52</span><br><span class="line">Line to show. At2021-04-11 01:54:54</span><br><span class="line">Line to show. At2021-04-11 01:54:56</span><br><span class="line">Line to show. At2021-04-11 01:54:58</span><br><span class="line">Line to show. At2021-04-11 01:55:00</span><br><span class="line">Line to show. At2021-04-11 01:55:02</span><br><span class="line">Line to show. At2021-04-11 01:55:04</span><br><span class="line">Line to show. At2021-04-11 01:55:06</span><br><span class="line">Line to show. At2021-04-11 01:55:08</span><br><span class="line">Line to show. At2021-04-11 01:55:10 Done.</span><br></pre></td></tr></table></figure></p>
+<p>对于客户端，我们也有简单的代码验证，关注浏览器开发者工具即可<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">watchResource</span>(<span class="params">url, callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> xhr = <span class="keyword">new</span> XMLHttpRequest();</span><br><span class="line"></span><br><span class="line">  xhr.open(<span class="string">"GET"</span>, url, <span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">  xhr.onreadystatechange = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (xhr.readyState &gt;= <span class="number">3</span> &amp;&amp; xhr.status === <span class="number">200</span>) &#123;</span><br><span class="line">      callback(xhr.responseText);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  xhr.send();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> xhr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">watchResource(<span class="string">"/streaming.php"</span>, <span class="function"><span class="keyword">function</span> (<span class="params">res</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(res);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>在这种情况下，每次后端有新的数据推送过来时，都会触发 <code>xhr.onreadystatechange</code> 事件，进而进入回调函数。</p>
+<p>关于 xhr.onreadystatechange 的 readState 状态值含义如下[1]：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0		The request is not initialized.</span><br><span class="line">1		The request has been set up.</span><br><span class="line">2		The request has been sent.</span><br><span class="line">3		The request is in process.</span><br><span class="line">4		The request is completed.</span><br></pre></td></tr></table></figure>
+<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><h3 id="HTTP-Streaming-VS-WebSocket"><a href="#HTTP-Streaming-VS-WebSocket" class="headerlink" title="HTTP Streaming VS WebSocket"></a>HTTP Streaming VS WebSocket</h3><p>两者的模式和使用场景不同，最明显的区别</p>
+<ul>
+<li>HTTP Streaming 是 Server Push，数据流向是单向的，由服务器推送给客户端。</li>
+<li>WebSocket 是双向通信，客户端可以和服务端进行交互通信。</li>
+</ul>
+<h3 id="以容器云为例的应用场景"><a href="#以容器云为例的应用场景" class="headerlink" title="以容器云为例的应用场景"></a>以容器云为例的应用场景</h3><p>以容器云平台为例，我们需要在平台上对容器进行简单的管理，其管理包括：</p>
+<ul>
+<li>场景1：持续获取容器的运行日志，即容器终端持续输出的日志(view container logs)</li>
+<li>场景2：远程登录至容器终端(exec container terminal)</li>
+</ul>
+<h4 id="场景1情况下，我们需要持续获取终端的日志输出，并且数据的流向是单向的：即服务端有新的日志输出就推送至客户端"><a href="#场景1情况下，我们需要持续获取终端的日志输出，并且数据的流向是单向的：即服务端有新的日志输出就推送至客户端" class="headerlink" title="场景1情况下，我们需要持续获取终端的日志输出，并且数据的流向是单向的：即服务端有新的日志输出就推送至客户端"></a>场景1情况下，我们需要持续获取终端的日志输出，并且数据的流向是单向的：即服务端有新的日志输出就推送至客户端</h4><p>在这种情况下，我们可以采用 HTTP Streaming 的方式来完成需求，其前端的代码简化如下</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 监听 url 的输出，每次触发后进入 callback 回调</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">watchResource</span>(<span class="params">url, callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> xhr = <span class="keyword">new</span> XMLHttpRequest()</span><br><span class="line">  xhr.open(<span class="string">'GET'</span>, url, <span class="literal">true</span>)</span><br><span class="line"></span><br><span class="line">  xhr.onreadystatechange = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (xhr.readyState &gt;= <span class="number">3</span> &amp;&amp; xhr.status === <span class="number">200</span>) &#123;</span><br><span class="line">      callback(xhr.responseText)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  xhr.send()</span><br><span class="line">  <span class="keyword">return</span> xhr</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 持续获取日志用于显示</span></span><br><span class="line"><span class="keyword">this</span>.logText = <span class="string">''</span></span><br><span class="line">watchResource(<span class="string">'/logs'</span>, res =&gt; &#123;</span><br><span class="line">  <span class="keyword">this</span>.logText += res</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h4 id="场景2情况下，数据是双向交互的，我们选择使用-Websocket"><a href="#场景2情况下，数据是双向交互的，我们选择使用-Websocket" class="headerlink" title="场景2情况下，数据是双向交互的，我们选择使用 Websocket"></a>场景2情况下，数据是双向交互的，我们选择使用 Websocket</h4><p>此场景下，用户输入 command 后，服务端响应后返回至前端，是典型的双向通信场景，使用 websocket 来完成需求。</p>
+<h2 id="注意点"><a href="#注意点" class="headerlink" title="注意点"></a>注意点</h2><p>在实际操作过程中，还是有些注意点需要提及。</p>
+<ol>
+<li>服务端的数据如果经过 Nginx 转发，需要注意 <code>proxy_buffer</code> 配置。不然会出现服务端服务有持续输出，经过 Nginx 后不一定有输出的情况。</li>
+<li>客户端在处理完流数据后，记得在合适的析构时期断开连接。如在 <code>unmount</code> 组件时进行 <code>xhr.abort()</code></li>
+</ol>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li>[1] XMLHttpRequest WIKI <a href="https://www.wikiwand.com/en/XMLHttpRequest" target="_blank" rel="noopener">https://www.wikiwand.com/en/XMLHttpRequest</a></li>
+<li>[2] What is HTTP Streaming? <a href="https://www.pubnub.com/learn/glossary/what-is-http-streaming/" target="_blank" rel="noopener">https://www.pubnub.com/learn/glossary/what-is-http-streaming/</a></li>
+<li>[3] proxy_buffer_size <a href="http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffer_size" target="_blank" rel="noopener">http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffer_size</a></li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2021/04/07/http-straming-in-js/" title="初探 http-straming" target="_blank" rel="external">https://rovast.github.io/2021/04/07/http-straming-in-js/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">但行好事</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2021/03/20/hexo-github-action/" title="使用 github action 自动发布 hexo blog"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: '2xvr0rI4HA5Vn1CcgtMPxMac-gzGzoHsz',
+  appKey: 'F2QrebTLqLwYwoJVJucLOjvX'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'abf475e647ab8d9e8787',
+    clientSecret: '8d99d6970c3df2ce36dd552e5204243e537dd3f4',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>

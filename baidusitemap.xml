@@ -2,7 +2,10 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://rovast.github.io/2021/03/20/hexo-github-action/</loc>
-    <lastmod>2021-03-20T15:05:08.093Z</lastmod>
+    <lastmod>2021-04-11T02:32:45.043Z</lastmod>
+  </url>  <url>
+    <loc>https://rovast.github.io/2021/04/07/http-straming-in-js/</loc>
+    <lastmod>2021-04-11T02:32:45.043Z</lastmod>
   </url>  <url>
     <loc>https://rovast.github.io/2021/03/13/pm2-usage/</loc>
     <lastmod>2021-03-20T07:20:13.845Z</lastmod>
