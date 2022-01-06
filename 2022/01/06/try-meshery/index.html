@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>meshery 初步试用 &amp; Service Mesh Performance(SMP) 了解 | rovast</title>
+  <meta name="description" content="First Try MesheryCreated: January 6, 2022 11:02 AM 零、总结SMP 是用来进行 Service Mesh 的性能测试而生的，并非实际的应用或集群的遥测。它定义了一致的性能测试标准，便于多 Service Mesh 进行统一横向性能比较(apples to apples performance comparisons)。 在 Mesh 和 Appli">
+<meta name="keywords" content="云原生">
+<meta property="og:type" content="article">
+<meta property="og:title" content="meshery 初步试用 &amp; Service Mesh Performance(SMP) 了解">
+<meta property="og:url" content="https://rovast.github.io/2022/01/06/try-meshery/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="First Try MesheryCreated: January 6, 2022 11:02 AM 零、总结SMP 是用来进行 Service Mesh 的性能测试而生的，并非实际的应用或集群的遥测。它定义了一致的性能测试标准，便于多 Service Mesh 进行统一横向性能比较(apples to apples performance comparisons)。 在 Mesh 和 Appli">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-1.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-2.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-3.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-4.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-5.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-6.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-7.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-8.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-9.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-10.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-11.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-12.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-13.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-14.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-15.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-16.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-17.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-18.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-19.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-20.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Meshery_-_The_Service_Mesh_Manager_35-47_screenshot.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-1.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-21.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-22.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-23.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-24.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-2.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-25.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-3.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-26.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-27.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-28.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-29.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-30.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-31.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-4.png">
+<meta property="og:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled-32.png">
+<meta property="og:updated_time" content="2022-01-06T08:45:59.215Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="meshery 初步试用 &amp; Service Mesh Performance(SMP) 了解">
+<meta name="twitter:description" content="First Try MesheryCreated: January 6, 2022 11:02 AM 零、总结SMP 是用来进行 Service Mesh 的性能测试而生的，并非实际的应用或集群的遥测。它定义了一致的性能测试标准，便于多 Service Mesh 进行统一横向性能比较(apples to apples performance comparisons)。 在 Mesh 和 Appli">
+<meta name="twitter:image" content="https://rovast.github.io/2022/01/06/try-meshery/Untitled.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2022/01/06/try-meshery/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">但行好事</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/流程/">流程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云原生/">云原生</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.33px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.67px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/docker/" style="font-size: 13.33px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.33px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/makefile/" style="font-size: 13px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13px;">php</a> <a href="/tags/soar/" style="font-size: 13.33px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.33px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.33px;">wiki</a> <a href="/tags/云原生/" style="font-size: 13px;">云原生</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.33px;">杂项</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 13.67px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/01/06/try-meshery/" class="title">meshery 初步试用 &amp; Service Mesh Performance(SMP) 了解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-01-06T08:18:33.000Z" itemprop="datePublished">2022-01-06</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/09/18/elegant-handler-error-with-sentry/" class="title">优雅统一处理 JS 错误(Sentry 上报场景)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-09-18T05:28:30.000Z" itemprop="datePublished">2021-09-18</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/11/jia-ban/" class="title">(no title)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-11T01:22:41.039Z" itemprop="datePublished">2021-05-11</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/04/06/http-straming-in-js/" class="title">初探 http-streaming</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-04-06T18:22:37.000Z" itemprop="datePublished">2021-04-06</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/工具/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/03/20/hexo-github-action/" class="title">使用 github action 自动发布 hexo blog</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-03-20T06:16:03.000Z" itemprop="datePublished">2021-03-20</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#First-Try-Meshery"><span class="toc-number">1.</span> <span class="toc-text">First Try Meshery</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#零、总结"><span class="toc-number">2.</span> <span class="toc-text">零、总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#0-1-SMP（Service-Mesh-Performance）——-Service-Mesh-性能测试（详情见-2-5-章节）"><span class="toc-number">2.1.</span> <span class="toc-text">0.1 SMP（Service Mesh Performance）—— Service Mesh 性能测试（详情见 2.5 章节）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0-2-SMI（Service-Mesh-Interface）"><span class="toc-number">2.2.</span> <span class="toc-text">0.2 SMI（Service Mesh Interface）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0-3-文档导读"><span class="toc-number">2.3.</span> <span class="toc-text">0.3 文档导读</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#一、环境准备"><span class="toc-number">3.</span> <span class="toc-text">一、环境准备</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#二、平台模块速览"><span class="toc-number">4.</span> <span class="toc-text">二、平台模块速览</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-平台初始化配置"><span class="toc-number">4.1.</span> <span class="toc-text">2.1 平台初始化配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-平台菜单一览"><span class="toc-number">4.2.</span> <span class="toc-text">2.2 平台菜单一览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-Dashboard"><span class="toc-number">4.3.</span> <span class="toc-text">2.3 Dashboard</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-Install-Service-Mesh"><span class="toc-number">4.4.</span> <span class="toc-text">2.4 Install Service Mesh</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-Performance"><span class="toc-number">4.5.</span> <span class="toc-text">2.5 Performance</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-1-Performance-Dashboard"><span class="toc-number">4.5.1.</span> <span class="toc-text">2.5.1 Performance Dashboard</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-2-Profiles"><span class="toc-number">4.5.2.</span> <span class="toc-text">2.5.2 Profiles</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-1-Add-Profile"><span class="toc-number">4.5.3.</span> <span class="toc-text">2.5.1 Add Profile</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-4-Run-Test"><span class="toc-number">4.5.4.</span> <span class="toc-text">2.5.4 Run Test</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-6-Add-Service-Mesh-Metrics"><span class="toc-number">4.6.</span> <span class="toc-text">2.6 Add Service Mesh Metrics</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-7-Conformance-SMI"><span class="toc-number">4.7.</span> <span class="toc-text">2.7 Conformance(SMI)</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#附录"><span class="toc-number">5.</span> <span class="toc-text">附录</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-try-meshery" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      meshery 初步试用 &amp; Service Mesh Performance(SMP) 了解
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2022/01/06/try-meshery/" class="article-date">
+	  <time datetime="2022-01-06T08:18:33.000Z" itemprop="datePublished">2022-01-06</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/云原生/">云原生</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2022/01/06/try-meshery/" class="leancloud_visitors" data-flag-title="meshery 初步试用 &amp; Service Mesh Performance(SMP) 了解">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/01/06/try-meshery/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1.2k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 4(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="First-Try-Meshery"><a href="#First-Try-Meshery" class="headerlink" title="First Try Meshery"></a>First Try Meshery</h1><p>Created: January 6, 2022 11:02 AM</p>
+<h1 id="零、总结"><a href="#零、总结" class="headerlink" title="零、总结"></a>零、总结</h1><p><strong>SMP 是用来进行 Service Mesh 的性能测试而生的，并非实际的应用或集群的遥测。它定义了一致的性能测试标准，便于多 Service Mesh 进行统一横向性能比较(apples to apples performance comparisons)。</strong></p>
+<p><strong>在 Mesh 和 Application 的遥测方面，Meshery 是通过接入 Grafana 或 Promethues 的方式来满足需求。</strong></p>
+<h2 id="0-1-SMP（Service-Mesh-Performance）——-Service-Mesh-性能测试（详情见-2-5-章节）"><a href="#0-1-SMP（Service-Mesh-Performance）——-Service-Mesh-性能测试（详情见-2-5-章节）" class="headerlink" title="0.1 SMP（Service Mesh Performance）—— Service Mesh 性能测试（详情见 2.5 章节）"></a>0.1 SMP（Service Mesh Performance）—— Service Mesh 性能测试（详情见 2.5 章节）</h2><p>SMP 是用来测试 Service Mesh 的性能表现的统一协议（数据格式）。通过一致的 protobuf 数据格式（在 Meshery 的源码中，就是 import 了 service-mesh-performance 的 go sdk），来完成不同 Service Mesh 的性能横向比较。</p>
+<p><em>协议</em></p>
+<img src="/2022/01/06/try-meshery/Untitled.png" class="img">
+<p><em>按照定义的 metadata 数据接入新 Service Mesh</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-1.png" class="img">
+<p><em>运行性能测试（图中的 11 是倒计时，点击 run test 后，就会产生一个大大的倒计时数字）</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-2.png" class="img">
+<p><em>不同 Service Mesh 性能横向比较</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-3.png" class="img">
+<h2 id="0-2-SMI（Service-Mesh-Interface）"><a href="#0-2-SMI（Service-Mesh-Interface）" class="headerlink" title="0.2 SMI（Service Mesh Interface）"></a>0.2 SMI（Service Mesh Interface）</h2><p>这一块在平台上的体现是 SMI 协议合规度检测，从协议定义的 Traffic Spec、Traffic Split、Traffic Access 三个方向进行检测（由于暂未找到应用相关的数据，尚不知晓关于流量方便的具体平台展现形式）。</p>
+<img src="/2022/01/06/try-meshery/Untitled-4.png" class="img">
+<h2 id="0-3-文档导读"><a href="#0-3-文档导读" class="headerlink" title="0.3 文档导读"></a>0.3 文档导读</h2><p>由于 Meshery 是 Layer5 的官方标准实现，此次调研以 Meshery 的平台为主要切入点，看其标准在平台上的具体落实情况来进一步了解，其调研的数据主要来源以下三个地方</p>
+<ol>
+<li>官方文档（含 Github）</li>
+<li>官方 YouTube 频道</li>
+<li>官方提供的在线实验</li>
+</ol>
+<h1 id="一、环境准备"><a href="#一、环境准备" class="headerlink" title="一、环境准备"></a>一、环境准备</h1><p>使用 layer5 官方提供的在线 lab 来运行。</p>
+<p><a href="https://layer5.io/learn/service-mesh-labs" target="_blank" rel="noopener">Interactive Service Mesh Labs</a></p>
+<img src="/2022/01/06/try-meshery/Untitled-5.png" class="img">
+<p>有以下两点需要注意：</p>
+<ol>
+<li><em>按照步骤进行运行即可，需要注意的是，当我们正常安装 Meshery 后，添加 Provider 一般是不生效的，我们需要点击 terminal 的  + 号，选择 “Select port to view on Host1”，并且输入端口后 9081 才能访问系统。</em></li>
+<li><p><em>另外，当我们正常安装完成后，可查看 meshery 状态都是 ready 后，方可打开 web</em></p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ mesheryctl system status</span><br><span class="line">NAME                    READY   STATUS  RESTARTS        AGE   </span><br><span class="line">meshery                 1/1     Running 0               2m30s</span><br><span class="line">meshery-broker          1/1     Running 0               1m7s </span><br><span class="line">meshery-linkerd         1/1     Running 0               2m30s</span><br><span class="line">meshery-operator        2/2     Running 0               2m30s</span><br><span class="line"></span><br><span class="line">Meshery endpoint is http://localhost:9081</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<blockquote>
+<p>通过体验 Meshery 的安装流程，我们发现其安装及其简单，通过一条指令即可完成，这是我们需要思考的，如何让用户以最小的心智来试用。</p>
+</blockquote>
+<p>除了安装友好，在进入系统后，我们安装对应的 service mesh，或者安装示例程序，都是直接在平台上点击操作，无疑大大简化了用户的上手负担。</p>
+<blockquote>
+</blockquote>
+<h1 id="二、平台模块速览"><a href="#二、平台模块速览" class="headerlink" title="二、平台模块速览"></a>二、平台模块速览</h1><p><em>说明：由于实验环境很多数据缺失，所以部分页面从 YouTube 或其他地方截图所得，来源见附录。</em></p>
+<h2 id="2-1-平台初始化配置"><a href="#2-1-平台初始化配置" class="headerlink" title="2.1 平台初始化配置"></a>2.1 平台初始化配置</h2><p>平台初始化配置主要完成以下工作：1、添加 Provider；2、登录</p>
+<p><em>Choose a provider ↓</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-6.png" class="img">
+<img src="/2022/01/06/try-meshery/Untitled-7.png" class="img">
+<p><em>Login ↓</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-8.png" class="img">
+<h2 id="2-2-平台菜单一览"><a href="#2-2-平台菜单一览" class="headerlink" title="2.2 平台菜单一览"></a>2.2 平台菜单一览</h2><p>菜单分为以下几个部分</p>
+<ol>
+<li><strong><em>Performance(SMP). 用来对 Service Mesh 进行性能测试。</em></strong></li>
+<li><strong><em>Conformance(SMI). 用来测试 Service Mesh 的协议合规度检测。</em></strong></li>
+<li><strong><em>Lifecycle. 用来管理不同的 Service Mesh。</em></strong></li>
+</ol>
+<p><em>SMP&amp;SMI ↓</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-9.png" class="img">
+<p><em>Configuration ↓</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-10.png" class="img">
+<p><em>Lifecycle&amp;Service Meshes ↓</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-11.png" class="img">
+<h2 id="2-3-Dashboard"><a href="#2-3-Dashboard" class="headerlink" title="2.3 Dashboard"></a>2.3 Dashboard</h2><p><em>Dashboard without data</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-12.png" class="img">
+<p><em>Dashboard with data</em></p>
+<ol>
+<li><em>Service Mesh 看板显示了当前接入的 mesh 和组件</em></li>
+<li><em>Metrics 直接嵌入的 Grafana 或 Promethues 面板</em></li>
+</ol>
+<img src="/2022/01/06/try-meshery/Untitled-13.png" class="img">
+<h2 id="2-4-Install-Service-Mesh"><a href="#2-4-Install-Service-Mesh" class="headerlink" title="2.4 Install Service Mesh"></a>2.4 Install Service Mesh</h2><p>通过 Meshery 可以管理多种 Service Mesh，我们可以在 meshery 中直接添加 service mesh 和示例程序。</p>
+<p><em>Linkerd Adapter</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-14.png" class="img">
+<p><em>点击加号，添加 Linkerd Service Mesh</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-15.png" class="img">
+<p><em>点击加号，添加示例程序</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-16.png" class="img">
+<h2 id="2-5-Performance"><a href="#2-5-Performance" class="headerlink" title="2.5 Performance"></a>2.5 Performance</h2><h3 id="2-5-1-Performance-Dashboard"><a href="#2-5-1-Performance-Dashboard" class="headerlink" title="2.5.1 Performance Dashboard"></a>2.5.1 Performance Dashboard</h3><p><em>Performance Dashboard without data</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-17.png" class="img">
+<p><em>Performance Dashboard with data</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-18.png" class="img">
+<h3 id="2-5-2-Profiles"><a href="#2-5-2-Profiles" class="headerlink" title="2.5.2 Profiles"></a>2.5.2 Profiles</h3><p><em>SMP Profiles without data</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-19.png" class="img">
+<p><em>SMP Profiles 列表</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-20.png" class="img">
+<p><em>查看 SMP Profile 详情以及具体测试数据结果</em></p>
+<p>![Meshery - The Service Mesh Manager 35-47 screenshot.png]<img src="/2022/01/06/try-meshery/Meshery_-_The_Service_Mesh_Manager_35-47_screenshot.png" class="img"></p>
+<h3 id="2-5-1-Add-Profile"><a href="#2-5-1-Add-Profile" class="headerlink" title="2.5.1 Add Profile"></a>2.5.1 Add Profile</h3><p><em>Profile 表单</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-1.png" class="img">
+<p><em>SMP Profile Service Mesh Options，选择具体的 Service Mesh</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-21.png" class="img">
+<p><em>SMP  Profile Service Mesh Load Generator，选择负载产生器</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-22.png" class="img">
+<img src="/2022/01/06/try-meshery/Untitled-23.png" class="img">
+<p><em>SMP Profile Advanced Options，进一步定制压测的请求信息</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-24.png" class="img">
+<h3 id="2-5-4-Run-Test"><a href="#2-5-4-Run-Test" class="headerlink" title="2.5.4 Run Test"></a>2.5.4 Run Test</h3><p><em>Run test 运行测试，倒计时</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-2.png" class="img">
+<p><em>View Performance Result 查看测试结果</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-25.png" class="img">
+<p><strong><em>Comparison 比较同一个 Profile 不同测试结果</em></strong></p>
+<ol>
+<li><em>这一点和 SMP 文档中 apple to apple performance comparison 相对应</em></li>
+</ol>
+<img src="/2022/01/06/try-meshery/Untitled-3.png" class="img">
+<h2 id="2-6-Add-Service-Mesh-Metrics"><a href="#2-6-Add-Service-Mesh-Metrics" class="headerlink" title="2.6 Add Service Mesh Metrics"></a>2.6 Add Service Mesh Metrics</h2><p><em>Configure Service Mesh Metrics</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-26.png" class="img">
+<p><em>Add Grafana</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-27.png" class="img">
+<p><em>Add Promethues</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-28.png" class="img">
+<p><em>Environment &amp; In Cluster Deployment</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-29.png" class="img">
+<p><em>Service Meshes</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-30.png" class="img">
+<h2 id="2-7-Conformance-SMI"><a href="#2-7-Conformance-SMI" class="headerlink" title="2.7 Conformance(SMI)"></a>2.7 Conformance(SMI)</h2><p><em>在 Manage Service Mesh 地方执行 SMI 协议检测</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-31.png" class="img">
+<p><em>Service Mesh Interface Conformance Results, SMI 协议标准合规情况检测</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-4.png" class="img">
+<p><em>摘自文档的更多检查结果</em></p>
+<img src="/2022/01/06/try-meshery/Untitled-32.png" class="img">
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><ul>
+<li><p>YouTube, <em>Meshery - The Service Mesh Manager</em></p>
+<p>  <a href="https://www.youtube.com/watch?v=mU8qHUGYsk8&amp;t=2146s" target="_blank" rel="noopener">Meshery - The Service Mesh Manager</a></p>
+</li>
+<li><p><em>Performance Management 文档</em></p>
+<p>  <a href="https://docs.meshery.io/functionality/performance-management" target="_blank" rel="noopener">Performance Management</a></p>
+</li>
+<li><p><em>Run SMI Conformance 文档</em></p>
+<p>  <a href="https://docs.meshery.io/guides/smi-conformance" target="_blank" rel="noopener">Running SMI Conformance Tests</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2022/01/06/try-meshery/" title="meshery 初步试用 &amp; Service Mesh Performance(SMP) 了解" target="_blank" rel="external">https://rovast.github.io/2022/01/06/try-meshery/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">但行好事</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2021/09/18/elegant-handler-error-with-sentry/" title="优雅统一处理 JS 错误(Sentry 上报场景)"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: '2xvr0rI4HA5Vn1CcgtMPxMac-gzGzoHsz',
+  appKey: 'F2QrebTLqLwYwoJVJucLOjvX'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'd09c04a01484da542af7',
+    clientSecret: '378cbbec6959681baa751421c508b75e3755b27c',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>
