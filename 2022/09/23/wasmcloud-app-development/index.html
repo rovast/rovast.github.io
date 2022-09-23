@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>wasmcloud app development | rovast</title>
+  <meta name="description" content="一、引言本文主要介绍基于 wasmcloud 的分布式开发概念和流程。通过以 wasm 为最小单元的开发，充分适用于当前的分布式开发环境。引用官方文档的原文来说：  Congratulations! You’ve successfully created and run your first actor. Welcome to the world of boilerplate-free, simp">
+<meta name="keywords" content="Web PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="wasmcloud app development">
+<meta property="og:url" content="https://rovast.github.io/2022/09/23/wasmcloud-app-development/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="一、引言本文主要介绍基于 wasmcloud 的分布式开发概念和流程。通过以 wasm 为最小单元的开发，充分适用于当前的分布式开发环境。引用官方文档的原文来说：  Congratulations! You’ve successfully created and run your first actor. Welcome to the world of boilerplate-free, simp">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://rovast.github.io/2022/09/23/wasmcloud-app-development/Untitled.png">
+<meta property="og:image" content="https://rovast.github.io/2022/09/23/wasmcloud-app-development/pic1.png">
+<meta property="og:image" content="https://rovast.github.io/2022/09/23/wasmcloud-app-development/pic2.png">
+<meta property="og:image" content="https://rovast.github.io/2022/09/23/wasmcloud-app-development/pic3.png">
+<meta property="og:image" content="https://rovast.github.io/2022/09/23/wasmcloud-app-development/pic4.png">
+<meta property="og:image" content="https://rovast.github.io/2022/09/23/wasmcloud-app-development/pic5.png">
+<meta property="og:image" content="https://rovast.github.io/2022/09/23/wasmcloud-app-development/pic6.png">
+<meta property="og:image" content="https://rovast.github.io/2022/09/23/wasmcloud-app-development/pic7.png">
+<meta property="og:updated_time" content="2022-09-23T06:04:20.762Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="wasmcloud app development">
+<meta name="twitter:description" content="一、引言本文主要介绍基于 wasmcloud 的分布式开发概念和流程。通过以 wasm 为最小单元的开发，充分适用于当前的分布式开发环境。引用官方文档的原文来说：  Congratulations! You’ve successfully created and run your first actor. Welcome to the world of boilerplate-free, simp">
+<meta name="twitter:image" content="https://rovast.github.io/2022/09/23/wasmcloud-app-development/Untitled.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2022/09/23/wasmcloud-app-development/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">但行好事</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/流程/">流程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云原生/">云原生</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.33px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.67px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/docker/" style="font-size: 13.33px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.33px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/makefile/" style="font-size: 13px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13px;">php</a> <a href="/tags/soar/" style="font-size: 13.33px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.33px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.33px;">wiki</a> <a href="/tags/云原生/" style="font-size: 13px;">云原生</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.33px;">杂项</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 13.67px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/23/wasmcloud-app-development/" class="title">wasmcloud app development</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-23T05:57:31.000Z" itemprop="datePublished">2022-09-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/19/wasmcloud-intro/" class="title">wasmcloud actor调度梳理</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-19T05:22:55.000Z" itemprop="datePublished">2022-09-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/01/06/try-meshery/" class="title">meshery 初步试用 &amp; Service Mesh Performance(SMP) 了解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-01-06T08:18:33.000Z" itemprop="datePublished">2022-01-06</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/09/18/elegant-handler-error-with-sentry/" class="title">优雅统一处理 JS 错误(Sentry 上报场景)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-09-18T05:28:30.000Z" itemprop="datePublished">2021-09-18</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/11/jia-ban/" class="title">(no title)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-11T01:22:41.039Z" itemprop="datePublished">2021-05-11</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#一、引言"><span class="toc-number">1.</span> <span class="toc-text">一、引言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#二、基本概念梳理"><span class="toc-number">2.</span> <span class="toc-text">二、基本概念梳理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#三、开发流程"><span class="toc-number">3.</span> <span class="toc-text">三、开发流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-编写-interface，即：smithy-文件"><span class="toc-number">3.0.1.</span> <span class="toc-text">1.2 编写 interface，即：smithy 文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-编写-provider"><span class="toc-number">3.0.2.</span> <span class="toc-text">2.2 编写 provider</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-生成-provider-产物"><span class="toc-number">3.0.3.</span> <span class="toc-text">2.3 生成 provider 产物</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3、开发-actor"><span class="toc-number">3.1.</span> <span class="toc-text">3、开发 actor</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-新建-actor"><span class="toc-number">3.1.1.</span> <span class="toc-text">3.1 新建 actor</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-开发-actor"><span class="toc-number">3.1.2.</span> <span class="toc-text">3.2 开发 actor</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-打包"><span class="toc-number">3.1.3.</span> <span class="toc-text">3.4 打包</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4、部署"><span class="toc-number">3.2.</span> <span class="toc-text">4、部署</span></a></li></ol><li class="toc-item toc-level-1"><a class="toc-link" href="#NEXT"><span class="toc-number">4.</span> <span class="toc-text">NEXT</span></a></li>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-wasmcloud-app-development" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      wasmcloud app development
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2022/09/23/wasmcloud-app-development/" class="article-date">
+	  <time datetime="2022-09-23T05:57:31.000Z" itemprop="datePublished">2022-09-23</time>
+	</a>
+</span>
+        
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2022/09/23/wasmcloud-app-development/" class="leancloud_visitors" data-flag-title="wasmcloud app development">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/09/23/wasmcloud-app-development/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.8k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 12(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h1><p>本文主要介绍基于 wasmcloud 的分布式开发概念和流程。通过以 wasm 为最小单元的开发，充分适用于当前的分布式开发环境。引用官方文档的原文来说：</p>
+<blockquote>
+<p><strong><em>Congratulations!</em></strong> You’ve successfully created and run your first actor. Welcome to the world of boilerplate-free, simple distributed application development in the cloud, browser, and everywhere in between.</p>
+</blockquote>
+<p>在了解和探索的过程中，主要参考官方文档进行了相关的示例程序编写和运行，用到的相关材料罗列如下：</p>
+<table>
+<thead>
+<tr>
+<th>说明</th>
+<th>网址</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>官网开发指引</td>
+<td><a href="https://wasmcloud.dev/app-dev/" target="_blank" rel="noopener">https://wasmcloud.dev/app-dev/</a></td>
+</tr>
+<tr>
+<td>官方examples代码</td>
+<td><a href="https://github.com/wasmCloud/examples" target="_blank" rel="noopener">https://github.com/wasmCloud/examples</a></td>
+</tr>
+<tr>
+<td>官方providers列表</td>
+<td><a href="https://github.com/wasmCloud/capability-providers" target="_blank" rel="noopener">https://github.com/wasmCloud/capability-providers</a></td>
+</tr>
+<tr>
+<td>官方interfaces列表</td>
+<td><a href="https://github.com/wasmCloud/interfaces" target="_blank" rel="noopener">https://github.com/wasmCloud/interfaces</a></td>
+</tr>
+<tr>
+<td>wasmcloud平台代码</td>
+<td><a href="https://github.com/wasmCloud/wasmcloud-otp" target="_blank" rel="noopener">https://github.com/wasmCloud/wasmcloud-otp</a></td>
+</tr>
+<tr>
+<td>rust权威指南</td>
+<td><a href="https://zh.b-ok.cc/book/17931171/7b822e" target="_blank" rel="noopener">https://zh.b-ok.cc/book/17931171/7b822e</a></td>
+</tr>
+<tr>
+<td>elixir教程</td>
+<td><a href="https://pragprog.com/titles/passelixir/programmer-passport-elixir/" target="_blank" rel="noopener">https://pragprog.com/titles/passelixir/programmer-passport-elixir/</a></td>
+</tr>
+<tr>
+<td>OTP教程</td>
+<td><a href="https://pragprog.com/titles/passotp/programmer-passport-otp/" target="_blank" rel="noopener">https://pragprog.com/titles/passotp/programmer-passport-otp/</a></td>
+</tr>
+</tbody>
+</table>
+<h1 id="二、基本概念梳理"><a href="#二、基本概念梳理" class="headerlink" title="二、基本概念梳理"></a>二、基本概念梳理</h1><p>在展开介绍 wasmcloud 的应用开发之前，我们需要熟悉其抽象出的几个概念。</p>
+<p>无论是采用传统的单体应用开发模式，还是微服务开发模式，亦或是 wasmcloud，其解决的问题基本类似，只不过不同的模式下称呼不同而已。</p>
+<p>一般而言，应用的开发都可以划分为以下几个部分：</p>
+<ol>
+<li><strong>纯业务逻辑。*</strong>如：商品功能，会员功能等。面向<strong>业务开发</strong>人员。*</li>
+<li><strong>中间件。*</strong>如：数据库中间件，缓存中间件，流量控制等。面向<strong>中间件开发</strong>人员，或<strong>平台开发</strong>人员。*</li>
+<li><strong>运行环境。*</strong>根据不同的技术栈，有不同的运行环境，属于基础设施层。比如采用容器部署的，一般运行在k8s里，这部分面向<strong>平台开发</strong>人员。*</li>
+</ol>
+<p>在 wasmcloud 中具有相似的概念，这里列举如下</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>面向人员</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>actor</td>
+<td>业务开发</td>
+<td>编写业务逻辑的地方，如果涉及到非业务逻辑的公共能力（或中间件能力），通过引用interface的方式来获取能力。业务人员可使用rust或tinyGo来开发actor。</td>
+</tr>
+<tr>
+<td>interface</td>
+<td>中间件或平台开发</td>
+<td>采用CDD模式开发，定义一些业务无关的公共能力接口，比如：keyvalue能力，但是不提供具体的实现。可以在 interface 中定义允许的操作(operations)，以及各种结构体(structure)。使用 smithy IDL 进行 interface 的定义，使用 wash 工具来生成对应代码。</td>
+</tr>
+<tr>
+<td>provider</td>
+<td>中间件或平台开发</td>
+<td>实现interface的能力，比如同样对于keyvalue功能，可以有redis实现，也可以有vault实现。并且可以用不同的技术栈来实现。可使用 rust 来进行 Provider 开发，官方未来会支持 Go。</td>
+</tr>
+<tr>
+<td>link def</td>
+<td>业务开发或部署人员</td>
+<td>由于actor只是引用了具体的interface，并没有指定哪一个provider，所以在实际部署时，需要关联actor和provider。可以通过 wasmcloud shell(wash)命令行，或者平台进行操作。</td>
+</tr>
+<tr>
+<td>wasm host</td>
+<td>中间件或平台开发</td>
+<td>作为整个wasmcloud生态的运行基石，用于协调actor,provider之间的分布式通信，同时也提供分布式调度能力。采用 Elixir/OTP 技术栈实现。</td>
+</tr>
+</tbody>
+</table>
+<p>整体的关系图梳理如下：</p>
+<img src="/2022/09/23/wasmcloud-app-development/Untitled.png" title="pic1">
+<p>wasmcloud app 的开发采用 CDD（Contract Driven Develop） 方式进行，其中 interface 就是契约的定义。</p>
+<h1 id="三、开发流程"><a href="#三、开发流程" class="headerlink" title="三、开发流程"></a>三、开发流程</h1><p>如果我们需要实现一个全新的业务场景，需要进行以下几个步骤:</p>
+<img src="/2022/09/23/wasmcloud-app-development/pic1.png" title="图1"> )<br><br>接下来以 kvcounter 为例，进一步说明各个环节。<br><br>## 示例目标：<br><br>开发一个 kvcounter 示例程序，当用户访问 <a href="http://localhost:8080" target="_blank" rel="noopener">http://localhost:8080</a> 时，能够正常显示 counter，且每次访问 +1。<br><br>示例效果如下：<br><br><img src="/2022/09/23/wasmcloud-app-development/pic2.png" title="图1"> )<br><br>## 1、创建（或使用）interface<br><br>在本示例中，我们用到了 kv 功能，所以需要找到一个能够提供 keyvalue 功能的 interface。有两种方式，一是找到一个现成可用的interface，二是定义一个keyvalue 的 interface。<br><br>这里以定义一个新的 keyvalue 为例。<br><br>### 1.1 使用 wash 工具创建新的 interface<br><br><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wash new interface keyvalue</span><br></pre></td></tr></table></figure>
+<h3 id="1-2-编写-interface，即：smithy-文件"><a href="#1-2-编写-interface，即：smithy-文件" class="headerlink" title="1.2 编写 interface，即：smithy 文件"></a>1.2 编写 interface，即：smithy 文件</h3><p>首先确定该接口提供的操作，然后是<strong>每个操作（operations）涉及到的结构体(structure)</strong>：</p>
+<p>这里摘除主要的operation定义，完整的定义可参考链接：</p>
+<p><a href="https://github.com/wasmCloud/interfaces/blob/main/keyvalue/keyvalue.smithy" target="_blank" rel="noopener">interfaces/keyvalue.smithy at main · wasmCloud/interfaces</a></p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">// key-value.smithy</span><br><span class="line">// Definition of a key-value store and the 'wasmcloud:keyvalue' capability contract</span><br><span class="line">//</span><br><span class="line"></span><br><span class="line">// Tell the code generator how to reference symbols defined in this namespace</span><br><span class="line">metadata package = [&#123;</span><br><span class="line">    namespace: <span class="string">"org.wasmcloud.interface.keyvalue"</span>,</span><br><span class="line">    crate: <span class="string">"wasmcloud_interface_keyvalue"</span>,</span><br><span class="line">    py_module: <span class="string">"wasmcloud_interface_keyvalue"</span>,</span><br><span class="line">    doc: <span class="string">"Keyvalue: wasmcloud capability contract for key-value store"</span>,</span><br><span class="line">&#125;]</span><br><span class="line"></span><br><span class="line">namespace org.wasmcloud.interface.keyvalue</span><br><span class="line"></span><br><span class="line">use org.wasmcloud.model<span class="comment">#wasmbus</span></span><br><span class="line">use org.wasmcloud.model<span class="comment">#rename</span></span><br><span class="line">use org.wasmcloud.model<span class="comment">#n</span></span><br><span class="line">use org.wasmcloud.model<span class="comment">#U32</span></span><br><span class="line">use org.wasmcloud.model<span class="comment">#I32</span></span><br><span class="line"></span><br><span class="line">@wasmbus(</span><br><span class="line">    contractId: <span class="string">"wasmcloud:keyvalue"</span>,</span><br><span class="line">    providerReceive: true )</span><br><span class="line">service KeyValue &#123;</span><br><span class="line">  version: <span class="string">"0.1.1"</span>,</span><br><span class="line">  operations: [</span><br><span class="line">    Increment, Contains, Del, Get,</span><br><span class="line">    ListAdd, ListClear, ListDel, ListRange,</span><br><span class="line">    Set, , SetAdd, SetDel, SetIntersection, SetQuery, SetUnion, SetClear,</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/// Gets a value for a specified key. If the key exists,</span><br><span class="line">/// the return structure contains exists: true and the value,</span><br><span class="line">/// otherwise the return structure contains exists == false.</span><br><span class="line">@readonly</span><br><span class="line">operation **Get** &#123;</span><br><span class="line">  input: String,</span><br><span class="line">  output: GetResponse,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/// Sets the value of a key.</span><br><span class="line">/// expires is an optional number of seconds before the value should be automatically deleted,</span><br><span class="line">/// or 0 for no expiration.</span><br><span class="line">operation **Set** &#123;</span><br><span class="line">  input: SetRequest,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/// Deletes a key, returning true if the key was deleted</span><br><span class="line"><span class="section">@rename([&#123;lang:"Python", name:"delete"&#125;])</span></span><br><span class="line">operation **Del** &#123;</span><br><span class="line">  input: String,</span><br><span class="line">  output: Boolean,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/// Increments a numeric value, returning the new value</span><br><span class="line">operation **Increment** &#123;</span><br><span class="line">  input: IncrementRequest,</span><br><span class="line">  output: I32</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们看到 smithy 文件只定义了相关的接口，并不涉及到具体的实现。这也是 wasmcloud app开发中比较重要的概念。</p>
+<p><strong>actor只依赖于具体的interface，而一个interface可以由多个provider来实现。</strong></p>
+<p>对于本示例，同样是 <code>wasmcloud:keyvalue</code> 的契约，我们可以用 redis 技术栈来实现一个 provider，也可以用 vault 来实现。实际上官方提供了两个版本 provider 的实现：</p>
+<p><a href="https://github.com/wasmCloud/capability-providers" target="_blank" rel="noopener">https://github.com/wasmCloud/capability-providers</a></p>
+<img src="/2022/09/23/wasmcloud-app-development/pic3.png" title="图1"> )<br><br>### 1.3 生成代码，发布到对应的仓，方便actor开发人员使用<br><br>我们可以直接执行 make 指令，生成对应的代码。之后可以把 interface 发布到 crate.io。<br><br>Go语言同理，这样在实际开发 actor 时，就可直接引入使用。<br><br>## 2、开发 provider<br><br>根据官方的说法，provider的作用如下：<br><br>启动后，通过 stdio 和 host 进行交互，其主要作用包括：健康检查、通过 RPC 和 actor 交互等。<br><br>&gt; Creating a capability provider involves creating a native executable. All capability provider executables have the same basic requirements:<br>&gt;<br>&gt; - Accept a <a href="https://wasmcloud.github.io/interfaces/html/org_wasmcloud_core.html#host_data" target="_blank" rel="noopener">Host Data</a> structure from <code>stdin</code> immediately upon starting the executable. The host data is a base64 encoded JSON object with a trailing newline making it easy to pull from the <code>stdin</code> pipe.<br>&gt; - Accept linkdef messages according to the <a href="https://wasmcloud.dev/reference/lattice-protocols/rpc" target="_blank" rel="noopener">RPC protocol</a><br>&gt; - Communicate with actors via rpc messages defined by a capability contract<br>&gt; - Respond to periodic health checks<br><br><img src="/2022/09/23/wasmcloud-app-development/pic4.png" title="图1"> )<br><br>### 2.1 使用 wash 新建 provider<br><br>通过 wash 指令，可以生成 provider 的模板代码<br><br><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wash new provider kvredis</span><br></pre></td></tr></table></figure>
+<h3 id="2-2-编写-provider"><a href="#2-2-编写-provider" class="headerlink" title="2.2 编写 provider"></a>2.2 编写 provider</h3><p>重点是基于 redis 实现 interface 中定义的各种 operations，完整代码见链接，核心代码框架摘录如下：</p>
+<p><a href="https://github.com/wasmCloud/capability-providers/blob/main/kvredis/src/main.rs" target="_blank" rel="noopener">capability-providers/main.rs at main · wasmCloud/capability-providers</a></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/// Handle KeyValue methods that interact with redis</span></span><br><span class="line"><span class="meta">#[async_trait]</span></span><br><span class="line"><span class="keyword">impl</span> KeyValue <span class="keyword">for</span> KvRedisProvider &#123;</span><br><span class="line">		<span class="comment">/// Increments a numeric value, returning the new value</span></span><br><span class="line">    <span class="meta">#[instrument(level = <span class="meta-string">"debug"</span>, skip(self, ctx, arg), fields(actor_id = ?ctx.actor, key = %arg.key))]</span></span><br><span class="line">    **async <span class="function"><span class="keyword">fn</span> <span class="title">increment</span>**</span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;IncrementRequest) -&gt; RpcResult&lt;<span class="built_in">i32</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> cmd = redis::Cmd::incr(&amp;arg.key, &amp;arg.value);</span><br><span class="line">        <span class="keyword">let</span> val: <span class="built_in">i32</span> = <span class="keyword">self</span>.exec(ctx, &amp;<span class="keyword">mut</span> cmd).await?;</span><br><span class="line">        <span class="literal">Ok</span>(val)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// Deletes a key, returning true if the key was deleted</span></span><br><span class="line">    <span class="meta">#[instrument(level = <span class="meta-string">"debug"</span>, skip(self, ctx, arg), fields(actor_id = ?ctx.actor, key = %arg.to_string()))]</span></span><br><span class="line">    **async <span class="function"><span class="keyword">fn</span> <span class="title">del</span>**</span>&lt;TS: <span class="built_in">ToString</span> + ?<span class="built_in">Sized</span> + <span class="built_in">Sync</span>&gt;(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;TS) -&gt; RpcResult&lt;<span class="built_in">bool</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> cmd = redis::Cmd::del(arg.to_string());</span><br><span class="line">        <span class="keyword">let</span> val: <span class="built_in">i32</span> = <span class="keyword">self</span>.exec(ctx, &amp;<span class="keyword">mut</span> cmd).await?;</span><br><span class="line">        <span class="literal">Ok</span>(val &gt; <span class="number">0</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// Gets a value for a specified key. If the key exists,</span></span><br><span class="line">    <span class="comment">/// the return structure contains exists: true and the value,</span></span><br><span class="line">    <span class="comment">/// otherwise the return structure contains exists == false.</span></span><br><span class="line">    <span class="meta">#[instrument(level = <span class="meta-string">"debug"</span>, skip(self, ctx, arg), fields(actor_id = ?ctx.actor, key = %arg.to_string()))]</span></span><br><span class="line">    **async <span class="function"><span class="keyword">fn</span> <span class="title">get</span>**</span>&lt;TS: <span class="built_in">ToString</span> + ?<span class="built_in">Sized</span> + <span class="built_in">Sync</span>&gt;(</span><br><span class="line">        &amp;<span class="keyword">self</span>,</span><br><span class="line">        ctx: &amp;Context,</span><br><span class="line">        arg: &amp;TS,</span><br><span class="line">    ) -&gt; RpcResult&lt;GetResponse&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> cmd = redis::Cmd::get(arg.to_string());</span><br><span class="line">        <span class="keyword">let</span> val: <span class="built_in">Option</span>&lt;<span class="built_in">String</span>&gt; = <span class="keyword">self</span>.exec(ctx, &amp;<span class="keyword">mut</span> cmd).await?;</span><br><span class="line">        <span class="keyword">let</span> resp = <span class="keyword">match</span> val &#123;</span><br><span class="line">            <span class="literal">Some</span>(s) =&gt; GetResponse &#123;</span><br><span class="line">                exists: <span class="literal">true</span>,</span><br><span class="line">                value: s,</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="literal">None</span> =&gt; GetResponse &#123;</span><br><span class="line">                exists: <span class="literal">false</span>,</span><br><span class="line">                ..<span class="built_in">Default</span>::<span class="keyword">default</span>()</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="literal">Ok</span>(resp)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// Sets the value of a key.</span></span><br><span class="line">    <span class="comment">/// expires is an optional number of seconds before the value should be automatically deleted,</span></span><br><span class="line">    <span class="comment">/// or 0 for no expiration.</span></span><br><span class="line">    <span class="meta">#[instrument(level = <span class="meta-string">"debug"</span>, skip(self, ctx, arg), fields(actor_id = ?ctx.actor, key = %arg.key))]</span></span><br><span class="line">    **async <span class="function"><span class="keyword">fn</span> <span class="title">set</span>**</span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;SetRequest) -&gt; RpcResult&lt;()&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> cmd = <span class="keyword">match</span> arg.expires &#123;</span><br><span class="line">            <span class="number">0</span> =&gt; redis::Cmd::set(&amp;arg.key, &amp;arg.value),</span><br><span class="line">            _ =&gt; redis::Cmd::set_ex(&amp;arg.key, &amp;arg.value, arg.expires <span class="keyword">as</span> <span class="built_in">usize</span>),</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">let</span> _value: <span class="built_in">Option</span>&lt;<span class="built_in">String</span>&gt; = <span class="keyword">self</span>.exec(ctx, &amp;<span class="keyword">mut</span> cmd).await?;</span><br><span class="line">        <span class="literal">Ok</span>(())</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>除了基于 redis 实现 provider 外，官方还提供了基于 valut 的 keyvalue 实现，可参阅</p>
+<p><a href="https://github.com/wasmCloud/capability-providers/blob/main/kv-vault/src/main.rs" target="_blank" rel="noopener">capability-providers/main.rs at main · wasmCloud/capability-providers</a></p>
+<p>其中也是有诸如 increment, del, set, get 的实现，而这些 operation 都是在名为 <code>wasmcloud:keyvalue</code> 的契约中定义的。</p>
+<h3 id="2-3-生成-provider-产物"><a href="#2-3-生成-provider-产物" class="headerlink" title="2.3 生成 provider 产物"></a>2.3 生成 provider 产物</h3><p>简单的使用 <code>make</code> 指令即可完成部署产物，该产物可以推送至 OCI 仓库以方便使用。</p>
+<h2 id="3、开发-actor"><a href="#3、开发-actor" class="headerlink" title="3、开发 actor"></a>3、开发 actor</h2><h3 id="3-1-新建-actor"><a href="#3-1-新建-actor" class="headerlink" title="3.1 新建 actor"></a>3.1 新建 actor</h3><p>使用 wash 指令可以很方便的生成便于快速开发的模板代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wash new actor kvcounter</span><br></pre></td></tr></table></figure>
+<h3 id="3-2-开发-actor"><a href="#3-2-开发-actor" class="headerlink" title="3.2 开发 actor"></a>3.2 开发 actor</h3><p><strong>声明契约依赖</strong></p>
+<p>kvcounter 依赖了两个 interface，用来提供两个能力：httpserver能力和 kv 存储能力。</p>
+<p>我们需要声明该依赖，这样打包完成 kvcounter 后，可以 inspect 出对应的信息。</p>
+<img src="/2022/09/23/wasmcloud-app-development/pic5.png" title="图1"> )<br><br>所以我们需要修改 makefile 的 CLAIMS 信息：<br><br><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># examples/actor/kvcounter</span></span><br><span class="line"></span><br><span class="line">PROJECT  = kvcounter</span><br><span class="line">VERSION  = <span class="variable">$(<span class="built_in">shell</span> cargo metadata --no-deps --format-version 1 | jq -r '.packages[] .version' | head -1)</span></span><br><span class="line">REVISION = 0</span><br><span class="line"><span class="comment"># list of all contract claims for actor signing (space-separated)</span></span><br><span class="line">**CLAIMS   = wasmcloud:httpserver wasmcloud:keyvalue**</span><br></pre></td></tr></table></figure>
+<p><strong>使用 interface</strong></p>
+<p>根据不同语言，我们可以引入不同的 interface package。以 rust 为例，官方的 interface 可以在 <a href="http://crates.io" target="_blank" rel="noopener">crates.io</a> 中查阅</p>
+<img src="/2022/09/23/wasmcloud-app-development/pic6.png" title="图1"> )<br><br>我们可在 cargo.toml 中加入 kvcounter 所依赖的两个包：<br><br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[package]</span></span><br><span class="line"><span class="attr">name</span> = <span class="string">"kvcounter"</span></span><br><span class="line"></span><br><span class="line"><span class="section">[dependencies]</span></span><br><span class="line">**wasmcloud-interface-keyvalue = "0.7.0"**</span><br><span class="line">**wasmcloud-interface-httpserver = "0.6.0"**</span><br></pre></td></tr></table></figure>
+<p>在 actor 中调用：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[async_trait]</span></span><br><span class="line"><span class="keyword">impl</span> HttpServer <span class="keyword">for</span> KvCounterActor &#123;</span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">handle_request</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, req: &amp;HttpRequest) -&gt; RpcResult&lt;HttpResponse&gt; &#123;</span><br><span class="line">        <span class="comment">// increment the value in kv and send response in json</span></span><br><span class="line">        <span class="keyword">let</span> (body, status_code) = <span class="keyword">match</span> **increment_counter**(ctx, key, amount).await &#123;</span><br><span class="line">            <span class="literal">Ok</span>(v) =&gt; (json!(&#123; <span class="string">"counter"</span>: v &#125;).to_string(), <span class="number">200</span>),</span><br><span class="line">            <span class="comment">// if we caught an error, return it to client</span></span><br><span class="line">            <span class="literal">Err</span>(e) =&gt; (json!(&#123; <span class="string">"error"</span>: e.to_string() &#125;).to_string(), <span class="number">500</span>),</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">let</span> resp = HttpResponse &#123;</span><br><span class="line">            body: body.as_bytes().to_vec(),</span><br><span class="line">            status_code,</span><br><span class="line">            ..<span class="built_in">Default</span>::<span class="keyword">default</span>()</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="literal">Ok</span>(resp)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// increment the counter by the amount, returning the new value</span></span><br><span class="line">async <span class="function"><span class="keyword">fn</span> <span class="title">increment_counter</span></span>(ctx: &amp;Context, key: <span class="built_in">String</span>, value: <span class="built_in">i32</span>) -&gt; RpcResult&lt;<span class="built_in">i32</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> new_val = KeyValueSender::new()</span><br><span class="line">        **.increment(ctx, &amp;IncrementRequest &#123; key, value &#125;)**</span><br><span class="line">        .await?;</span><br><span class="line">    <span class="literal">Ok</span>(new_val)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-4-打包"><a href="#3-4-打包" class="headerlink" title="3.4 打包"></a>3.4 打包</h3><p>我们可以使用 make 指令，将代码打包为 .wasm 文件，进而推送到 OCI 仓库。</p>
+<h2 id="4、部署"><a href="#4、部署" class="headerlink" title="4、部署"></a>4、部署</h2><p>我们可以使用 wasmcloud shell(即 wash) 或者 web dashboard 进行部署。主要进行如下操作：</p>
+<ol>
+<li>start actors。将 actor 的 wasm 文件上传到 wasmcloud 运行时，或者提供 registry 地址供其下载。</li>
+<li>start providers。将 provider 的包上传到 wasmcloud 运行时，或提供 registry 地址供其下载。</li>
+<li>建立 link 关系。</li>
+</ol>
+<p>在平台的操作截图效果如下：</p>
+<img src="/2022/09/23/wasmcloud-app-development/pic7.png" title="图1"> )<br><br>这里需要注意的是，kvcounter 的 actor 需要分别与 httpserver 以及 kvredis 的 provider 进行 link，也就是有两条 link 记录。<br><br>## 5、访问<br><br>至此，已能正常通过 http 进行访问。<br><br><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ curl localhost:<span class="number">8080</span></span><br><span class="line">&#123;<span class="string">"counter"</span>:<span class="number">17</span>&#125;%</span><br><span class="line">➜  ~ curl localhost:<span class="number">8080</span></span><br><span class="line">&#123;<span class="string">"counter"</span>:<span class="number">18</span>&#125;%</span><br></pre></td></tr></table></figure>
+<h1 id="NEXT"><a href="#NEXT" class="headerlink" title="NEXT"></a>NEXT</h1><p>本文主要是梳理了 wasmcloud app 开发的概况，包括其主要涉及的概念、工具链的使用、主要的开发流程。</p>
+<p>在当前的探索过程中，已基本熟悉 wasmcloud 的外围生态，能够根据实际的工作需求，进行部分平台数据获取（或UI）的修改，同时提交 PR，参与官方的平台建设。</p>
+<p>下一步需要进一步探究 wasmcloud runtime 的具体实现，尤其是如何调度 actor, provider，以及 actor 和 provider 之间的协作通信细节。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2022/09/23/wasmcloud-app-development/" title="wasmcloud app development" target="_blank" rel="external">https://rovast.github.io/2022/09/23/wasmcloud-app-development/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">但行好事</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2022/09/19/wasmcloud-intro/" title="wasmcloud actor调度梳理"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: '2xvr0rI4HA5Vn1CcgtMPxMac-gzGzoHsz',
+  appKey: 'F2QrebTLqLwYwoJVJucLOjvX'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'd09c04a01484da542af7',
+    clientSecret: '378cbbec6959681baa751421c508b75e3755b27c',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>
