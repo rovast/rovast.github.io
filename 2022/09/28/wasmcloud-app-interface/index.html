@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>wasmcloud app interface 源码阅读 | rovast</title>
+  <meta name="description" content="新建 interfacewasmcloud app 开发使用的是 CDD 模式，也就是基于契约开发的模式。其中契约的定义，使用 wash 指令即可完成： 1wash new interface 执行完成后，会根据契约的相关属性信息（如 contractId）等，生成 smithy IDL 的定义文件。smithy 文件专注于契约的定义，而成功将契约和具体的语言实现解耦出来。 简单来说，同一套 sm">
+<meta name="keywords" content="Web PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="wasmcloud app interface 源码阅读">
+<meta property="og:url" content="https://rovast.github.io/2022/09/28/wasmcloud-app-interface/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="新建 interfacewasmcloud app 开发使用的是 CDD 模式，也就是基于契约开发的模式。其中契约的定义，使用 wash 指令即可完成： 1wash new interface 执行完成后，会根据契约的相关属性信息（如 contractId）等，生成 smithy IDL 的定义文件。smithy 文件专注于契约的定义，而成功将契约和具体的语言实现解耦出来。 简单来说，同一套 sm">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-interface/pic.png">
+<meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-interface/pic1.png">
+<meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-interface/pic2.png">
+<meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-interface/pic2.png">
+<meta property="og:updated_time" content="2022-09-28T06:14:26.588Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="wasmcloud app interface 源码阅读">
+<meta name="twitter:description" content="新建 interfacewasmcloud app 开发使用的是 CDD 模式，也就是基于契约开发的模式。其中契约的定义，使用 wash 指令即可完成： 1wash new interface 执行完成后，会根据契约的相关属性信息（如 contractId）等，生成 smithy IDL 的定义文件。smithy 文件专注于契约的定义，而成功将契约和具体的语言实现解耦出来。 简单来说，同一套 sm">
+<meta name="twitter:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-interface/pic.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2022/09/28/wasmcloud-app-interface/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">但行好事</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/APM/">APM</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/WASM/">WASM</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/最佳实践/">最佳实践</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">23</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/APM/">APM</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/antv/">antv</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/">iframe</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/权限控制/">权限控制</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">6</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/APM/" style="font-size: 13.5px;">APM</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.25px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.75px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/antv/" style="font-size: 13px;">antv</a> <a href="/tags/docker/" style="font-size: 13.25px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/iframe/" style="font-size: 13px;">iframe</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.25px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/mac/" style="font-size: 13.5px;">mac</a> <a href="/tags/makefile/" style="font-size: 13.25px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13.25px;">php</a> <a href="/tags/soar/" style="font-size: 13.25px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.25px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.25px;">wiki</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.25px;">杂项</a> <a href="/tags/权限控制/" style="font-size: 13px;">权限控制</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 14px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/28/wasmcloud-app-interface/" class="title">wasmcloud app interface 源码阅读</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-28T05:57:16.000Z" itemprop="datePublished">2022-09-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/28/wasmcloud-app-provider-read/" class="title">wasmcloud app provider 源码阅读</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-28T02:33:49.000Z" itemprop="datePublished">2022-09-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/23/wasmcloud-app-development/" class="title">wasmcloud app development</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-23T05:57:31.000Z" itemprop="datePublished">2022-09-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/19/wasmcloud-intro/" class="title">wasmcloud actor调度梳理</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-19T05:22:55.000Z" itemprop="datePublished">2022-09-19</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/云原生/">云原生</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/01/06/try-meshery/" class="title">meshery 初步试用 &amp; Service Mesh Performance(SMP) 了解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-01-06T08:18:33.000Z" itemprop="datePublished">2022-01-06</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#新建-interface"><span class="toc-number">1.</span> <span class="toc-text">新建 interface</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#actor-to-actor-VS-capability-provider"><span class="toc-number">1.1.</span> <span class="toc-text">actor-to-actor VS capability provider</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#文件结构"><span class="toc-number">2.</span> <span class="toc-text">文件结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#actor-调用-interface"><span class="toc-number">3.</span> <span class="toc-text">actor 调用 interface</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-wasmcloud-app-interface" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      wasmcloud app interface 源码阅读
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2022/09/28/wasmcloud-app-interface/" class="article-date">
+	  <time datetime="2022-09-28T05:57:16.000Z" itemprop="datePublished">2022-09-28</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/WASM/">WASM</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/09/28/wasmcloud-app-interface/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.9k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 15(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="新建-interface"><a href="#新建-interface" class="headerlink" title="新建 interface"></a>新建 interface</h1><p>wasmcloud app 开发使用的是 CDD 模式，也就是基于契约开发的模式。其中契约的定义，使用 wash 指令即可完成：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wash new interface</span><br></pre></td></tr></table></figure>
+<p>执行完成后，会根据契约的相关属性信息（如 contractId）等，生成 smithy IDL 的定义文件。smithy 文件专注于契约的定义，而成功将契约和具体的语言实现解耦出来。</p>
+<p>简单来说，同一套 smithy 定义文件，可以根据编程语言的不同，生成不同的代码，方便不同语言进行集成开发。</p>
+<p>比如当前 wasmcloud 支持生成 rust 和 go 两种语言的代码。这样在基于 rust 语言开发 actor 时，可以直接在 cargo.toml 文件中引入 interface 的包，进而调用 interface 相关的 operation，也可以使用 interface 中的数据结构。</p>
+<p>而这些 operation 的具体实现，则由 provider 来实现。</p>
+<p>通过 smithy IDL 定义的契约，成功将 actor, provider 解耦出来。</p>
+<p><img src="pic.png" width="700"></p>
+<h2 id="actor-to-actor-VS-capability-provider"><a href="#actor-to-actor-VS-capability-provider" class="headerlink" title="actor-to-actor VS capability provider"></a>actor-to-actor VS capability provider</h2><p>在新建 interface 的时候，有两种模板可选，分别是 actor-to-actor 和 provider。其区别主要在 wasmbus 的相关处理上。本文主要讨论的是 capability provider。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// factorial.smithy</span></span><br><span class="line"><span class="comment">// A simple service that calculates the factorial of a whole number</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Tell the code generator how to reference symbols defined in this namespace</span></span><br><span class="line">metadata package = [ &#123; namespace: <span class="string">"org.example.interfaces.factorial"</span>, <span class="keyword">crate</span>: <span class="string">"factorial_interface"</span> &#125; ]</span><br><span class="line"></span><br><span class="line">namespace org.example.interfaces.factorial</span><br><span class="line"></span><br><span class="line"><span class="keyword">use</span> org.wasmcloud.model#wasmbus</span><br><span class="line"><span class="keyword">use</span> org.wasmcloud.model#U32</span><br><span class="line"><span class="keyword">use</span> org.wasmcloud.model#U64</span><br><span class="line"></span><br><span class="line"><span class="comment">/// The Factorial service has a single method, calculate, which</span></span><br><span class="line"><span class="comment">/// calculates the factorial of its whole number parameter.</span></span><br><span class="line">**@wasmbus(</span><br><span class="line">    contractId: <span class="string">"example:interfaces:factorial"</span>,</span><br><span class="line">    actorReceive: <span class="literal">true</span>,</span><br><span class="line">    providerReceive: <span class="literal">true</span> )**</span><br><span class="line">service Factorial &#123;</span><br><span class="line">  version: <span class="string">"0.1"</span>,</span><br><span class="line">  operations: [ Calculate ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// Calculates the factorial (n!) of the input parameter</span></span><br><span class="line">operation Calculate &#123;</span><br><span class="line">  input: U32,</span><br><span class="line">  output: U64</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// converter.smithy</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Tell the code generator how to reference symbols defined in this namespace</span></span><br><span class="line">metadata package = [ &#123; namespace: <span class="string">"org.example.interfaces.converter"</span>, <span class="keyword">crate</span>: <span class="string">"converter_interface"</span> &#125; ]</span><br><span class="line"></span><br><span class="line">namespace org.example.interfaces.converter</span><br><span class="line"></span><br><span class="line"><span class="keyword">use</span> org.wasmcloud.model#wasmbus</span><br><span class="line"></span><br><span class="line"><span class="comment">/// Description of Converter service</span></span><br><span class="line">@wasmbus( actorReceive: <span class="literal">true</span> )</span><br><span class="line">service Converter &#123;</span><br><span class="line">  version: <span class="string">"0.1"</span>,</span><br><span class="line">  operations: [ Convert ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// Converts the input string to a result</span></span><br><span class="line">operation Convert &#123;</span><br><span class="line">  input: <span class="built_in">String</span>,</span><br><span class="line">  output: <span class="built_in">String</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="文件结构"><a href="#文件结构" class="headerlink" title="文件结构"></a>文件结构</h1><p>这里以 keyvalue interface 为例进行分析，具体的定义可参阅下面的链接：</p>
+<p><a href="https://github.com/wasmCloud/interfaces/tree/main/keyvalue" target="_blank" rel="noopener">https://github.com/wasmCloud/interfaces/tree/main/keyvalue</a></p>
+<p>我们在 smithy IDL 中主要定义了下面三块内容：</p>
+<ol>
+<li>metadata，包括：contractId, version 等</li>
+<li>operations，主要是该契约允许操作的方法，比如：increment, contains, del, get, set 等</li>
+<li>structure，主要是用于各个 operation 的传参和入参，除了标量类型外的符合类型，包括：GetReponse, GetRequest 等</li>
+</ol>
+<p>部分归纳如下</p>
+<table>
+<thead>
+<tr>
+<th>metadata</th>
+<th>contractId, version, namespace</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>operations</td>
+<td>get, set, del, increment, contains</td>
+</tr>
+<tr>
+<td>structure</td>
+<td>GetResponse, GetRequest, SetResponse, SetRequest</td>
+</tr>
+</tbody>
+</table>
+<p>我们重点看生成的 rust 文件 <code>keyvalue/rust/src/keyvalue.rs</code></p>
+<p><img src="pic1.png" width="600"></p>
+<p>文件脉络如下：</p>
+<ol>
+<li><p><strong>根据 smithy 定义的结构体信息</strong>，使用 rust 语言语法格式，定义各种 struct。除此之外，为了能够在 wasmcloud 运行时中传递该结构，需要对结构进行必要的序列化和反序列化（CBOR）。我们以 GetReponse 结构体为例。</p>
+<ul>
+<li><p><code>GetResponse</code> Smithy IDL，契约定义</p>
+  <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// Response to get request</span></span><br><span class="line">structure GetResponse &#123;</span><br><span class="line">    <span class="comment">/// the value, if it existed</span></span><br><span class="line">    @required</span><br><span class="line">    @n(<span class="number">0</span>)</span><br><span class="line">    value: <span class="built_in">String</span>,</span><br><span class="line">    <span class="comment">/// whether or not the value existed</span></span><br><span class="line">    @required</span><br><span class="line">    @n(<span class="number">1</span>)</span><br><span class="line">    exists: Boolean,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ol>
+<pre><code>- `GetResponse` rust struct，rust语言的结构体定义
+
+    <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// Response to get request</span></span><br><span class="line"><span class="meta">#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="class"><span class="keyword">struct</span> <span class="title">GetResponse</span></span> &#123;</span><br><span class="line">    <span class="comment">/// the value, if it existed</span></span><br><span class="line">    <span class="meta">#[serde(default)]</span></span><br><span class="line">    <span class="keyword">pub</span> value: <span class="built_in">String</span>,</span><br><span class="line">    <span class="comment">/// whether or not the value existed</span></span><br><span class="line">    <span class="meta">#[serde(default)]</span></span><br><span class="line">    <span class="keyword">pub</span> exists: <span class="built_in">bool</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+- `GetResponse` rust encode，结构体序列化
+
+    <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Encode GetResponse as CBOR and append to output stream</span></span><br><span class="line"><span class="meta">#[doc(hidden)]</span></span><br><span class="line"><span class="meta">#[allow(unused_mut)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">encode_get_response</span></span>&lt;W: wasmbus_rpc::cbor::Write&gt;(</span><br><span class="line">    <span class="keyword">mut</span> e: &amp;<span class="keyword">mut</span> wasmbus_rpc::cbor::Encoder&lt;W&gt;,</span><br><span class="line">    val: &amp;GetResponse,</span><br><span class="line">) -&gt; RpcResult&lt;()&gt;</span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">    &lt;W <span class="keyword">as</span> wasmbus_rpc::cbor::Write&gt;::Error: std::fmt::Display,</span><br><span class="line">&#123;</span><br><span class="line">    e.array(<span class="number">2</span>)?; <span class="comment">// 结构体成员数量 2</span></span><br><span class="line">    e.<span class="built_in">str</span>(&amp;val.value)?; <span class="comment">// 第一个成员的类型 string</span></span><br><span class="line">    e.<span class="built_in">bool</span>(val.exists)?; <span class="comment">// 第二个成员的类型 bool</span></span><br><span class="line">    <span class="literal">Ok</span>(())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+- `GetResponse` rust decode，结构体反序列化
+
+    <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Decode GetResponse from cbor input stream</span></span><br><span class="line"><span class="meta">#[doc(hidden)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">decode_get_response</span></span>(</span><br><span class="line">    d: &amp;<span class="keyword">mut</span> wasmbus_rpc::cbor::Decoder&lt;<span class="symbol">'_</span>&gt;,</span><br><span class="line">) -&gt; <span class="built_in">Result</span>&lt;GetResponse, RpcError&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> __result = &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> value: <span class="built_in">Option</span>&lt;<span class="built_in">String</span>&gt; = <span class="literal">None</span>;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> exists: <span class="built_in">Option</span>&lt;<span class="built_in">bool</span>&gt; = <span class="literal">None</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> is_array = <span class="keyword">match</span> d.datatype()? &#123;</span><br><span class="line">            wasmbus_rpc::cbor::Type::Array =&gt; <span class="literal">true</span>,</span><br><span class="line">            wasmbus_rpc::cbor::Type::Map =&gt; <span class="literal">false</span>,</span><br><span class="line">            _ =&gt; &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">Err</span>(RpcError::Deser(</span><br><span class="line">                    <span class="string">"decoding struct GetResponse, expected array or map"</span>.to_string(),</span><br><span class="line">                ))</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">if</span> is_array &#123;</span><br><span class="line">            <span class="keyword">let</span> len = d.fixed_array()?;</span><br><span class="line">            <span class="keyword">for</span> __i <span class="keyword">in</span> <span class="number">0</span>..(len <span class="keyword">as</span> <span class="built_in">usize</span>) &#123;</span><br><span class="line">                <span class="keyword">match</span> __i &#123;</span><br><span class="line">                    <span class="number">0</span> =&gt; value = <span class="literal">Some</span>(d.<span class="built_in">str</span>()?.to_string()),</span><br><span class="line">                    <span class="number">1</span> =&gt; exists = <span class="literal">Some</span>(d.<span class="built_in">bool</span>()?),</span><br><span class="line">                    _ =&gt; d.skip()?,</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> len = d.fixed_map()?;</span><br><span class="line">            <span class="keyword">for</span> __i <span class="keyword">in</span> <span class="number">0</span>..(len <span class="keyword">as</span> <span class="built_in">usize</span>) &#123;</span><br><span class="line">                <span class="keyword">match</span> d.<span class="built_in">str</span>()? &#123;</span><br><span class="line">                    <span class="string">"value"</span> =&gt; value = <span class="literal">Some</span>(d.<span class="built_in">str</span>()?.to_string()),</span><br><span class="line">                    <span class="string">"exists"</span> =&gt; exists = <span class="literal">Some</span>(d.<span class="built_in">bool</span>()?),</span><br><span class="line">                    _ =&gt; d.skip()?,</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        GetResponse &#123;</span><br><span class="line">            value: <span class="keyword">if</span> <span class="keyword">let</span> <span class="literal">Some</span>(__x) = value &#123;</span><br><span class="line">                __x</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">Err</span>(RpcError::Deser(</span><br><span class="line">                    <span class="string">"missing field GetResponse.value (#0)"</span>.to_string(),</span><br><span class="line">                ));</span><br><span class="line">            &#125;,</span><br><span class="line"></span><br><span class="line">            exists: <span class="keyword">if</span> <span class="keyword">let</span> <span class="literal">Some</span>(__x) = exists &#123;</span><br><span class="line">                __x</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">Err</span>(RpcError::Deser(</span><br><span class="line">                    <span class="string">"missing field GetResponse.exists (#1)"</span>.to_string(),</span><br><span class="line">                ));</span><br><span class="line">            &#125;,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="literal">Ok</span>(__result)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</code></pre><ol start="2">
+<li><p><strong>contract traIt 定义</strong>。这个定义比较简单，就是把 smithy IDL 的 operations 用 rust 语言翻译一遍。</p>
+ <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// wasmbus.contractId: wasmcloud:keyvalue</span></span><br><span class="line"><span class="comment">/// wasmbus.providerReceive</span></span><br><span class="line"><span class="meta">#[async_trait]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="class"><span class="keyword">trait</span> <span class="title">KeyValue</span></span> &#123;</span><br><span class="line">    <span class="comment">/// returns the capability contract id for this interface</span></span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">contract_id</span></span>() -&gt; &amp;<span class="symbol">'static</span> <span class="built_in">str</span> &#123;</span><br><span class="line">        <span class="string">"wasmcloud:keyvalue"</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/// Increments a numeric value, returning the new value</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">increment</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;IncrementRequest) -&gt; RpcResult&lt;<span class="built_in">i32</span>&gt;;</span><br><span class="line">    <span class="comment">/// returns whether the store contains the key</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">contains</span></span>&lt;TS: <span class="built_in">ToString</span> + ?<span class="built_in">Sized</span> + std::marker::<span class="built_in">Sync</span>&gt;(</span><br><span class="line">        &amp;<span class="keyword">self</span>,</span><br><span class="line">        ctx: &amp;Context,</span><br><span class="line">        arg: &amp;TS,</span><br><span class="line">    ) -&gt; RpcResult&lt;<span class="built_in">bool</span>&gt;;</span><br><span class="line">    <span class="comment">/// Deletes a key, returning true if the key was deleted</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">del</span></span>&lt;TS: <span class="built_in">ToString</span> + ?<span class="built_in">Sized</span> + std::marker::<span class="built_in">Sync</span>&gt;(</span><br><span class="line">        &amp;<span class="keyword">self</span>,</span><br><span class="line">        ctx: &amp;Context,</span><br><span class="line">        arg: &amp;TS,</span><br><span class="line">    ) -&gt; RpcResult&lt;<span class="built_in">bool</span>&gt;;</span><br><span class="line">    <span class="comment">/// Gets a value for a specified key. If the key exists,</span></span><br><span class="line">    <span class="comment">/// the return structure contains exists: true and the value,</span></span><br><span class="line">    <span class="comment">/// otherwise the return structure contains exists == false.</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">get</span></span>&lt;TS: <span class="built_in">ToString</span> + ?<span class="built_in">Sized</span> + std::marker::<span class="built_in">Sync</span>&gt;(</span><br><span class="line">        &amp;<span class="keyword">self</span>,</span><br><span class="line">        ctx: &amp;Context,</span><br><span class="line">        arg: &amp;TS,</span><br><span class="line">    ) -&gt; RpcResult&lt;GetResponse&gt;;</span><br><span class="line">    <span class="comment">/// Append a value onto the end of a list. Returns the new list size</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">list_add</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;ListAddRequest) -&gt; RpcResult&lt;<span class="built_in">u32</span>&gt;;</span><br><span class="line">    <span class="comment">/// Deletes a list and its contents</span></span><br><span class="line">    <span class="comment">/// input: list name</span></span><br><span class="line">    <span class="comment">/// output: true if the list existed and was deleted</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">list_clear</span></span>&lt;TS: <span class="built_in">ToString</span> + ?<span class="built_in">Sized</span> + std::marker::<span class="built_in">Sync</span>&gt;(</span><br><span class="line">        &amp;<span class="keyword">self</span>,</span><br><span class="line">        ctx: &amp;Context,</span><br><span class="line">        arg: &amp;TS,</span><br><span class="line">    ) -&gt; RpcResult&lt;<span class="built_in">bool</span>&gt;;</span><br><span class="line">    <span class="comment">/// Deletes a value from a list. Returns true if the item was removed.</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">list_del</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;ListDelRequest) -&gt; RpcResult&lt;<span class="built_in">bool</span>&gt;;</span><br><span class="line">    <span class="comment">/// Retrieves a range of values from a list using 0-based indices.</span></span><br><span class="line">    <span class="comment">/// Start and end values are inclusive, for example, (0,10) returns</span></span><br><span class="line">    <span class="comment">/// 11 items if the list contains at least 11 items. If the stop value</span></span><br><span class="line">    <span class="comment">/// is beyond the end of the list, it is treated as the end of the list.</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">list_range</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;ListRangeRequest) -&gt; RpcResult&lt;StringList&gt;;</span><br><span class="line">    <span class="comment">/// Sets the value of a key.</span></span><br><span class="line">    <span class="comment">/// expires is an optional number of seconds before the value should be automatically deleted,</span></span><br><span class="line">    <span class="comment">/// or 0 for no expiration.</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">set</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;SetRequest) -&gt; RpcResult&lt;()&gt;;</span><br><span class="line">    <span class="comment">/// Add an item into a set. Returns number of items added (1 or 0)</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">set_add</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;SetAddRequest) -&gt; RpcResult&lt;<span class="built_in">u32</span>&gt;;</span><br><span class="line">    <span class="comment">/// Deletes an item from the set. Returns number of items removed from the set (1 or 0)</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">set_del</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;SetDelRequest) -&gt; RpcResult&lt;<span class="built_in">u32</span>&gt;;</span><br><span class="line">    <span class="comment">/// perform intersection of sets and returns values from the intersection.</span></span><br><span class="line">    <span class="comment">/// input: list of sets for performing intersection (at least two)</span></span><br><span class="line">    <span class="comment">/// output: values</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">set_intersection</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;StringList) -&gt; RpcResult&lt;StringList&gt;;</span><br><span class="line">    <span class="comment">/// Retrieves all items from a set</span></span><br><span class="line">    <span class="comment">/// input: String</span></span><br><span class="line">    <span class="comment">/// output: set members</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">set_query</span></span>&lt;TS: <span class="built_in">ToString</span> + ?<span class="built_in">Sized</span> + std::marker::<span class="built_in">Sync</span>&gt;(</span><br><span class="line">        &amp;<span class="keyword">self</span>,</span><br><span class="line">        ctx: &amp;Context,</span><br><span class="line">        arg: &amp;TS,</span><br><span class="line">    ) -&gt; RpcResult&lt;StringList&gt;;</span><br><span class="line">    <span class="comment">/// perform union of sets and returns values from the union</span></span><br><span class="line">    <span class="comment">/// input: list of sets for performing union (at least two)</span></span><br><span class="line">    <span class="comment">/// output: union of values</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">set_union</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;StringList) -&gt; RpcResult&lt;StringList&gt;;</span><br><span class="line">    <span class="comment">/// clears all values from the set and removes it</span></span><br><span class="line">    <span class="comment">/// input: set name</span></span><br><span class="line">    <span class="comment">/// output: true if the set existed and was deleted</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">set_clear</span></span>&lt;TS: <span class="built_in">ToString</span> + ?<span class="built_in">Sized</span> + std::marker::<span class="built_in">Sync</span>&gt;(</span><br><span class="line">        &amp;<span class="keyword">self</span>,</span><br><span class="line">        ctx: &amp;Context,</span><br><span class="line">        arg: &amp;TS,</span><br><span class="line">    ) -&gt; RpcResult&lt;<span class="built_in">bool</span>&gt;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol start="3">
+<li><p><strong>Receiver trait 定义。</strong>receiver 的 trait 定义如下，默认实现了 dispatch 方法，根据 message.method 来进行不同的数据转换。Message 的结构体定义如下：</p>
+<p> <code>wasmbus-rpc/src/common.rs</code>, 用于封装 wasmcloud message,主要是 trait 的 method 和 parameters</p>
+ <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// A wasmcloud message</span></span><br><span class="line"><span class="meta">#[derive(Debug)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="class"><span class="keyword">struct</span> <span class="title">Message</span></span>&lt;<span class="symbol">'m</span>&gt; &#123;</span><br><span class="line">    <span class="comment">/// Message name, usually in the form 'Trait.method'</span></span><br><span class="line">    <span class="keyword">pub</span> method: &amp;<span class="symbol">'m</span> <span class="built_in">str</span>,</span><br><span class="line">    <span class="comment">/// parameter serialized as a byte array. If the method takes no args, the array will be</span></span><br><span class="line">    <span class="comment">/// zero length.</span></span><br><span class="line">    <span class="keyword">pub</span> arg: Cow&lt;<span class="symbol">'m</span>, [<span class="built_in">u8</span>]&gt;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<pre><code>`keyvalue/rust/src/keyvalue.rs`
+
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// KeyValueReceiver receives messages defined in the KeyValue service trait</span></span><br><span class="line"><span class="meta">#[doc(hidden)]</span></span><br><span class="line"><span class="meta">#[async_trait]</span></span><br><span class="line">**<span class="keyword">pub</span> <span class="class"><span class="keyword">trait</span> <span class="title">KeyValueReceiver</span></span>: MessageDispatch + KeyValue &#123;**</span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> <span class="title">dispatch</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, message: Message&lt;<span class="symbol">'_</span>&gt;) -&gt; <span class="built_in">Result</span>&lt;<span class="built_in">Vec</span>&lt;<span class="built_in">u8</span>&gt;, RpcError&gt; &#123;</span><br><span class="line">        <span class="keyword">match</span> message.method &#123; <span class="comment">// method 主要由 method 和 args 组成，用于传递消息</span></span><br><span class="line">            <span class="string">"**Increment**"</span> =&gt; &#123;</span><br><span class="line">                <span class="keyword">let</span> value: IncrementRequest = wasmbus_rpc::common::deserialize(&amp;message.arg)</span><br><span class="line">                    .map_err(|e| RpcError::Deser(<span class="built_in">format!</span>(<span class="string">"'IncrementRequest': &#123;&#125;"</span>, e)))?;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">let</span> resp = **KeyValue::increment**(<span class="keyword">self</span>, ctx, &amp;value).await?; <span class="comment">// 根据不同的  method 调用 trait 的不同方法</span></span><br><span class="line">                <span class="keyword">let</span> buf = wasmbus_rpc::common::serialize(&amp;resp)?;  <span class="comment">// 根据该方法的返回值，进行不同的反序列化</span></span><br><span class="line"></span><br><span class="line">                <span class="literal">Ok</span>(buf)</span><br><span class="line">            &#125;</span><br><span class="line"><span class="comment">// ================= 其他更多 方法 ========== //</span></span><br><span class="line">            <span class="string">"Contains"</span> =&gt; &#123;</span><br><span class="line">                <span class="keyword">let</span> value: <span class="built_in">String</span> = wasmbus_rpc::common::deserialize(&amp;message.arg)</span><br><span class="line">                    .map_err(|e| RpcError::Deser(<span class="built_in">format!</span>(<span class="string">"'String': &#123;&#125;"</span>, e)))?;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">let</span> resp = KeyValue::contains(<span class="keyword">self</span>, ctx, &amp;value).await?;</span><br><span class="line">                <span class="keyword">let</span> buf = wasmbus_rpc::common::serialize(&amp;resp)?;</span><br><span class="line"></span><br><span class="line">                <span class="literal">Ok</span>(buf)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="string">"Del"</span> =&gt; &#123;</span><br><span class="line">                <span class="keyword">let</span> value: <span class="built_in">String</span> = wasmbus_rpc::common::deserialize(&amp;message.arg)</span><br><span class="line">                    .map_err(|e| RpcError::Deser(<span class="built_in">format!</span>(<span class="string">"'String': &#123;&#125;"</span>, e)))?;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">let</span> resp = KeyValue::del(<span class="keyword">self</span>, ctx, &amp;value).await?;</span><br><span class="line">                <span class="keyword">let</span> buf = wasmbus_rpc::common::serialize(&amp;resp)?;</span><br><span class="line"></span><br><span class="line">                <span class="literal">Ok</span>(buf)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="string">"Get"</span> =&gt; &#123;</span><br><span class="line">                <span class="keyword">let</span> value: <span class="built_in">String</span> = wasmbus_rpc::common::deserialize(&amp;message.arg)</span><br><span class="line">                    .map_err(|e| RpcError::Deser(<span class="built_in">format!</span>(<span class="string">"'String': &#123;&#125;"</span>, e)))?;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">let</span> resp = KeyValue::get(<span class="keyword">self</span>, ctx, &amp;value).await?;</span><br><span class="line">                <span class="keyword">let</span> buf = wasmbus_rpc::common::serialize(&amp;resp)?;</span><br><span class="line"></span><br><span class="line">                <span class="literal">Ok</span>(buf)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="string">"Set"</span> =&gt; &#123;</span><br><span class="line">                <span class="keyword">let</span> value: SetRequest = wasmbus_rpc::common::deserialize(&amp;message.arg)</span><br><span class="line">                    .map_err(|e| RpcError::Deser(<span class="built_in">format!</span>(<span class="string">"'SetRequest': &#123;&#125;"</span>, e)))?;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">let</span> _resp = KeyValue::set(<span class="keyword">self</span>, ctx, &amp;value).await?;</span><br><span class="line">                <span class="keyword">let</span> buf = <span class="built_in">Vec</span>::new();</span><br><span class="line">                <span class="literal">Ok</span>(buf)</span><br><span class="line">            &#125;</span><br><span class="line">            _ =&gt; <span class="literal">Err</span>(RpcError::MethodNotHandled(<span class="built_in">format!</span>(</span><br><span class="line">                <span class="string">"KeyValue::&#123;&#125;"</span>,</span><br><span class="line">                message.method</span><br><span class="line">            ))),</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</code></pre><ol start="4">
+<li><p><strong>Sender trait 定义。</strong>Sender 用来传输调用的 method 和 args。</p>
+<p> <img src="pic2.png" width="300"></p>
+<p> <code>keyvalue/rust/src/keyvalue.rs</code>，根据调用的 operation 不同，组装不同的请求参数，进行不同的数据序列化</p>
+ <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">impl</span> KeyValueSender&lt;wasmbus_rpc::actor::prelude::WasmHost&gt; &#123;</span><br><span class="line">    **<span class="comment">/// Constructs a client for sending to a KeyValue provider</span></span><br><span class="line">    <span class="comment">/// implementing the 'wasmcloud:keyvalue' capability contract, with the "default" link**</span></span><br><span class="line">    **<span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">new</span></span>() -&gt; <span class="keyword">Self</span>** &#123;</span><br><span class="line">        <span class="keyword">let</span> transport =</span><br><span class="line">            **wasmbus_rpc::actor::prelude::WasmHost::to_provider(<span class="string">"wasmcloud:keyvalue"</span>, <span class="string">"default"</span>)**</span><br><span class="line">                .unwrap();</span><br><span class="line">        <span class="keyword">Self</span> &#123; transport &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// Constructs a client for sending to a KeyValue provider</span></span><br><span class="line">    <span class="comment">/// implementing the 'wasmcloud:keyvalue' capability contract, with the specified link name</span></span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">new_with_link</span></span>(link_name: &amp;<span class="built_in">str</span>) -&gt; wasmbus_rpc::error::RpcResult&lt;<span class="keyword">Self</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> transport =</span><br><span class="line">            wasmbus_rpc::actor::prelude::WasmHost::to_provider(<span class="string">"wasmcloud:keyvalue"</span>, link_name)?;</span><br><span class="line">        <span class="literal">Ok</span>(<span class="keyword">Self</span> &#123; transport &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[async_trait]</span></span><br><span class="line"><span class="keyword">impl</span>&lt;T: Transport + std::marker::<span class="built_in">Sync</span> + std::marker::<span class="built_in">Send</span>&gt; KeyValue <span class="keyword">for</span> KeyValueSender&lt;T&gt; &#123;</span><br><span class="line">    <span class="meta">#[allow(unused)]</span></span><br><span class="line">    <span class="comment">/// Increments a numeric value, returning the new value</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> **<span class="title">increment</span>**</span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;**IncrementRequest**) -&gt; RpcResult&lt;<span class="built_in">i32</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> buf = wasmbus_rpc::common::serialize(arg)?;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> resp = <span class="keyword">self</span></span><br><span class="line">            .transport</span><br><span class="line">            .send(</span><br><span class="line">                ctx,</span><br><span class="line">                Message &#123;</span><br><span class="line">                    **method: <span class="string">"KeyValue.Increment"</span>,**</span><br><span class="line">                    arg: Cow::Borrowed(&amp;buf),</span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="literal">None</span>,</span><br><span class="line">            )</span><br><span class="line">            .await?;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> value: <span class="built_in">i32</span> = wasmbus_rpc::common::deserialize(&amp;resp)</span><br><span class="line">            .map_err(|e| RpcError::Deser(<span class="built_in">format!</span>(<span class="string">"'&#123;&#125;': I32"</span>, e)))?;</span><br><span class="line">        <span class="literal">Ok</span>(value)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h1 id="actor-调用-interface"><a href="#actor-调用-interface" class="headerlink" title="actor 调用 interface"></a>actor 调用 interface</h1><p>我们以 kvcounter 为例，首先需要在 makefile 中声明（claims）自己需要使用的契约。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># examples/actor/kvcounter</span></span><br><span class="line"></span><br><span class="line">PROJECT  = kvcounter</span><br><span class="line">VERSION  = <span class="variable">$(<span class="built_in">shell</span> cargo metadata --no-deps --format-version 1 | jq -r '.packages[] .version' | head -1)</span></span><br><span class="line">REVISION = 0</span><br><span class="line"><span class="comment"># list of all contract claims for actor signing (space-separated)</span></span><br><span class="line">**CLAIMS   = wasmcloud:httpserver wasmcloud:keyvalue**</span><br><span class="line"><span class="comment"># registry url for our actor</span></span><br><span class="line">REG_URL  = localhost:5000/v2/<span class="variable">$(PROJECT)</span>:<span class="variable">$(VERSION)</span></span><br><span class="line"><span class="comment"># command to upload to registry (without last wasm parameter)</span></span><br><span class="line">PUSH_REG_CMD = wash reg push --insecure <span class="variable">$(REG_URL)</span></span><br><span class="line">ACTOR_NAME = <span class="string">"KVCounter"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span> ../../build/makefiles/actor.mk</span><br></pre></td></tr></table></figure>
+<p>其次在 cargo.toml 中引入需要的 interface。</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[package]</span></span><br><span class="line"><span class="attr">name</span> = <span class="string">"kvcounter"</span></span><br><span class="line"><span class="attr">version</span> = <span class="string">"0.3.4"</span></span><br><span class="line"><span class="attr">authors</span> = [ <span class="string">"wasmcloud Team"</span> ]</span><br><span class="line"><span class="attr">edition</span> = <span class="string">"2021"</span></span><br><span class="line"></span><br><span class="line"><span class="section">[lib]</span></span><br><span class="line"><span class="attr">crate-type</span> = [<span class="string">"cdylib"</span>, <span class="string">"rlib"</span>]</span><br><span class="line"></span><br><span class="line"><span class="section">[dependencies]</span></span><br><span class="line"><span class="attr">async-trait</span> = <span class="string">"0.1"</span></span><br><span class="line"><span class="attr">form_urlencoded</span> = <span class="string">"1.0"</span></span><br><span class="line"><span class="attr">futures</span> = <span class="string">"0.3"</span></span><br><span class="line"><span class="attr">serde_bytes</span> = <span class="string">"0.11"</span></span><br><span class="line"><span class="attr">serde_json</span> =<span class="string">"1.0"</span></span><br><span class="line"><span class="attr">serde</span> = &#123;version = <span class="string">"1.0"</span>, features = [<span class="string">"derive"</span>]&#125;</span><br><span class="line"></span><br><span class="line"><span class="attr">wasmbus-rpc</span> = <span class="string">"0.9"</span></span><br><span class="line">**wasmcloud-interface-keyvalue = "0.7.0"</span><br><span class="line"><span class="attr">wasmcloud-interface-httpserver</span> = <span class="string">"0.6.0"</span>**</span><br><span class="line"></span><br><span class="line"><span class="section">[profile.release]</span></span><br><span class="line"><span class="comment"># Optimize for small code size</span></span><br><span class="line"><span class="attr">lto</span> = <span class="literal">true</span></span><br><span class="line"><span class="attr">opt-level</span> = <span class="string">"s"</span></span><br></pre></td></tr></table></figure>
+<p>最后在 actor 中使用</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">async <span class="function"><span class="keyword">fn</span> <span class="title">increment_counter</span></span>(ctx: &amp;Context, key: <span class="built_in">String</span>, value: <span class="built_in">i32</span>) -&gt; RpcResult&lt;<span class="built_in">i32</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> new_val = **KeyValueSender::new()**</span><br><span class="line">        **.increment(ctx, &amp;IncrementRequest &#123; key, value &#125;)**</span><br><span class="line">        .await?;</span><br><span class="line">    <span class="literal">Ok</span>(new_val)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的 <strong>Sender::new().increment</strong> 就是我们之前在 Interface sender 中默认生成的方法，其核心就是把 actor 的调用包装成消息体发送出去：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">async <span class="function"><span class="keyword">fn</span> <span class="title">increment</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;IncrementRequest) -&gt; RpcResult&lt;<span class="built_in">i32</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">let</span> buf = wasmbus_rpc::common::serialize(arg)?;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> resp = <span class="keyword">self</span></span><br><span class="line">        .transport</span><br><span class="line">        **.send(   <span class="comment">// wasmbus-rpc</span></span><br><span class="line">            ctx,</span><br><span class="line">            Message &#123;</span><br><span class="line">                method: <span class="string">"KeyValue.Increment"</span>,</span><br><span class="line">                arg: Cow::Borrowed(&amp;buf),</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="literal">None</span>,</span><br><span class="line">        )**</span><br><span class="line">        .await?;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> value: <span class="built_in">i32</span> = wasmbus_rpc::common::deserialize(&amp;resp)</span><br><span class="line">        .map_err(|e| RpcError::Deser(<span class="built_in">format!</span>(<span class="string">"'&#123;&#125;': I32"</span>, e)))?;</span><br><span class="line">    <span class="literal">Ok</span>(value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>根据上面的分析，我们初探了 interface 的具体代码生成规则：</p>
+<ul>
+<li>根据契约定义的不同，生成对应的结构体。包括序列化和反序列化</li>
+<li>包装调用方法，抽象出 Sender 和 Receiver 两个 trait<ul>
+<li>receiver 默认实现了 dispatch。里面根据具体调用的 method 进行数据的序列化和反序列化</li>
+<li>sender 则根据不同的方法，生成了不同的 sender method，这样调用 Sender 的 method 时，就能直接发送对应的请求，请求体包含了 method 和 params</li>
+</ul>
+</li>
+<li>actor 实际调用 interface 时，就是向 runtime 发送了具体的 rpc 请求。再由  runtime 去调度对应的 provider 实现，进而返回。</li>
+</ul>
+<p><img src="pic2.png" width="300"></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2022/09/28/wasmcloud-app-interface/" title="wasmcloud app interface 源码阅读" target="_blank" rel="external">https://rovast.github.io/2022/09/28/wasmcloud-app-interface/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">但行好事</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2022/09/28/wasmcloud-app-provider-read/" title="wasmcloud app provider 源码阅读"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'd09c04a01484da542af7',
+    clientSecret: '378cbbec6959681baa751421c508b75e3755b27c',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+
+<!-- Cloudflare Web Analytics -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "772d8ac6c6e34909aabd01d173940c88"}"></script>
+<!-- End Cloudflare Web Analytics -->
+
+</body>
+</html>
