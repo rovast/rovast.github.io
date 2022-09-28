@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>wasmcloud app provider 源码阅读 | rovast</title>
+  <meta name="description" content="背景provider 在 wasmcloud 体系中扮演者重要的作用。它负责实现 Interface，在 actor 和 provider 建立链接关系后，可为 actor 提供具体的能力。对于同一个 Interface，可以有不同的 Provider 实现，在 link def 阶段，再去指定具体由哪个 Provider 给 actor 提供能力。 而 actor 调用具体的 Interface">
+<meta name="keywords" content="Web PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="wasmcloud app provider 源码阅读">
+<meta property="og:url" content="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="背景provider 在 wasmcloud 体系中扮演者重要的作用。它负责实现 Interface，在 actor 和 provider 建立链接关系后，可为 actor 提供具体的能力。对于同一个 Interface，可以有不同的 Provider 实现，在 link def 阶段，再去指定具体由哪个 Provider 给 actor 提供能力。 而 actor 调用具体的 Interface">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/pic.png">
+<meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/pic1.png">
+<meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/pic2.png">
+<meta property="og:updated_time" content="2022-09-28T03:02:36.331Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="wasmcloud app provider 源码阅读">
+<meta name="twitter:description" content="背景provider 在 wasmcloud 体系中扮演者重要的作用。它负责实现 Interface，在 actor 和 provider 建立链接关系后，可为 actor 提供具体的能力。对于同一个 Interface，可以有不同的 Provider 实现，在 link def 阶段，再去指定具体由哪个 Provider 给 actor 提供能力。 而 actor 调用具体的 Interface">
+<meta name="twitter:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/pic.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">但行好事</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/WASM/">WASM</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">15</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/流程/">流程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云原生/">云原生</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.33px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.67px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/docker/" style="font-size: 13.33px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.33px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/makefile/" style="font-size: 13px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13px;">php</a> <a href="/tags/soar/" style="font-size: 13.33px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.33px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.33px;">wiki</a> <a href="/tags/云原生/" style="font-size: 13px;">云原生</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.33px;">杂项</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 13.67px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/28/hello-world/" class="title">Hello World</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-28T03:02:36.299Z" itemprop="datePublished">2022-09-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/28/jia-ban/" class="title">(no title)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-28T03:02:36.299Z" itemprop="datePublished">2022-09-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/28/wasmcloud-app-provider-read/" class="title">wasmcloud app provider 源码阅读</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-28T02:33:49.000Z" itemprop="datePublished">2022-09-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/23/wasmcloud-app-development/" class="title">wasmcloud app development</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-23T05:57:31.000Z" itemprop="datePublished">2022-09-23</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/19/wasmcloud-intro/" class="title">wasmcloud actor调度梳理</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-19T05:22:55.000Z" itemprop="datePublished">2022-09-19</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#主流程"><span class="toc-number">2.</span> <span class="toc-text">主流程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#启动-provider"><span class="toc-number">2.1.</span> <span class="toc-text">启动 provider</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实现-interface"><span class="toc-number">2.2.</span> <span class="toc-text">实现 interface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#处理事件"><span class="toc-number">2.3.</span> <span class="toc-text">处理事件</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-wasmcloud-app-provider-read" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      wasmcloud app provider 源码阅读
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2022/09/28/wasmcloud-app-provider-read/" class="article-date">
+	  <time datetime="2022-09-28T02:33:49.000Z" itemprop="datePublished">2022-09-28</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/WASM/">WASM</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2022/09/28/wasmcloud-app-provider-read/" class="leancloud_visitors" data-flag-title="wasmcloud app provider 源码阅读">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/09/28/wasmcloud-app-provider-read/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.2k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 11(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>provider 在 wasmcloud 体系中扮演者重要的作用。它负责实现 Interface，在 actor 和 provider 建立链接关系后，可为 actor 提供具体的能力。对于同一个 Interface，可以有不同的 Provider 实现，在 link def 阶段，再去指定具体由哪个 Provider 给 actor 提供能力。</p>
+<p>而 actor 调用具体的 Interface 方法时，则由 wasmcloud host runtime 作为协调者，接收到 actor 调用的方法信息（包括函数名称，参数），进而寻找对应的 provider 进行执行，并将调用结果返回。</p>
+<p><img src="pic.png" width="400"></p>
+<h1 id="主流程"><a href="#主流程" class="headerlink" title="主流程"></a>主流程</h1><p>Provider 的运行机理主要分三块：</p>
+<ol>
+<li>启动 provider，建立和 wasmcloud runtime 的通信链接。这部分在我们 start provider 的时候就会执行。</li>
+<li>实现 interface 中定义的 operations</li>
+<li>处理控制 provider 的部分事件（可选）</li>
+</ol>
+<h2 id="启动-provider"><a href="#启动-provider" class="headerlink" title="启动 provider"></a>启动 provider</h2><p>我们可以在平台（或使用 wasmcloud shell）来启动 provider。启动后，会进行一系列的初始化，并向 wasmcloud runtime 中注册该 provider。</p>
+<p><img src="pic1.png" width="500"></p>
+<p>kvredis 和 http-server-rs 两个  provider 的 main 函数入口如下：</p>
+<p><code>kvredis/src/main.rs</code></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() -&gt; <span class="built_in">Result</span>&lt;(), <span class="built_in">Box</span>&lt;dyn std::error::Error&gt;&gt; &#123;</span><br><span class="line">    <span class="comment">// handle lattice control messages and forward rpc to the provider dispatch</span></span><br><span class="line">    <span class="comment">// returns when provider receives a shutdown control message</span></span><br><span class="line">		<span class="comment">// 执行后，常驻 runtime，和 rpc 消息进行交互，直到接收到关闭指令后，才会退出。</span></span><br><span class="line">    provider_main(</span><br><span class="line">        KvRedisProvider::<span class="keyword">default</span>(),</span><br><span class="line">        <span class="literal">Some</span>(<span class="string">"KeyValue Redis Provider"</span>.to_string()),</span><br><span class="line">    )?;</span><br><span class="line"></span><br><span class="line">    eprintln!(<span class="string">"KVRedis provider exiting"</span>);</span><br><span class="line">    <span class="literal">Ok</span>(())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>httpserver-rs/bin/main.rs</code></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() -&gt; <span class="built_in">Result</span>&lt;(), <span class="built_in">Box</span>&lt;dyn std::error::Error&gt;&gt; &#123;</span><br><span class="line">    <span class="comment">// handle lattice control messages and forward rpc to the provider dispatch</span></span><br><span class="line">    <span class="comment">// returns when provider receives a shutdown control message</span></span><br><span class="line">    provider_main(</span><br><span class="line">        HttpServerProvider::<span class="keyword">default</span>(),</span><br><span class="line">        <span class="literal">Some</span>(<span class="string">"HttpServer Provider"</span>.to_string()),</span><br><span class="line">    )?;</span><br><span class="line"></span><br><span class="line">    eprintln!(<span class="string">"HttpServer provider exiting"</span>);</span><br><span class="line">    <span class="literal">Ok</span>(())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们看到 provider 的 main 干的事情是一致的，即调用 provider_main 来启动 provider server。其中 provider_main 是由 wasmbus-rpc 库来提供，作为 provider 的开发者，直接调用即可。我们简单分析下 wasmbus-rpc 的 相关实现。</p>
+<p><code>wasmbus-rpc-src/provider_main.rs</code></p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// Start provider services: tokio runtime, logger, nats, and rpc subscriptions</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> **<span class="title">provider_main</span>**</span>&lt;P&gt;(</span><br><span class="line">    provider_dispatch: P,</span><br><span class="line">    friendly_name: <span class="built_in">Option</span>&lt;<span class="built_in">String</span>&gt;,</span><br><span class="line">) -&gt; <span class="built_in">Result</span>&lt;(), <span class="built_in">Box</span>&lt;dyn std::error::Error&gt;&gt;</span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">    P: ProviderDispatch + <span class="built_in">Send</span> + <span class="built_in">Sync</span> + <span class="built_in">Clone</span> + <span class="symbol">'static</span>,</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// get lattice configuration from host</span></span><br><span class="line">		<span class="comment">// 通过 stdin 获取 host 配置信息</span></span><br><span class="line">    <span class="keyword">let</span> host_data = load_host_data().map_err(|e| &#123;</span><br><span class="line">        eprintln!(<span class="string">"error loading host data: &#123;&#125;"</span>, &amp;e.to_string());</span><br><span class="line">        <span class="built_in">Box</span>::new(e)</span><br><span class="line">    &#125;)?;</span><br><span class="line">    **provider_start**(provider_dispatch, host_data, friendly_name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// Start provider services: tokio runtime, logger, nats, and rpc subscriptions,</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> **<span class="title">provider_start</span>**</span>&lt;P&gt;(</span><br><span class="line">    provider_dispatch: P,</span><br><span class="line">    host_data: HostData,</span><br><span class="line">    friendly_name: <span class="built_in">Option</span>&lt;<span class="built_in">String</span>&gt;,</span><br><span class="line">) -&gt; <span class="built_in">Result</span>&lt;(), <span class="built_in">Box</span>&lt;dyn std::error::Error&gt;&gt;</span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">    P: ProviderDispatch + <span class="built_in">Send</span> + <span class="built_in">Sync</span> + <span class="built_in">Clone</span> + <span class="symbol">'static</span>,</span><br><span class="line">&#123;</span><br><span class="line">		<span class="comment">// 这里的 runtime 是一个 tokio runtime 的库。</span></span><br><span class="line">    <span class="comment">// 简单来说，就是提供了诸如：并发、异步等编程所用的运行时，用用户态的调度方式来管理并发编程，类似 Go 的协程管理，Erlang 的进程管理等</span></span><br><span class="line">    <span class="keyword">let</span> runtime = tokio::runtime::Builder::new_multi_thread()</span><br><span class="line">        .enable_all()</span><br><span class="line">        <span class="comment">//.enable_io()</span></span><br><span class="line">        .build()?;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// block_on 就是执行一个异步操作，等待其结果</span></span><br><span class="line">    **runtime.block_on(async &#123; provider_run(provider_dispatch, host_data, friendly_name).await &#125;)?;**</span><br><span class="line">    <span class="comment">// in the unlikely case there are any stuck threads,</span></span><br><span class="line">    <span class="comment">// close them so the process has a clean exit</span></span><br><span class="line">    runtime.shutdown_timeout(core::time::Duration::from_secs(<span class="number">10</span>));</span><br><span class="line">    <span class="literal">Ok</span>(())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/// Async provider initialization</span></span><br><span class="line"><span class="comment">// provider 初始化</span></span><br><span class="line"><span class="keyword">pub</span> async <span class="function"><span class="keyword">fn</span> **<span class="title">provider_run</span>**</span>&lt;P&gt;(</span><br><span class="line">    provider_dispatch: P,</span><br><span class="line">    host_data: HostData,</span><br><span class="line">    friendly_name: <span class="built_in">Option</span>&lt;<span class="built_in">String</span>&gt;,</span><br><span class="line">) -&gt; <span class="built_in">Result</span>&lt;(), <span class="built_in">Box</span>&lt;dyn std::error::Error&gt;&gt;</span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">    P: ProviderDispatch + <span class="built_in">Send</span> + <span class="built_in">Sync</span> + <span class="built_in">Clone</span> + <span class="symbol">'static</span>,</span><br><span class="line">&#123;</span><br><span class="line">    configure_tracing(</span><br><span class="line">        friendly_name.unwrap_or_else(|| host_data.provider_key.clone()),</span><br><span class="line">        host_data.structured_logging,</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> (shutdown_tx, <span class="keyword">mut</span> shutdown_rx) = tokio::sync::broadcast::channel::&lt;<span class="built_in">bool</span>&gt;(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 这里输出了一条日志信息，在我们启动 provider 时候可以看到该日志</span></span><br><span class="line">    **eprintln!(</span><br><span class="line">        <span class="string">"Starting capability provider &#123;&#125; instance &#123;&#125; with nats url &#123;&#125;"</span>,</span><br><span class="line">        &amp;host_data.provider_key, &amp;host_data.instance_id, &amp;host_data.lattice_rpc_url,</span><br><span class="line">    );**</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 初始化 nats-server，建立链接</span></span><br><span class="line">    <span class="keyword">let</span> nats_addr = <span class="keyword">if</span> !host_data.lattice_rpc_url.is_empty() &#123;</span><br><span class="line">        host_data.lattice_rpc_url.as_str()</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        crate::provider::DEFAULT_NATS_ADDR</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">let</span> nats_server = async_nats::ServerAddr::from_str(nats_addr).map_err(|e| &#123;</span><br><span class="line">        RpcError::InvalidParameter(<span class="built_in">format!</span>(<span class="string">"Invalid nats server url '&#123;&#125;': &#123;&#125;"</span>, nats_addr, e))</span><br><span class="line">    &#125;)?;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> nc = crate::rpc_client::with_connection_event_logging(</span><br><span class="line">        <span class="keyword">match</span> (</span><br><span class="line">            host_data.lattice_rpc_user_jwt.trim(),</span><br><span class="line">            host_data.lattice_rpc_user_seed.trim(),</span><br><span class="line">        ) &#123;</span><br><span class="line">            (<span class="string">""</span>, <span class="string">""</span>) =&gt; async_nats::ConnectOptions::<span class="keyword">default</span>(),</span><br><span class="line">            (rpc_jwt, rpc_seed) =&gt; &#123;</span><br><span class="line">                <span class="keyword">let</span> key_pair = std::sync::Arc::new(nkeys::KeyPair::from_seed(rpc_seed).unwrap());</span><br><span class="line">                <span class="keyword">let</span> jwt = rpc_jwt.to_owned();</span><br><span class="line">                async_nats::ConnectOptions::with_jwt(jwt, <span class="keyword">move</span> |nonce| &#123;</span><br><span class="line">                    <span class="keyword">let</span> key_pair = key_pair.clone();</span><br><span class="line">                    async <span class="keyword">move</span> &#123; key_pair.sign(&amp;nonce).map_err(async_nats::AuthError::new) &#125;</span><br><span class="line">                &#125;)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">    )</span><br><span class="line">    .connect(nats_server)</span><br><span class="line">    .await?;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// initialize HostBridge</span></span><br><span class="line">		<span class="comment">// HostBriage 管理 nats 和 host 之间的通信</span></span><br><span class="line">    <span class="keyword">let</span> bridge = HostBridge::new_client(nc, &amp;host_data)?;</span><br><span class="line">    set_host_bridge(bridge).ok();</span><br><span class="line">    <span class="keyword">let</span> bridge = get_host_bridge();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// pre-populate provider and bridge with initial set of link definitions</span></span><br><span class="line">    <span class="comment">// initialization of any link is fatal for provider startup</span></span><br><span class="line">		<span class="comment">// 如果已经有相关的 link 定义，那么在启动 provider 时候，需要恢复这些 link 信息</span></span><br><span class="line">    <span class="keyword">let</span> initial_links = host_data.link_definitions.clone();</span><br><span class="line">    <span class="keyword">for</span> ld <span class="keyword">in</span> initial_links.into_iter() &#123;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">let</span> <span class="literal">Err</span>(e) = provider_dispatch.put_link(&amp;ld).await &#123;</span><br><span class="line">            eprintln!(</span><br><span class="line">                <span class="string">"Failed to initialize link during provider startup - (&#123;:?&#125;): &#123;:?&#125;"</span>,</span><br><span class="line">                &amp;ld, e</span><br><span class="line">            );</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            bridge.put_link(ld).await;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// subscribe to nats topics</span></span><br><span class="line">		<span class="comment">// 订阅主题，用来和 wasmcloud host runtime 交互更自己相关的消息</span></span><br><span class="line">    <span class="keyword">let</span> _join = bridge</span><br><span class="line">        .connect(</span><br><span class="line">            provider_dispatch,</span><br><span class="line">            &amp;shutdown_tx,</span><br><span class="line">            &amp;host_data.lattice_rpc_prefix,</span><br><span class="line">        )</span><br><span class="line">        .await;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// run until we receive a shutdown request from host</span></span><br><span class="line">		<span class="comment">// 直到接收到 shutdown 请求，不然一直在这里监听</span></span><br><span class="line">    **<span class="keyword">let</span> _ = shutdown_rx.recv().await;**</span><br><span class="line"></span><br><span class="line">    <span class="comment">// close chunkifiers</span></span><br><span class="line">    <span class="keyword">let</span> _ = tokio::task::spawn_blocking(crate::chunkify::shutdown).await;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// flush async_nats client</span></span><br><span class="line">    bridge.flush().await;</span><br><span class="line"></span><br><span class="line">    <span class="literal">Ok</span>(())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在我们添加完 provider 后，wasmcloud host 输出的日志如下：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[debug] StateMonitor handle info wasmbus.evt.<span class="keyword">default</span></span><br><span class="line">[debug] Handling host heartbeat</span><br><span class="line">**[debug] Received control interface request on wasmbus.ctl.<span class="keyword">default</span>.cmd.NBTXBYKGMTTLY6ZJHUMW4MBO2R6CJBPE5VC3VQ6XON3TMO4DASQ4AG2H.lp**</span><br><span class="line">[debug] StateMonitor handle info wasmbus.evt.<span class="keyword">default</span></span><br><span class="line">[debug] Handling host heartbeat</span><br><span class="line">[info] Starting executable capability provider from '/var/folders/wj/<span class="number">68</span>rwh9s94w17h9z0frb4h6w00000gn/T/wasmcloudcache/VAZVC4RX54J2NVCMCW7BPCAHGGG5XZXDBXFUMDUXGESTMQEJLC3YVZWB/<span class="number">1660779368</span>/wasmcloud_keyvalue_default'</span><br><span class="line">**[debug] Publishing OCI <span class="keyword">ref</span> map <span class="keyword">for</span> <span class="string">"wasmcloud.azurecr.io/kvredis:0.16.3"</span>**</span><br><span class="line">[debug] StateMonitor handle info wasmbus.evt.<span class="keyword">default</span></span><br><span class="line">span_id=e2b0fb00ba96b407 trace_id=<span class="number">8</span>bdcf587b24a5221c1ea0a9bf721d630 [**debug] Successfully started provider wasmcloud.azurecr.io/kvredis:<span class="number">0.16</span>.<span class="number">3</span> (<span class="keyword">default</span>)**</span><br><span class="line">[debug] StateMonitor handle info wasmbus.evt.<span class="keyword">default</span></span><br><span class="line">[debug] Cached claims <span class="keyword">for</span> VAZVC4RX54J2NVCMCW7BPCAHGGG5XZXDBXFUMDUXGESTMQEJLC3YVZWB</span><br><span class="line">[debug] Cached OCI map reference from wasmcloud.azurecr.io/kvredis:<span class="number">0.16</span>.<span class="number">3</span> to VAZVC4RX54J2NVCMCW7BPCAHGGG5XZXDBXFUMDUXGESTMQEJLC3YVZWB</span><br><span class="line">RUST_LOG was not set or the given directive was invalid: FromEnvError &#123; kind: Env(NotPresent) &#125;</span><br><span class="line">Defaulting logger to `info` level</span><br><span class="line">**Starting capability provider VAZVC4RX54J2NVCMCW7BPCAHGGG5XZXDBXFUMDUXGESTMQEJLC3YVZWB instance <span class="number">8</span>efc5842-<span class="number">5</span>b6e-<span class="number">4400</span>-afeb-<span class="number">95</span>c6207deb29 with nats url <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">4222</span>**</span><br><span class="line">[debug] StateMonitor handle info wasmbus.evt.<span class="keyword">default</span></span><br><span class="line">[debug] Handling successful health check <span class="keyword">for</span> VAZVC4RX54J2NVCMCW7BPCAHGGG5XZXDBXFUMDUXGESTMQEJLC3YVZWB</span><br></pre></td></tr></table></figure>
+<p>其中倒数第三行加粗的部分，就是在 <strong><code>provider_run</code></strong> 函数中输出的日志。</p>
+<h2 id="实现-interface"><a href="#实现-interface" class="headerlink" title="实现 interface"></a>实现 interface</h2><p>对于 keyvalue 这个 interface 而言，我们可以用 redis 来实现 kv 功能，也可以使用 vault。甚至可以使用其他你认为任意其他合适的存储驱动。实现完成后，actor 可根据自己的实际需求，来 link 对应的 provider 满足自己的需求。</p>
+<p>那对于 provider 而言，就需要实现 interface trait 中定义的所有方法。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> wasmcloud_interface_keyvalue::&#123;</span><br><span class="line">    GetResponse, IncrementRequest, **KeyValue**, KeyValueReceiver, ListAddRequest, ListDelRequest,</span><br><span class="line">    ListRangeRequest, SetAddRequest, SetDelRequest, SetRequest, StringList,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// Redis keyValue provider implementation.</span></span><br><span class="line"><span class="comment">// 这里通过一个 services 过程宏。给 KvRedisProvider extend 出 KeyValue 的 trait，进而约束其实现所有方法</span></span><br><span class="line"><span class="meta">#[derive(Default, Clone, Provider)]</span></span><br><span class="line">**<span class="meta">#[services(KeyValue)]</span>**</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">KvRedisProvider</span></span> &#123;</span><br><span class="line">    <span class="comment">// store redis connections per actor</span></span><br><span class="line">    actors: Arc&lt;RwLock&lt;HashMap&lt;<span class="built_in">String</span>, RwLock&lt;Connection&gt;&gt;&gt;&gt;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// Handle KeyValue methods that interact with redis</span></span><br><span class="line"><span class="meta">#[async_trait]</span></span><br><span class="line">**<span class="keyword">impl</span> KeyValue <span class="keyword">for</span> KvRedisProvider &#123;**</span><br><span class="line">    <span class="comment">/// Increments a numeric value, returning the new value</span></span><br><span class="line">    <span class="meta">#[instrument(level = <span class="meta-string">"debug"</span>, skip(self, ctx, arg), fields(actor_id = ?ctx.actor, key = %arg.key))]</span></span><br><span class="line">    **async <span class="function"><span class="keyword">fn</span> <span class="title">increment</span></span>(&amp;<span class="keyword">self</span>, ctx: &amp;Context, arg: &amp;IncrementRequest) -&gt; RpcResult&lt;<span class="built_in">i32</span>&gt; &#123;**</span><br><span class="line">        **<span class="keyword">let</span> <span class="keyword">mut</span> cmd = redis::Cmd::incr(&amp;arg.key, &amp;arg.value); <span class="comment">// 实现 increment 方法**</span></span><br><span class="line">        <span class="keyword">let</span> val: <span class="built_in">i32</span> = <span class="keyword">self</span>.exec(ctx, &amp;<span class="keyword">mut</span> cmd).await?;</span><br><span class="line">        <span class="literal">Ok</span>(val)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="处理事件"><a href="#处理事件" class="headerlink" title="处理事件"></a>处理事件</h2><p>wasmcloud host runtime 会抛出部分事件，而 Provider 可以选择处理其中的部分事件。拿 rediskv 的 provider 而言，我们需要在用户 put link 的时候，建立和 redis 的链接，这样在后面的所有操作中，可以复用该链接。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// Handle provider control commands</span></span><br><span class="line"><span class="comment">/// put_link (new actor link command), del_link (remove link command), and shutdown</span></span><br><span class="line"><span class="meta">#[async_trait]</span></span><br><span class="line"><span class="keyword">impl</span> ProviderHandler <span class="keyword">for</span> KvRedisProvider &#123;</span><br><span class="line">    <span class="comment">/// Provider should perform any operations needed for a new link,</span></span><br><span class="line">    <span class="comment">/// including setting up per-actor resources, and checking authorization.</span></span><br><span class="line">    <span class="comment">/// If the link is allowed, return true, otherwise return false to deny the link.</span></span><br><span class="line">		**<span class="comment">// put_link 的时候建立链接**</span></span><br><span class="line">    <span class="meta">#[instrument(level = <span class="meta-string">"debug"</span>, skip(self, ld), fields(actor_id = %ld.actor_id))]</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> **<span class="title">put_link</span>**</span>(&amp;<span class="keyword">self</span>, ld: &amp;LinkDefinition) -&gt; RpcResult&lt;<span class="built_in">bool</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> redis_url = <span class="keyword">match</span> ld.values.get(REDIS_URL_KEY) &#123;</span><br><span class="line">            <span class="literal">Some</span>(v) =&gt; v.as_str(),</span><br><span class="line">            <span class="literal">None</span> =&gt; DEFAULT_CONNECT_URL,</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">let</span> client = redis::Client::open(redis_url).map_err(|e| &#123;</span><br><span class="line">            RpcError::ProviderInit(<span class="built_in">format!</span>(<span class="string">"redis connection to &#123;&#125;: &#123;&#125;"</span>, redis_url, e))</span><br><span class="line">        &#125;)?;</span><br><span class="line">        <span class="keyword">let</span> connection = client.get_async_connection().await.map_err(|e| &#123;</span><br><span class="line">            RpcError::ProviderInit(<span class="built_in">format!</span>(<span class="string">"redis connection to &#123;&#125;: &#123;&#125;"</span>, redis_url, e))</span><br><span class="line">        &#125;)?;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> update_map = <span class="keyword">self</span>.actors.write().await;</span><br><span class="line">        update_map.insert(ld.actor_id.to_string(), RwLock::new(connection));</span><br><span class="line"></span><br><span class="line">        <span class="literal">Ok</span>(<span class="literal">true</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// Handle notification that a link is dropped - close the connection</span></span><br><span class="line">		**<span class="comment">// delete_link 的时候，移除链接**</span></span><br><span class="line">    <span class="meta">#[instrument(level = <span class="meta-string">"info"</span>, skip(self))]</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> **<span class="title">delete_link</span>**</span>(&amp;<span class="keyword">self</span>, actor_id: &amp;<span class="built_in">str</span>) &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> aw = <span class="keyword">self</span>.actors.write().await;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">let</span> <span class="literal">Some</span>(conn) = aw.remove(actor_id) &#123;</span><br><span class="line">            info!(<span class="string">"redis closing connection for actor &#123;&#125;"</span>, actor_id);</span><br><span class="line">            <span class="built_in">drop</span>(conn)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// Handle shutdown request by closing all connections</span></span><br><span class="line">		<span class="comment">// shutdown 时关闭所有链接</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> **<span class="title">shutdown</span>**</span>(&amp;<span class="keyword">self</span>) -&gt; <span class="built_in">Result</span>&lt;(), Infallible&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> aw = <span class="keyword">self</span>.actors.write().await;</span><br><span class="line">        <span class="comment">// empty the actor link data and stop all servers</span></span><br><span class="line">        <span class="keyword">for</span> (_, conn) <span class="keyword">in</span> aw.drain() &#123;</span><br><span class="line">            <span class="built_in">drop</span>(conn)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="literal">Ok</span>(())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们看到在 http-server-rs（一个实现 http server 的 provider） 中，有类似处理</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[async_trait]</span></span><br><span class="line"><span class="keyword">impl</span> ProviderHandler <span class="keyword">for</span> HttpServerProvider &#123;</span><br><span class="line">    <span class="comment">/// Provider should perform any operations needed for a new link,</span></span><br><span class="line">    <span class="comment">/// including setting up per-actor resources, and checking authorization.</span></span><br><span class="line">    <span class="comment">/// If the link is allowed, return true, otherwise return false to deny the link.</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> **<span class="title">put_link</span>**</span>(&amp;<span class="keyword">self</span>, ld: &amp;LinkDefinition) -&gt; <span class="built_in">Result</span>&lt;<span class="built_in">bool</span>, RpcError&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> settings =</span><br><span class="line">            load_settings(&amp;ld.values).map_err(|e| RpcError::ProviderInit(e.to_string()))?;</span><br><span class="line"></span><br><span class="line">        **<span class="keyword">let</span> http_server = HttpServerCore::new(settings.clone(), get_host_bridge());**</span><br><span class="line">        http_server.start(ld.clone()).await.map_err(|e| &#123;</span><br><span class="line">            RpcError::ProviderInit(<span class="built_in">format!</span>(</span><br><span class="line">                <span class="string">"starting httpserver for &#123;&#125; &#123;:?&#125;: &#123;&#125;"</span>,</span><br><span class="line">                &amp;ld.actor_id, &amp;settings.address, e</span><br><span class="line">            ))</span><br><span class="line">        &#125;)?;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> update_map = <span class="keyword">self</span>.actors.write().await;</span><br><span class="line">        update_map.insert(ld.actor_id.to_string(), http_server);</span><br><span class="line"></span><br><span class="line">        <span class="literal">Ok</span>(<span class="literal">true</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// Handle notification that a link is dropped - stop the http listener</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> **<span class="title">delete_link</span>**</span>(&amp;<span class="keyword">self</span>, actor_id: &amp;<span class="built_in">str</span>) &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> aw = <span class="keyword">self</span>.actors.write().await;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">let</span> <span class="literal">Some</span>(server) = aw.remove(actor_id) &#123;</span><br><span class="line">            tracing::info!(%actor_id, <span class="string">"httpserver stopping listener for actor"</span>);</span><br><span class="line">            **server.begin_shutdown().await;**</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// Handle shutdown request by shutting down all the http server threads</span></span><br><span class="line">    async <span class="function"><span class="keyword">fn</span> **<span class="title">shutdown</span>**</span>(&amp;<span class="keyword">self</span>) -&gt; <span class="built_in">Result</span>&lt;(), Infallible&gt; &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="keyword">mut</span> aw = <span class="keyword">self</span>.actors.write().await;</span><br><span class="line">        <span class="comment">// empty the actor link data and stop all servers</span></span><br><span class="line">        **<span class="keyword">for</span> (_, server) <span class="keyword">in</span> aw.drain() &#123;</span><br><span class="line">            server.begin_shutdown().await;</span><br><span class="line">        &#125;**</span><br><span class="line">        <span class="literal">Ok</span>(())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>回顾一下 provider 的主要职能：</p>
+<p><img src="pic2.png" width="700"></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/" title="wasmcloud app provider 源码阅读" target="_blank" rel="external">https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">但行好事</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2022/09/28/jia-ban/" title="(no title)"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2022/09/23/wasmcloud-app-development/" title="wasmcloud app development"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<!-- custom analytics part create by xiamo -->
+<script defer src="https://cdn1.lncld.net/static/js/av-min-1.2.1.js"></script>
+<script defer>
+AV.init({
+  appId: '2xvr0rI4HA5Vn1CcgtMPxMac-gzGzoHsz',
+  appKey: 'F2QrebTLqLwYwoJVJucLOjvX'
+});
+
+function showTime(Counter) {
+	var query = new AV.Query(Counter);
+		var visitors= $('.leancloud_visitors');
+		query.greaterThanOrEqualTo("time", 0);		
+		query.find({
+			success: function(results) {
+				if (results.length == 0) {				
+					return;
+				}
+				var data = results;
+				visitors.each(function(){
+					var url = $(this).attr('id').trim();					
+					for (var i = 0; i < data.length; i++) {
+						var object = data[i];
+						var content = object.get('time');
+						var _url = object.get('url')
+						if(url == _url){
+							$(this).text(content);
+						}
+					}
+				})
+				
+			},
+			error: function(object, error) {
+				console.log("Error: " + error.code + " " + error.message);
+			}
+		});
+}
+
+function addCount(Counter) {
+	var Counter = AV.Object.extend("Counter");
+	url = $(".leancloud_visitors").attr('id').trim();
+	title = $(".leancloud_visitors").attr('data-flag-title').trim();
+	var query = new AV.Query(Counter);
+	query.equalTo("url", url);
+	query.find({
+		success: function(results) {
+			if (results.length > 0) {
+				var counter = results[0];
+				counter.fetchWhenSave(true);
+				counter.increment("time");
+				counter.save(null, {
+					success: function(counter) {
+						var content = counter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(counter, error) {
+						console.log('Failed to save Visitor num, with error message: ' + error.message);
+					}
+				});
+			} else {
+				var newcounter = new Counter();
+				newcounter.set("title", title);
+				newcounter.set("url", url);
+				newcounter.set("time", 1);
+				newcounter.save(null, {
+					success: function(newcounter) {
+					    console.log("newcounter.get('time')="+newcounter.get('time'));
+						var content = newcounter.get('time');
+						$(document.getElementById(url)).text(content);
+					},
+					error: function(newcounter, error) {
+						console.log('Failed to create');
+					}
+				});
+			}
+		},
+		error: function(error) {
+			console.log('Error:' + error.code + " " + error.message);
+		}
+	});
+}
+$(function() {
+	var Counter = AV.Object.extend("Counter");
+	if ($('.leancloud_visitors').length == 1) {
+		addCount(Counter);
+	} else {
+		showTime(Counter);
+	}
+}); 
+</script>
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'd09c04a01484da542af7',
+    clientSecret: '378cbbec6959681baa751421c508b75e3755b27c',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>
