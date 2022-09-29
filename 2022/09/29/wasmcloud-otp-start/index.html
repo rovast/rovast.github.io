@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>wasmcloud OTP 启动流程分析 | rovast</title>
+  <meta name="description" content="项目目录介绍hostcore 目录处理 nats 相关 topic 的处理，属于整个 runtime 的核心。 otel 目录是用来指导 opentelemetry 的使用，项目中其他地方出现的该单词基本也是这个意思。 wasmcloud_host 是 OTP Application 项目，其中 wasmcloud_host_web 它使用 phoenix framework + liveview">
+<meta name="keywords" content="Web PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="wasmcloud OTP 启动流程分析">
+<meta property="og:url" content="https://rovast.github.io/2022/09/29/wasmcloud-otp-start/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="项目目录介绍hostcore 目录处理 nats 相关 topic 的处理，属于整个 runtime 的核心。 otel 目录是用来指导 opentelemetry 的使用，项目中其他地方出现的该单词基本也是这个意思。 wasmcloud_host 是 OTP Application 项目，其中 wasmcloud_host_web 它使用 phoenix framework + liveview">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://rovast.github.io/2022/09/29/wasmcloud-otp-start/pic.png">
+<meta property="og:updated_time" content="2022-09-29T11:11:20.174Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="wasmcloud OTP 启动流程分析">
+<meta name="twitter:description" content="项目目录介绍hostcore 目录处理 nats 相关 topic 的处理，属于整个 runtime 的核心。 otel 目录是用来指导 opentelemetry 的使用，项目中其他地方出现的该单词基本也是这个意思。 wasmcloud_host 是 OTP Application 项目，其中 wasmcloud_host_web 它使用 phoenix framework + liveview">
+<meta name="twitter:image" content="https://rovast.github.io/2022/09/29/wasmcloud-otp-start/pic.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2022/09/29/wasmcloud-otp-start/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">但行好事</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/APM/">APM</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/WASM/">WASM</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/最佳实践/">最佳实践</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">23</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/APM/">APM</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/antv/">antv</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/">iframe</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/权限控制/">权限控制</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">6</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/APM/" style="font-size: 13.5px;">APM</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.25px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.75px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/antv/" style="font-size: 13px;">antv</a> <a href="/tags/docker/" style="font-size: 13.25px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/iframe/" style="font-size: 13px;">iframe</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.25px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/mac/" style="font-size: 13.5px;">mac</a> <a href="/tags/makefile/" style="font-size: 13.25px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13.25px;">php</a> <a href="/tags/soar/" style="font-size: 13.25px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.25px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.25px;">wiki</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.25px;">杂项</a> <a href="/tags/权限控制/" style="font-size: 13px;">权限控制</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 14px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/29/wasmcloud-otp-start/" class="title">wasmcloud OTP 启动流程分析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-29T10:55:11.000Z" itemprop="datePublished">2022-09-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/29/wasmcloud-lattice-protocol/" class="title">wasmcloud Lattice(NATS) 通信协议总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-29T10:53:09.000Z" itemprop="datePublished">2022-09-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/28/wasmcloud-app-interface/" class="title">wasmcloud app interface 源码阅读</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-28T05:57:16.000Z" itemprop="datePublished">2022-09-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/28/wasmcloud-app-provider-read/" class="title">wasmcloud app provider 源码阅读</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-28T02:33:49.000Z" itemprop="datePublished">2022-09-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/23/wasmcloud-app-development/" class="title">wasmcloud app development</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-23T05:57:31.000Z" itemprop="datePublished">2022-09-23</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#项目目录介绍"><span class="toc-number">1.</span> <span class="toc-text">项目目录介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#项目启动指令"><span class="toc-number">2.</span> <span class="toc-text">项目启动指令</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#host-core-启动流程"><span class="toc-number">3.</span> <span class="toc-text">host_core 启动流程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#rpc-amp-lattice-connection"><span class="toc-number">3.1.</span> <span class="toc-text">rpc&amp;lattice connection</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Actor-RPC-Supervisor"><span class="toc-number">3.2.</span> <span class="toc-text">Actor RPC Supervisor</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#init-amp-start"><span class="toc-number">3.2.1.</span> <span class="toc-text">init&amp;start</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#start-amp-stop-actor-rpc-subscriber"><span class="toc-number">3.2.2.</span> <span class="toc-text">start&amp;stop actor rpc subscriber</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Provider-Supervisor"><span class="toc-number">3.3.</span> <span class="toc-text">Provider Supervisor</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#init-amp-start-1"><span class="toc-number">3.3.1.</span> <span class="toc-text">init&amp;start</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#start-provider"><span class="toc-number">3.3.2.</span> <span class="toc-text">start provider</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#actor-supervisor"><span class="toc-number">3.4.</span> <span class="toc-text">actor supervisor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Actors-CallCounter"><span class="toc-number">3.5.</span> <span class="toc-text">Actors.CallCounter</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HeartbeatEmitter"><span class="toc-number">3.6.</span> <span class="toc-text">HeartbeatEmitter</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#init-amp-start-2"><span class="toc-number">3.6.1.</span> <span class="toc-text">init&amp;start</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#wasmcloud-host-启动流程"><span class="toc-number">4.</span> <span class="toc-text">wasmcloud_host 启动流程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Lattice-StateMonitor"><span class="toc-number">4.1.</span> <span class="toc-text">Lattice.StateMonitor</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#init"><span class="toc-number">4.1.1.</span> <span class="toc-text">init</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#start-link"><span class="toc-number">4.1.2.</span> <span class="toc-text">start_link</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#事件处理"><span class="toc-number">4.1.3.</span> <span class="toc-text">事件处理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ActorWatcher"><span class="toc-number">4.2.</span> <span class="toc-text">ActorWatcher</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#init-amp-start-link"><span class="toc-number">4.2.1.</span> <span class="toc-text">init &amp; start_link</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#start-actor"><span class="toc-number">4.2.2.</span> <span class="toc-text">start actor</span></a></li></ol></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-wasmcloud-otp-start" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      wasmcloud OTP 启动流程分析
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2022/09/29/wasmcloud-otp-start/" class="article-date">
+	  <time datetime="2022-09-29T10:55:11.000Z" itemprop="datePublished">2022-09-29</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/WASM/">WASM</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/09/29/wasmcloud-otp-start/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.9k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 14(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="项目目录介绍"><a href="#项目目录介绍" class="headerlink" title="项目目录介绍"></a>项目目录介绍</h1><p><code>hostcore</code> 目录处理 nats 相关 topic 的处理，属于整个 runtime 的核心。</p>
+<p><code>otel</code> 目录是用来指导 opentelemetry 的使用，项目中其他地方出现的该单词基本也是这个意思。</p>
+<p><code>wasmcloud_host</code> 是 OTP Application 项目，其中 wasmcloud_host_web 它使用 phoenix framework + liveview 构建，用来处理用户在 webUI 中处理的请求。然后将对应的消息经由 NATS，最后由 host core 作处理。</p>
+<h1 id="项目启动指令"><a href="#项目启动指令" class="headerlink" title="项目启动指令"></a>项目启动指令</h1><p>进入项目 <code>wasmcloud_host</code> 目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">make esbuild <span class="comment"># 可选，编译前端静态资源</span></span><br><span class="line"></span><br><span class="line">nats-server -js <span class="comment"># 启用 jetstream，该组件用于各组件通信</span></span><br><span class="line"></span><br><span class="line">make run <span class="comment"># 执行</span></span><br></pre></td></tr></table></figure>
+<p>注意在启动的时候，host_core 也会一起呗启动，在 <code>mix.exs</code> 中可看到对应配置</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">application</span></span> <span class="keyword">do</span></span><br><span class="line">    [</span><br><span class="line">      <span class="symbol">mod:</span> &#123;WasmcloudHost.Application, []&#125;,</span><br><span class="line">      **<span class="symbol">extra_applications:</span> [<span class="symbol">:logger</span>, <span class="symbol">:runtime_tools</span>, <span class="symbol">:host_core</span>],**</span><br><span class="line">      <span class="symbol">env:</span> [<span class="symbol">app_version:</span> <span class="variable">@app_vsn</span>]</span><br><span class="line">    ]</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">defp</span> <span class="title">deps</span></span> <span class="keyword">do</span></span><br><span class="line">    [</span><br><span class="line">/<span class="regexp">/ .....</span></span><br><span class="line"><span class="regexp">      **&#123;:host_core, path: "../host</span>_core<span class="string">"&#125;,</span></span><br><span class="line"><span class="string">// ....**</span></span><br><span class="line"><span class="string">    ]</span></span><br><span class="line"><span class="string">  end</span></span><br></pre></td></tr></table></figure>
+<p>在 <a href="https://hexdocs.pm/mix/Mix.Tasks.Compile.App.html" target="_blank" rel="noopener">https://hexdocs.pm/mix/Mix.Tasks.Compile.App.html</a> 文档中，我们得知：<strong>extra_application 会先于 application 启动，所以 host_core 在 wasmcloud_host 之前启动</strong></p>
+<blockquote>
+<p><code>:extra_applications</code> - a list of OTP applications your application depends on which are not included in <code>:deps</code> (usually defined in <code>deps/0</code> in your <code>mix.exs</code>). For example, here you can declare a dependency on applications that ship with Erlang/OTP or Elixir, like <code>:crypto</code> or <code>:logger</code>. Optional extra applications can be declared as a tuple, such as <code>{:ex_unit, :optional}</code>. <strong><em>Mix guarantees all non-optional applications are started before your application starts.</em></strong></p>
+</blockquote>
+<p><img src="pic.png" width="700"></p>
+<h1 id="host-core-启动流程"><a href="#host-core-启动流程" class="headerlink" title="host_core 启动流程"></a>host_core 启动流程</h1><p>查看 <code>host_core/lib/host_core.ex</code>,关注 init 和 start 函数，进而分析启动时的处理。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start</span></span>(_type, _args) <span class="keyword">do</span></span><br><span class="line">  config = Vapor.load!(HostCore.ConfigPlan)</span><br><span class="line">  config = post_process_config(config)</span><br><span class="line"></span><br><span class="line">  OpentelemetryLoggerMetadata.setup()</span><br><span class="line"></span><br><span class="line">	<span class="comment"># 挂载监督树，处理更多进程的初始化工作</span></span><br><span class="line">  **children = mount_supervisor_tree(config)**</span><br><span class="line"></span><br><span class="line">  opts = [<span class="symbol">strategy:</span> <span class="symbol">:one_for_one</span>, <span class="symbol">name:</span> HostCore.Supervisor]</span><br><span class="line"></span><br><span class="line">  started = Supervisor.start_link(children, opts)</span><br><span class="line"></span><br><span class="line">/<span class="regexp">/ ......</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">  Logger.info(</span></span><br><span class="line"><span class="regexp">    "Started wasmCloud OTP Host Runtime",</span></span><br><span class="line"><span class="regexp">    version: "<span class="subst">#&#123;Application.spec(<span class="symbol">:host_core</span>, <span class="symbol">:vsn</span>) |&gt; to_string()&#125;</span>"</span></span><br><span class="line"><span class="regexp">  )</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">  started</span></span><br><span class="line"><span class="regexp">end</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">defp</span> <span class="title">mount_supervisor_tree</span></span>(config) <span class="keyword">do</span></span><br><span class="line">  [</span><br><span class="line">		<span class="comment"># Registry 是本地的，可跨进程共享的 KV 存储，这里进行相关的配置，便于在整个系统的其他模块使用</span></span><br><span class="line">    &#123;Registry, <span class="symbol">keys:</span> <span class="symbol">:unique</span>, <span class="symbol">name:</span> Registry.ProviderRegistry&#125;,</span><br><span class="line">    &#123;Registry, <span class="symbol">keys:</span> <span class="symbol">:duplicate</span>, <span class="symbol">name:</span> Registry.ActorRegistry&#125;,</span><br><span class="line">    &#123;Registry, <span class="symbol">keys:</span> <span class="symbol">:unique</span>, <span class="symbol">name:</span> Registry.ActorRpcSubscribers&#125;,</span><br><span class="line">    &#123;Registry,</span><br><span class="line">     <span class="symbol">keys:</span> <span class="symbol">:duplicate</span>,</span><br><span class="line">     <span class="symbol">name:</span> Registry.EventMonitorRegistry,</span><br><span class="line">     <span class="symbol">partitions:</span> System.schedulers_online()&#125;,</span><br><span class="line"></span><br><span class="line">		<span class="comment"># 处于通信安全，这里将 control 和 rpc 通信分成两个链接。这部分可参考已经整理的 《lattice(NATS) 通信协议整理》</span></span><br><span class="line">    Supervisor.child_spec(</span><br><span class="line">      &#123;Gnat.ConnectionSupervisor, HostCore.Nats.control_connection_settings(config)&#125;,</span><br><span class="line">      <span class="symbol">id:</span> <span class="symbol">:control_connection_supervisor</span></span><br><span class="line">    ),</span><br><span class="line">    Supervisor.child_spec(</span><br><span class="line">      &#123;Gnat.ConnectionSupervisor, HostCore.Nats.rpc_connection_settings(config)&#125;,</span><br><span class="line">      <span class="symbol">id:</span> <span class="symbol">:rpc_connection_supervisor</span></span><br><span class="line">    ),</span><br><span class="line"></span><br><span class="line">		<span class="comment"># ActorRPC, Provider, Actor 相关进程相关初始化</span></span><br><span class="line">    &#123;HostCore.Actors.ActorRpcSupervisor, <span class="symbol">strategy:</span> <span class="symbol">:one_for_one</span>&#125;,</span><br><span class="line">    &#123;HostCore.Providers.ProviderSupervisor, <span class="symbol">strategy:</span> <span class="symbol">:one_for_one</span>, <span class="symbol">name:</span> ProviderRoot&#125;,</span><br><span class="line">    &#123;HostCore.Actors.ActorSupervisor,</span><br><span class="line">     <span class="symbol">strategy:</span> <span class="symbol">:one_for_one</span>,</span><br><span class="line">     <span class="symbol">allow_latest:</span> config.allow_latest,</span><br><span class="line">     <span class="symbol">allowed_insecure:</span> config.allowed_insecure&#125;,</span><br><span class="line"></span><br><span class="line">		<span class="comment"># 处理 lattice 的控制请求，这部分的主要处理方式是通过订阅相关的 topic 来进行</span></span><br><span class="line">    <span class="comment"># Handle lattice control interface requests</span></span><br><span class="line">    Supervisor.child_spec(</span><br><span class="line">      &#123;Gnat.ConsumerSupervisor,</span><br><span class="line">       %&#123;</span><br><span class="line">         <span class="symbol">connection_name:</span> <span class="symbol">:control_nats</span>,</span><br><span class="line">         <span class="symbol">module:</span> HostCore.ControlInterface.Server,</span><br><span class="line">         <span class="symbol">subscription_topics:</span> [</span><br><span class="line">           %&#123;<span class="symbol">topic:</span> <span class="string">"wasmbus.ctl.<span class="subst">#&#123;config.lattice_prefix&#125;</span>.registries.put"</span>&#125;,</span><br><span class="line">           %&#123;<span class="symbol">topic:</span> <span class="string">"wasmbus.ctl.<span class="subst">#&#123;config.lattice_prefix&#125;</span>.cmd.<span class="subst">#&#123;config.host_key&#125;</span>.*"</span>&#125;,</span><br><span class="line">           %&#123;<span class="symbol">topic:</span> <span class="string">"wasmbus.ctl.<span class="subst">#&#123;config.lattice_prefix&#125;</span>.ping.hosts"</span>&#125;,</span><br><span class="line">           %&#123;</span><br><span class="line">             <span class="symbol">topic:</span> <span class="string">"wasmbus.ctl.<span class="subst">#&#123;config.lattice_prefix&#125;</span>.linkdefs.*"</span>,</span><br><span class="line">             <span class="symbol">queue_group:</span> <span class="string">"wasmbus.ctl.<span class="subst">#&#123;config.lattice_prefix&#125;</span>"</span></span><br><span class="line">           &#125;,</span><br><span class="line">           %&#123;</span><br><span class="line">             <span class="symbol">topic:</span> <span class="string">"wasmbus.ctl.<span class="subst">#&#123;config.lattice_prefix&#125;</span>.get.*"</span>,</span><br><span class="line">             <span class="symbol">queue_group:</span> <span class="string">"wasmbus.ctl.<span class="subst">#&#123;config.lattice_prefix&#125;</span>"</span></span><br><span class="line">           &#125;,</span><br><span class="line">           %&#123;</span><br><span class="line">             <span class="symbol">topic:</span> <span class="string">"wasmbus.ctl.<span class="subst">#&#123;config.lattice_prefix&#125;</span>.get.<span class="subst">#&#123;config.host_key&#125;</span>.inv"</span></span><br><span class="line">           &#125;,</span><br><span class="line">           %&#123;<span class="symbol">topic:</span> <span class="string">"wasmbus.ctl.<span class="subst">#&#123;config.lattice_prefix&#125;</span>.auction.&gt;"</span>&#125;</span><br><span class="line">         ]</span><br><span class="line">       &#125;&#125;,</span><br><span class="line">      <span class="symbol">id:</span> <span class="symbol">:latticectl_consumer_supervisor</span></span><br><span class="line">    ),</span><br><span class="line">    Supervisor.child_spec(</span><br><span class="line">      &#123;Gnat.ConsumerSupervisor,</span><br><span class="line">       %&#123;</span><br><span class="line">         <span class="symbol">connection_name:</span> <span class="symbol">:control_nats</span>,</span><br><span class="line">         <span class="symbol">module:</span> HostCore.Jetstream.CacheLoader,</span><br><span class="line">         <span class="symbol">subscription_topics:</span> [</span><br><span class="line">           %&#123;<span class="symbol">topic:</span> <span class="string">"<span class="subst">#&#123;config.cache_deliver_inbox&#125;</span>"</span>&#125;</span><br><span class="line">         ]</span><br><span class="line">       &#125;&#125;,</span><br><span class="line">      <span class="symbol">id:</span> <span class="symbol">:cacheloader_consumer_supervisor</span></span><br><span class="line">    ),</span><br><span class="line"></span><br><span class="line">		<span class="comment"># 其他的进程处理</span></span><br><span class="line">    &#123;HostCore.Actors.CallCounter, <span class="keyword">nil</span>&#125;,</span><br><span class="line">    &#123;HostCore.Host, config&#125;,</span><br><span class="line">    &#123;HostCore.HeartbeatEmitter, config&#125;,</span><br><span class="line">    &#123;HostCore.Jetstream.Client, config&#125;</span><br><span class="line">  ] ++</span><br><span class="line">    HostCore.Policy.Manager.spec()</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>对于其中关键流程，我们进一步看下代码</p>
+<h2 id="rpc-amp-lattice-connection"><a href="#rpc-amp-lattice-connection" class="headerlink" title="rpc&amp;lattice connection"></a>rpc&amp;lattice connection</h2><p><code>host_core/lib/host_core/nats.ex</code></p>
+<p>建立了两个链接，我们重点关注 name 字段，这个元组名称是贯穿整个 OTP 项目的，分别为</p>
+<ul>
+<li><code>lattice_nats</code> 用于 RPC 通信</li>
+<li><code>control_nats</code> 用于 lattice control interface 的通信</li>
+</ul>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">HostCore.Nats</span></span> <span class="keyword">do</span></span><br><span class="line">  <span class="variable">@moduledoc</span> <span class="keyword">false</span></span><br><span class="line">  <span class="keyword">require</span> Logger</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">rpc_connection_settings</span></span>(opts) <span class="keyword">do</span></span><br><span class="line">    %&#123;</span><br><span class="line">      **<span class="symbol">name:</span> <span class="symbol">:lattice_nats</span>,**</span><br><span class="line">      <span class="symbol">backoff_period:</span> <span class="number">4_000</span>,</span><br><span class="line">      <span class="symbol">connection_settings:</span> [] <span class="comment"># 配置参数略</span></span><br><span class="line">    &#125;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">control_connection_settings</span></span>(opts) <span class="keyword">do</span></span><br><span class="line">    %&#123;</span><br><span class="line">      **<span class="symbol">name:</span> <span class="symbol">:control_nats</span>,**</span><br><span class="line">      <span class="symbol">backoff_period:</span> <span class="number">4_000</span>,</span><br><span class="line">      <span class="symbol">connection_settings:</span> [] <span class="comment"># 配置参数略</span></span><br><span class="line">    &#125;</span><br><span class="line">  <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h2 id="Actor-RPC-Supervisor"><a href="#Actor-RPC-Supervisor" class="headerlink" title="Actor RPC Supervisor"></a>Actor RPC Supervisor</h2><p>该部分用于维护 Actor RPC 通信所需的进程管理（如启动、守护等）。具体的 RPC 响应和处理由 <code>host_core/lib/host_core/actors/actor_rpc_server.ex</code> 完成。</p>
+<h3 id="init-amp-start"><a href="#init-amp-start" class="headerlink" title="init&amp;start"></a>init&amp;start</h3><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span>(state) <span class="keyword">do</span></span><br><span class="line">  Supervisor.start_link(__MODULE_<span class="number">_</span>, state, <span class="symbol">name:</span> __MODULE_<span class="number">_</span>)</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init</span></span>(_opts) <span class="keyword">do</span></span><br><span class="line">  Process.flag(<span class="symbol">:trap_exit</span>, <span class="keyword">true</span>)</span><br><span class="line">  Supervisor.init([], <span class="symbol">strategy:</span> <span class="symbol">:one_for_one</span>)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h3 id="start-amp-stop-actor-rpc-subscriber"><a href="#start-amp-stop-actor-rpc-subscriber" class="headerlink" title="start&amp;stop actor rpc subscriber"></a>start&amp;stop actor rpc subscriber</h3><p>通过 <code>start_or_reuse_consumer_supervisor</code> 来为指定的 actor 订阅对应的 topic <strong><code>wasmbus.rpc.{prefix}.{claims.public_key}</code></strong></p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start_or_reuse_consumer_supervisor</span></span>(claims) <span class="keyword">do</span></span><br><span class="line">    prefix = HostCore.Host.lattice_prefix()</span><br><span class="line">    **topic = <span class="string">"wasmbus.rpc.<span class="subst">#&#123;prefix&#125;</span>.<span class="subst">#&#123;claims.public_key&#125;</span>"</span> <span class="comment"># actor rpc 订阅的 topic**</span></span><br><span class="line"></span><br><span class="line">    cs_settings = %&#123;</span><br><span class="line">      <span class="symbol">connection_name:</span> <span class="symbol">:lattice_nats</span>,</span><br><span class="line">      **<span class="symbol">module:</span> HostCore.Actors.ActorRpcServer, <span class="comment"># topic 处理细节**</span></span><br><span class="line">      <span class="symbol">subscription_topics:</span> [</span><br><span class="line">        %&#123;<span class="symbol">topic:</span> topic, <span class="symbol">queue_group:</span> topic&#125;</span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    spec_id = via_tuple(claims.public_key)</span><br><span class="line"></span><br><span class="line">    spec =</span><br><span class="line">      Supervisor.child_spec(</span><br><span class="line">        &#123;Gnat.ConsumerSupervisor, cs_settings&#125;,</span><br><span class="line">        <span class="symbol">id:</span> spec_id</span><br><span class="line">      )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> Supervisor.start_child(</span><br><span class="line">           __MODULE_<span class="number">_</span>,</span><br><span class="line">           spec</span><br><span class="line">         ) <span class="keyword">do</span></span><br><span class="line">      &#123;<span class="symbol">:ok</span>, _v&#125; -&gt;</span><br><span class="line">        Logger.debug(<span class="string">"Starting consumer supervisor for actor RPC <span class="subst">#&#123;claims.public_key&#125;</span>"</span>)</span><br><span class="line">		<span class="comment"># 更多处理</span></span><br><span class="line">  <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h2 id="Provider-Supervisor"><a href="#Provider-Supervisor" class="headerlink" title="Provider Supervisor"></a>Provider Supervisor</h2><h3 id="init-amp-start-1"><a href="#init-amp-start-1" class="headerlink" title="init&amp;start"></a>init&amp;start</h3><p>常规的启动参数，暂无特殊处理</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">@start_provider</span> <span class="string">"start_provider"</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span>(init_arg) <span class="keyword">do</span></span><br><span class="line">  DynamicSupervisor.start_link(__MODULE_<span class="number">_</span>, init_arg, <span class="symbol">name:</span> __MODULE_<span class="number">_</span>)</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="variable">@impl</span> <span class="keyword">true</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init</span></span>(_init_arg) <span class="keyword">do</span></span><br><span class="line">  DynamicSupervisor.init(<span class="symbol">strategy:</span> <span class="symbol">:one_for_one</span>)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h3 id="start-provider"><a href="#start-provider" class="headerlink" title="start provider"></a>start provider</h3><p>使用 provider 有多种方式，包括：OCI、Bindle、File。这里的 provider supervisor 只负责进行 provider 的相关校验，开启相关的进程，具体的处理逻辑由 <strong><code>ProviderModule</code></strong> 完成<strong>。</strong></p>
+<p>该文件剩余的部分包装了其他几种 start provider 的方式，包括</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">defp</span> <span class="title">start_executable_provider</span></span>(</span><br><span class="line">       path,</span><br><span class="line">       claims,</span><br><span class="line">       link_name,</span><br><span class="line">       contract_id,</span><br><span class="line">       oci \\ <span class="string">""</span>,</span><br><span class="line">       config_json \\ <span class="string">""</span>,</span><br><span class="line">       annotations \\ %&#123;&#125;</span><br><span class="line">     ) <span class="keyword">do</span></span><br><span class="line">  <span class="keyword">with</span> %&#123;<span class="symbol">permitted:</span> <span class="keyword">true</span>&#125; &lt;-  <span class="comment"># with 条件需要全部满足后，才会执行 do</span></span><br><span class="line">         HostCore.Policy.Manager.evaluate_action( <span class="comment"># 校验</span></span><br><span class="line">           %&#123;</span><br><span class="line">             <span class="symbol">publicKey:</span> <span class="string">""</span>,</span><br><span class="line">             <span class="symbol">contractId:</span> <span class="string">""</span>,</span><br><span class="line">             <span class="symbol">linkName:</span> <span class="string">""</span>,</span><br><span class="line">             <span class="symbol">capabilities:</span> [],</span><br><span class="line">             <span class="symbol">issuer:</span> <span class="string">""</span>,</span><br><span class="line">             <span class="symbol">issuedOn:</span> <span class="string">""</span>,</span><br><span class="line">             <span class="symbol">expiresAt:</span> DateTime.utc_now() |&gt; DateTime.add(<span class="number">60</span>) |&gt; DateTime.to_unix(),</span><br><span class="line">             <span class="symbol">expired:</span> <span class="keyword">false</span></span><br><span class="line">           &#125;,</span><br><span class="line">           %&#123;</span><br><span class="line">             <span class="symbol">publicKey:</span> claims.public_key,</span><br><span class="line">             <span class="symbol">issuer:</span> claims.issuer,</span><br><span class="line">             <span class="symbol">linkName:</span> link_name,</span><br><span class="line">             <span class="symbol">contractId:</span> contract_id</span><br><span class="line">           &#125;,</span><br><span class="line">           <span class="variable">@start_provider</span></span><br><span class="line">         ),</span><br><span class="line">       <span class="number">0</span> &lt;- Registry.count_match(Registry.ProviderRegistry, &#123;claims.public_key, link_name&#125;, <span class="symbol">:_</span>) <span class="keyword">do</span></span><br><span class="line">    **DynamicSupervisor.start_child(</span><br><span class="line">      __MODULE_<span class="number">_</span>,</span><br><span class="line">      &#123;ProviderModule,**</span><br><span class="line">       &#123;<span class="symbol">:executable</span>, path, claims, link_name, contract_id, oci, config_json, annotations&#125;&#125;</span><br><span class="line">    )</span><br><span class="line">  else</span><br><span class="line">    %&#123;<span class="symbol">permitted:</span> <span class="keyword">false</span>, <span class="symbol">message:</span> message, <span class="symbol">requestId:</span> request_id&#125; -&gt;</span><br><span class="line">      Tracer.set_status(<span class="symbol">:error</span>, <span class="string">"Policy denied starting provider, request: <span class="subst">#&#123;request_id&#125;</span>"</span>)</span><br><span class="line">      &#123;<span class="symbol">:error</span>, <span class="string">"Starting provider <span class="subst">#&#123;claims.public_key&#125;</span> denied: <span class="subst">#&#123;message&#125;</span>"</span>&#125;</span><br><span class="line"></span><br><span class="line">    <span class="number">_</span> -&gt;</span><br><span class="line">      &#123;<span class="symbol">:error</span>, <span class="string">"Provider is already running on this host"</span>&#125;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>关于 provider 的 init 流程。我们在分析 start actor 和 start provider 时进一步深入。</p>
+<h2 id="actor-supervisor"><a href="#actor-supervisor" class="headerlink" title="actor supervisor"></a>actor supervisor</h2><p>经分析，actor supervisor 和 provider supervisor 的流程类似：管理 start actor 时的进程，进行必要的校验后交由 actor module 处理。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">@start_actor</span> <span class="string">"start_actor"</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span>(init_arg) <span class="keyword">do</span></span><br><span class="line">    DynamicSupervisor.start_link(__MODULE_<span class="number">_</span>, init_arg, <span class="symbol">name:</span> __MODULE_<span class="number">_</span>)</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="variable">@impl</span> <span class="keyword">true</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">init</span></span>(_opts) <span class="keyword">do</span></span><br><span class="line">    Process.flag(<span class="symbol">:trap_exit</span>, <span class="keyword">true</span>)</span><br><span class="line">    DynamicSupervisor.init(<span class="symbol">strategy:</span> <span class="symbol">:one_for_one</span>)</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="variable">@spec</span> start_actor(</span><br><span class="line">          bytes :: binary(),</span><br><span class="line">          oci :: String.t(),</span><br><span class="line">          count :: Integer.t(),</span><br><span class="line">          annotations :: Map.t()</span><br><span class="line">        ) :: &#123;<span class="symbol">:error</span>, any&#125; | &#123;<span class="symbol">:ok</span>, [pid()]&#125;</span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">start_actor</span></span>(bytes, oci \\ <span class="string">""</span>, count \\ <span class="number">1</span>, annotations \\ %&#123;&#125;) <span class="keyword">when</span> is_binary(bytes) <span class="keyword">do</span></span><br><span class="line">    Tracer.with_span <span class="string">"Starting Actor"</span> <span class="keyword">do</span></span><br><span class="line">      Tracer.set_attribute(<span class="string">"actor_ref"</span>, oci)</span><br><span class="line">      Tracer.set_attribute(<span class="string">"byte_size"</span>, byte_size(bytes))</span><br><span class="line">      Logger.debug(<span class="string">"Start actor request received"</span>, <span class="symbol">oci_ref:</span> oci)</span><br><span class="line"></span><br><span class="line">      <span class="keyword">case</span> HostCore.WasmCloud.Native.extract_claims(bytes) <span class="keyword">do</span></span><br><span class="line">        &#123;<span class="symbol">:error</span>, err&#125; -&gt;</span><br><span class="line">          Tracer.set_status(<span class="symbol">:error</span>, <span class="string">"<span class="subst">#&#123;inspect(err)&#125;</span>"</span>)</span><br><span class="line">          Logger.error(<span class="string">"Failed to extract claims from WebAssembly module"</span>, <span class="symbol">oci_ref:</span> oci)</span><br><span class="line">          &#123;<span class="symbol">:error</span>, err&#125;</span><br><span class="line"></span><br><span class="line">        &#123;<span class="symbol">:ok</span>, claims&#125; -&gt;</span><br><span class="line">          <span class="keyword">with</span> %&#123;<span class="symbol">permitted:</span> <span class="keyword">true</span>&#125; &lt;-</span><br><span class="line">                 **HostCore.Policy.Manager.evaluate_action( <span class="comment"># 校验**</span></span><br><span class="line">                   %&#123;</span><br><span class="line">                     <span class="symbol">publicKey:</span> <span class="string">""</span>,</span><br><span class="line">                     <span class="symbol">contractId:</span> <span class="string">""</span>,</span><br><span class="line">                     <span class="symbol">linkName:</span> <span class="string">""</span>,</span><br><span class="line">                     <span class="symbol">capabilities:</span> [],</span><br><span class="line">                     <span class="symbol">issuer:</span> <span class="string">""</span>,</span><br><span class="line">                     <span class="symbol">issuedOn:</span> <span class="string">""</span>,</span><br><span class="line">                     <span class="symbol">expiresAt:</span> DateTime.utc_now() |&gt; DateTime.add(<span class="number">60</span>) |&gt; DateTime.to_unix(),</span><br><span class="line">                     <span class="symbol">expired:</span> <span class="keyword">false</span></span><br><span class="line">                   &#125;,</span><br><span class="line">                   %&#123;</span><br><span class="line">                     <span class="symbol">publicKey:</span> claims.public_key,</span><br><span class="line">                     <span class="symbol">issuer:</span> claims.issuer,</span><br><span class="line">                     <span class="symbol">contractId:</span> <span class="keyword">nil</span>,</span><br><span class="line">                     <span class="symbol">linkName:</span> <span class="keyword">nil</span></span><br><span class="line">                   &#125;,</span><br><span class="line">                   <span class="variable">@start_actor</span></span><br><span class="line">                 ),</span><br><span class="line">               <span class="keyword">false</span> &lt;- other_oci_already_running?(oci, claims.public_key) <span class="keyword">do</span></span><br><span class="line">            <span class="comment"># Start `count` instances of this actor</span></span><br><span class="line">            <span class="keyword">case</span> <span class="number">1</span>..count</span><br><span class="line">                 |&gt; Enum.reduce_while([], <span class="keyword">fn</span> _count, pids -&gt;</span><br><span class="line">                   **<span class="keyword">case</span> DynamicSupervisor.start_child(</span><br><span class="line">                          __MODULE_<span class="number">_</span>,</span><br><span class="line">                          &#123;HostCore.Actors.ActorModule, &#123;claims, bytes, oci, annotations&#125;&#125; <span class="comment"># 由 actor module 进一步处理</span></span><br><span class="line">                        ) <span class="keyword">do</span>**</span><br></pre></td></tr></table></figure>
+<h2 id="Actors-CallCounter"><a href="#Actors-CallCounter" class="headerlink" title="Actors.CallCounter"></a>Actors.CallCounter</h2><p>目前看下来就是记录 actor 的调用次数？？具体的设计意义，需要进一步调研后确认。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">HostCore.Actors.CallCounter</span></span> <span class="keyword">do</span></span><br><span class="line">  <span class="keyword">use</span> GenServer</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span>(_opts) <span class="keyword">do</span></span><br><span class="line">    GenServer.start_link(__MODULE_<span class="number">_</span>, [])</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">init</span></span>(<span class="number">_</span>) <span class="keyword">do</span></span><br><span class="line">    <span class="symbol">:ets</span>.new(__MODULE_<span class="number">_</span>, [<span class="symbol">:public</span>, <span class="symbol">:set</span>, <span class="symbol">:named_table</span>])</span><br><span class="line"></span><br><span class="line">    &#123;<span class="symbol">:ok</span>, <span class="keyword">nil</span>&#125;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">read_and_increment</span></span>(pk) <span class="keyword">when</span> is_binary(pk) <span class="keyword">do</span></span><br><span class="line">    <span class="symbol">:ets</span>.update_counter(HostCore.Actors.CallCounter, pk, <span class="number">1</span>, &#123;pk, -<span class="number">1</span>&#125;)</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h2 id="HeartbeatEmitter"><a href="#HeartbeatEmitter" class="headerlink" title="HeartbeatEmitter"></a>HeartbeatEmitter</h2><h3 id="init-amp-start-2"><a href="#init-amp-start-2" class="headerlink" title="init&amp;start"></a>init&amp;start</h3><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span>(opts) <span class="keyword">do</span></span><br><span class="line">  GenServer.start_link(__MODULE_<span class="number">_</span>, opts, <span class="symbol">name:</span> __MODULE_<span class="number">_</span>)</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="variable">@impl</span> <span class="keyword">true</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init</span></span>(opts) <span class="keyword">do</span></span><br><span class="line">  <span class="symbol">:timer</span>.send_interval(<span class="variable">@thirty_seconds</span>, <span class="keyword">self</span>(), <span class="symbol">:publish_heartbeat</span>)</span><br><span class="line">  Process.send(<span class="keyword">self</span>(), <span class="symbol">:publish_heartbeat</span>, [<span class="symbol">:noconnect</span>, <span class="symbol">:nosuspend</span>])</span><br><span class="line"></span><br><span class="line">  &#123;<span class="symbol">:ok</span>, opts&#125;</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>给所有的 actors 和 providers 发布健康检查消息等待他们回复，进而确定其健康状态。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">defp</span> <span class="title">publish_heartbeat</span></span>(state) <span class="keyword">do</span></span><br><span class="line">    topic = <span class="string">"wasmbus.evt.<span class="subst">#&#123;state[<span class="symbol">:lattice_prefix</span>]&#125;</span>"</span></span><br><span class="line">    msg = generate_heartbeat(state)</span><br><span class="line">    HostCore.Nats.safe_pub(<span class="symbol">:control_nats</span>, topic, msg)</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">defp</span> <span class="title">generate_heartbeat</span></span>(state) <span class="keyword">do</span></span><br><span class="line">    actors =</span><br><span class="line">      HostCore.Actors.ActorSupervisor.all_actors_for_hb()</span><br><span class="line">      |&gt; Enum.map(<span class="keyword">fn</span> &#123;k, iid&#125; -&gt; %&#123;<span class="symbol">public_key:</span> k, <span class="symbol">instance_id:</span> iid&#125; <span class="keyword">end</span>)</span><br><span class="line"></span><br><span class="line">    providers =</span><br><span class="line">      HostCore.Providers.ProviderSupervisor.all_providers()</span><br><span class="line">      |&gt; Enum.map(<span class="keyword">fn</span> &#123;_pid, pk, link, contract, instance_id&#125; -&gt;</span><br><span class="line">        %&#123;<span class="symbol">public_key:</span> pk, <span class="symbol">link_name:</span> link, <span class="symbol">contract_id:</span> contract, <span class="symbol">instance_id:</span> instance_id&#125;</span><br><span class="line">      <span class="keyword">end</span>)</span><br><span class="line"></span><br><span class="line">%&#123;</span><br><span class="line">      <span class="symbol">actors:</span> actors,</span><br><span class="line">      <span class="symbol">providers:</span> providers,</span><br><span class="line">      <span class="symbol">labels:</span> HostCore.Host.host_labels(),</span><br><span class="line">      <span class="symbol">friendly_name:</span> HostCore.Host.friendly_name(),</span><br><span class="line">      <span class="symbol">version:</span> Application.spec(<span class="symbol">:host_core</span>, <span class="symbol">:vsn</span>) |&gt; to_string(),</span><br><span class="line">      <span class="symbol">uptime_seconds:</span> ut_seconds,</span><br><span class="line">      <span class="symbol">uptime_human:</span> ut_human</span><br><span class="line">    &#125;</span><br><span class="line">    **|&gt; CloudEvent.new(<span class="string">"host_heartbeat"</span>, state[<span class="symbol">:host_key</span>])**</span><br></pre></td></tr></table></figure>
+<h1 id="wasmcloud-host-启动流程"><a href="#wasmcloud-host-启动流程" class="headerlink" title="wasmcloud_host 启动流程"></a>wasmcloud_host 启动流程</h1><p>wasmcloud_host 是一个 OTP(<strong>Open Telecom Platform</strong>) application 应用，按照约定，我们看下项目启动的配置文件 <code>wasmcloud_host/lib/wasmcloud_host/application.ex</code></p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">WasmcloudHost.Application</span></span> <span class="keyword">do</span></span><br><span class="line">  <span class="comment"># 阅读 https://hexdocs.pm/elixir/Application.html 获取更多关于 OTP Application 的介绍</span></span><br><span class="line"></span><br><span class="line">	<span class="comment"># 使用 Application。这个是对 GenServer, 进程通信等进一步封装的框架</span></span><br><span class="line">  <span class="keyword">use</span> Application</span><br><span class="line"></span><br><span class="line">  <span class="comment"># start 为入口函数（也可以定义 init 函数进行其他的初始化操作）</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">start</span></span>(_type, _args) <span class="keyword">do</span></span><br><span class="line">    children = [</span><br><span class="line">			<span class="comment"># ====== WasmcloudHostWeb 可以暂时忽略，基本都属于 phoenix framework 的部分</span></span><br><span class="line">			<span class="comment"># Start the Telemetry supervisor</span></span><br><span class="line">      WasmcloudHostWeb.Telemetry,</span><br><span class="line">      <span class="comment"># Phoenix pubsub</span></span><br><span class="line">      &#123;Phoenix.PubSub, <span class="symbol">name:</span> WasmcloudHost.PubSub&#125;,</span><br><span class="line">      <span class="comment"># Start the Endpoint (http/https)</span></span><br><span class="line">      WasmcloudHostWeb.Endpoint,</span><br><span class="line"></span><br><span class="line">			<span class="comment"># ========= 关于 wasmcloud host 需要重点关注</span></span><br><span class="line">      <span class="comment"># Start a worker by calling: WasmcloudHost.Worker.start_link(arg)</span></span><br><span class="line">      <span class="comment"># &#123;WasmcloudHost.Worker, arg&#125;</span></span><br><span class="line">      **WasmcloudHost.Lattice.StateMonitor,**</span><br><span class="line">      <span class="comment"># Start the actor "hot watcher" Server</span></span><br><span class="line">      **WasmcloudHost.ActorWatcher**</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># See https://hexdocs.pm/elixir/Supervisor.html</span></span><br><span class="line">    <span class="comment"># for other strategies and supported options</span></span><br><span class="line">    opts = [<span class="symbol">strategy:</span> <span class="symbol">:one_for_one</span>, <span class="symbol">name:</span> WasmcloudHost.Supervisor]</span><br><span class="line">    Supervisor.start_link(children, opts)</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line">	</span><br><span class="line">  <span class="comment"># ....</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h2 id="Lattice-StateMonitor"><a href="#Lattice-StateMonitor" class="headerlink" title="Lattice.StateMonitor"></a>Lattice.StateMonitor</h2><p>正如其名，该进程主要用来处理 Lattice 的状态。同时通过订阅 <code>wasmbus.evt.{prefix}</code> 来处理 lattice 事件（订阅事件也是为了更新 state，而不是说进行实际的调度），事件的格式遵循 CloudEvent 规范。关于事件部分，可参考 </p>
+<p><a href="https://www.notion.so/Lattice-NATS-0744af1dea614d47a32275257fb72e35" target="_blank" rel="noopener">Lattice(NATS) 通信协议总结</a></p>
+<p>接下来我们分析代码，对于 Supervisor 监督的子进程，我们在分析其启动流程时，一般关注 <code>init</code> 和 <code>start_link</code>(或 <code>start</code>）函数。</p>
+<h3 id="init"><a href="#init" class="headerlink" title="init"></a>init</h3><p>init 主要进行了如下工作</p>
+<ul>
+<li>订阅 <strong><code>wasmbus.evt.#{prefix}</code></strong> topic，处理 lattice event</li>
+<li>读取缓存，初始化 process state</li>
+</ul>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">@impl</span> <span class="keyword">true</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init</span></span>(_opts) <span class="keyword">do</span></span><br><span class="line">  state = %State&#123;</span><br><span class="line">    <span class="symbol">linkdefs:</span> %&#123;&#125;,</span><br><span class="line">    <span class="symbol">refmaps:</span> %&#123;&#125;,</span><br><span class="line">    <span class="symbol">claims:</span> %&#123;&#125;,</span><br><span class="line">    <span class="symbol">hosts:</span> %&#123;</span><br><span class="line">      HostCore.Host.host_key() =&gt; %&#123;</span><br><span class="line">        <span class="symbol">actors:</span> %&#123;&#125;,</span><br><span class="line">        <span class="symbol">providers:</span> %&#123;&#125;,</span><br><span class="line">        <span class="symbol">labels:</span> HostCore.Host.host_labels()</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  prefix = HostCore.Host.lattice_prefix()</span><br><span class="line"></span><br><span class="line">	<span class="comment"># 处理 lattice events 事件，其 topic 如下</span></span><br><span class="line">  **topic = <span class="string">"wasmbus.evt.<span class="subst">#&#123;prefix&#125;</span>"</span></span><br><span class="line">  &#123;<span class="symbol">:ok</span>, _sub&#125; = Gnat.sub(<span class="symbol">:control_nats</span>, <span class="keyword">self</span>(), topic)**</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 本地的，可跨进程的 kv 存储器</span></span><br><span class="line">****  Registry.register(Registry.EventMonitorRegistry, <span class="string">"cache_loader_events"</span>, [])</span><br><span class="line"></span><br><span class="line">	<span class="comment"># 读取缓存，并设置 process state</span></span><br><span class="line">  &#123;<span class="symbol">:ok</span>, state, &#123;<span class="symbol">:continue</span>, <span class="symbol">:**retrieve_cache**</span>&#125;&#125;</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="variable">@impl</span> <span class="keyword">true</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">handle_continue</span></span>(<span class="symbol">:**retrieve_cache**</span>, state) <span class="keyword">do</span></span><br><span class="line">  cmap =</span><br><span class="line">    HostCore.Claims.Manager.get_claims()</span><br><span class="line">    |&gt; Enum.reduce(state.claims, <span class="keyword">fn</span> claims, cmap -&gt;</span><br><span class="line">      Map.put(cmap, claims.sub, claims)</span><br><span class="line">    <span class="keyword">end</span>)</span><br><span class="line"></span><br><span class="line">  ldefs =</span><br><span class="line">    HostCore.Linkdefs.Manager.get_link_definitions()</span><br><span class="line">    |&gt; Enum.reduce(state.linkdefs, <span class="keyword">fn</span> ld, linkdefs_map -&gt;</span><br><span class="line">      key = &#123;ld.actor_id, ld.contract_id, ld.link_name&#125;</span><br><span class="line">      map = %&#123;<span class="symbol">values:</span> ld.values, <span class="symbol">provider_key:</span> ld.provider_id&#125;</span><br><span class="line">      Map.put(linkdefs_map, key, map)</span><br><span class="line">    <span class="keyword">end</span>)</span><br><span class="line"></span><br><span class="line">  PubSub.broadcast(WasmcloudHost.PubSub, <span class="string">"lattice:state"</span>, &#123;<span class="symbol">:claims</span>, cmap&#125;)</span><br><span class="line">  PubSub.broadcast(WasmcloudHost.PubSub, <span class="string">"lattice:state"</span>, &#123;<span class="symbol">:linkdefs</span>, ldefs&#125;)</span><br><span class="line"></span><br><span class="line">  **new_state =</span><br><span class="line">    state</span><br><span class="line">    |&gt; Map.put(<span class="symbol">:claims</span>, cmap)</span><br><span class="line">    |&gt; Map.put(<span class="symbol">:linkdefs</span>, ldefs)**</span><br><span class="line"></span><br><span class="line">	<span class="comment"># 设置进程的新状态</span></span><br><span class="line">  **&#123;<span class="symbol">:noreply</span>, new_state&#125;**</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h3 id="start-link"><a href="#start-link" class="headerlink" title="start_link"></a>start_link</h3><p>这部分没啥好说的，就是以 link 的方式启动进程（或者理解为守护的方式启动）</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span>(opts) <span class="keyword">do</span></span><br><span class="line">  GenServer.start_link(__MODULE_<span class="number">_</span>, opts, <span class="symbol">name:</span> <span class="symbol">:state_monitor</span>)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h3 id="事件处理"><a href="#事件处理" class="headerlink" title="事件处理"></a>事件处理</h3><p>这部分主要关注该模块定义的 process_event。通过参数的 type 来确定具体的处理逻辑（这个用到 Elixir 的 Match 机制，会自动根据 type 来执行对应的函数）。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">defp</span> <span class="title">handle_event</span></span>(state, body) <span class="keyword">do</span></span><br><span class="line">    evt =</span><br><span class="line">      body</span><br><span class="line">      |&gt; Cloudevents.from_json!()</span><br><span class="line"></span><br><span class="line">    **process_event(state, evt)**</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">defp</span> <span class="title">process_event</span></span>(</span><br><span class="line">         state,</span><br><span class="line">         %Cloudevents.Format.V_1_<span class="number">0</span>.Event&#123;</span><br><span class="line">           <span class="symbol">data:</span> %&#123;</span><br><span class="line">             <span class="string">"public_key"</span> =&gt; pk</span><br><span class="line">           &#125;,</span><br><span class="line">           <span class="symbol">source:</span> source_host,</span><br><span class="line">           <span class="symbol">datacontenttype:</span> <span class="string">"application/json"</span>,</span><br><span class="line">           **<span class="symbol">type:</span> <span class="string">"com.wasmcloud.lattice.actor_started"</span>**</span><br><span class="line">         &#125;</span><br><span class="line">       ) <span class="keyword">do</span></span><br><span class="line">    hosts = add_actor(pk, source_host, state.hosts) <span class="comment"># 这里的 actor 只是处理 state，并没有实际的扩缩容的动作</span></span><br><span class="line">    PubSub.broadcast(WasmcloudHost.PubSub, <span class="string">"lattice:state"</span>, &#123;<span class="symbol">:hosts</span>, hosts&#125;)</span><br><span class="line">    %State&#123;state | <span class="symbol">hosts:</span> hosts&#125;</span><br><span class="line">  <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>处理的 <code>lattice:state</code> 最后会被 page_live 订阅，进而改变页面的展示。可查阅 <code>wasmcloud_host/lib/wasmcloud_host_web/live/page_live.ex</code></p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">defmodule</span> <span class="title">WasmcloudHostWeb.PageLive</span></span> <span class="keyword">do</span></span><br><span class="line">  <span class="keyword">use</span> WasmcloudHostWeb, <span class="symbol">:**live_view</span> <span class="comment"># 注意这里**</span></span><br><span class="line">  <span class="keyword">require</span> Logger</span><br><span class="line"></span><br><span class="line">  <span class="variable">@impl</span> <span class="keyword">true</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">mount</span></span>(_params, _session, socket) <span class="keyword">do</span></span><br><span class="line">    **WasmcloudHostWeb.Endpoint.subscribe(<span class="string">"lattice:state"</span>) <span class="comment"># 注意这里**</span></span><br><span class="line">    WasmcloudHostWeb.Endpoint.subscribe(<span class="string">"frontend"</span>)</span><br><span class="line"></span><br><span class="line">    &#123;<span class="symbol">:ok</span>,</span><br><span class="line">     socket</span><br><span class="line">     |&gt; assign(</span><br><span class="line">       <span class="symbol">hosts:</span> WasmcloudHost.Lattice.StateMonitor.get_hosts(),</span><br><span class="line">       <span class="symbol">linkdefs:</span> WasmcloudHost.Lattice.StateMonitor.get_linkdefs(),</span><br><span class="line">       <span class="symbol">ocirefs:</span> WasmcloudHost.Lattice.StateMonitor.get_ocirefs(),</span><br><span class="line">       <span class="symbol">claims:</span> WasmcloudHost.Lattice.StateMonitor.get_claims(),</span><br><span class="line">       <span class="symbol">open_modal:</span> <span class="keyword">nil</span>,</span><br><span class="line">       <span class="symbol">selected_host:</span> HostCore.Host.host_key()</span><br><span class="line">     )&#125;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">handle_info</span></span>(&#123;<span class="symbol">:hosts</span>, hosts&#125;, socket) <span class="keyword">do</span></span><br><span class="line">    &#123;<span class="symbol">:noreply</span>, assign(socket, <span class="symbol">hosts:</span> hosts)&#125;</span><br><span class="line">  <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h2 id="ActorWatcher"><a href="#ActorWatcher" class="headerlink" title="ActorWatcher"></a>ActorWatcher</h2><p>这里主要是为了支持 actor 的 hot reload 功能。这样在开发 actor 时，指定路径的 wasm 发生改变时，就能理解更新 actor。（存疑：在未开启 hot reload 时，该文件的作用需要进一步调研）</p>
+<h3 id="init-amp-start-link"><a href="#init-amp-start-link" class="headerlink" title="init &amp; start_link"></a>init &amp; start_link</h3><p>这部分没有特别的操作，就是正常启动，状态是空的 map。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init</span></span>(_args) <span class="keyword">do</span></span><br><span class="line">  &#123;<span class="symbol">:ok</span>, %&#123;&#125;&#125;</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start_link</span></span>(args) <span class="keyword">do</span></span><br><span class="line">  GenServer.start_link(__MODULE_<span class="number">_</span>, args, <span class="symbol">name:</span> <span class="symbol">:actor_watcher</span>)</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h3 id="start-actor"><a href="#start-actor" class="headerlink" title="start actor"></a>start actor</h3><p>当检测到 actor 的 wasm 发生变更时，调用 start actor</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start_actor</span></span>(bytes, replicas) <span class="keyword">do</span></span><br><span class="line">    <span class="keyword">case</span> HostCore.Actors.ActorSupervisor.start_actor(bytes, <span class="string">""</span>, replicas) <span class="keyword">do</span></span><br><span class="line">      &#123;<span class="symbol">:ok</span>, _pids&#125; -&gt; <span class="symbol">:ok</span></span><br><span class="line">      &#123;<span class="symbol">:error</span>, e&#125; -&gt; &#123;<span class="symbol">:error</span>, e&#125;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2022/09/29/wasmcloud-otp-start/" title="wasmcloud OTP 启动流程分析" target="_blank" rel="external">https://rovast.github.io/2022/09/29/wasmcloud-otp-start/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">但行好事</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2022/09/29/wasmcloud-lattice-protocol/" title="wasmcloud Lattice(NATS) 通信协议总结"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'd09c04a01484da542af7',
+    clientSecret: '378cbbec6959681baa751421c508b75e3755b27c',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+
+<!-- Cloudflare Web Analytics -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "772d8ac6c6e34909aabd01d173940c88"}"></script>
+<!-- End Cloudflare Web Analytics -->
+
+</body>
+</html>

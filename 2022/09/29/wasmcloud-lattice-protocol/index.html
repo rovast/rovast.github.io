@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>wasmcloud Lattice(NATS) 通信协议总结 | rovast</title>
+  <meta name="description" content="背景借助 Lattice，我们可以很方便的部署一个 mesh 网络，并且这个网络具备自发现、自愈的能力。本文主要根据官方文档，罗列了 wasmcloud 系统中各模块用于交互的通信协议，通过跟踪这些对应的消息，更便于我们梳理 wasmcloud 的工作机制。 监听 nats-server 消息使用 verbose 模式启动 nats-server，可以很方便监听其消息交互情况： 1nats-ser">
+<meta name="keywords" content="Web PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="wasmcloud Lattice(NATS) 通信协议总结">
+<meta property="og:url" content="https://rovast.github.io/2022/09/29/wasmcloud-lattice-protocol/index.html">
+<meta property="og:site_name" content="rovast">
+<meta property="og:description" content="背景借助 Lattice，我们可以很方便的部署一个 mesh 网络，并且这个网络具备自发现、自愈的能力。本文主要根据官方文档，罗列了 wasmcloud 系统中各模块用于交互的通信协议，通过跟踪这些对应的消息，更便于我们梳理 wasmcloud 的工作机制。 监听 nats-server 消息使用 verbose 模式启动 nats-server，可以很方便监听其消息交互情况： 1nats-ser">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2022-09-29T11:11:20.174Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="wasmcloud Lattice(NATS) 通信协议总结">
+<meta name="twitter:description" content="背景借助 Lattice，我们可以很方便的部署一个 mesh 网络，并且这个网络具备自发现、自愈的能力。本文主要根据官方文档，罗列了 wasmcloud 系统中各模块用于交互的通信协议，通过跟踪这些对应的消息，更便于我们梳理 wasmcloud 的工作机制。 监听 nats-server 消息使用 verbose 模式启动 nats-server，可以很方便监听其消息交互情况： 1nats-ser">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://rovast.github.io/2022/09/29/wasmcloud-lattice-protocol/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="rovast" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.jpg" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/rovast" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">rovast</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">但行好事</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Nanjing, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>Welcome to rovast's blog</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/APM/">APM</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/WASM/">WASM</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/wiki/">wiki</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/云原生/">云原生</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础/">基础</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/最佳实践/">最佳实践</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂项/">杂项</a><span class="category-list-count">23</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/翻译/">翻译</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随想/">随想</a><span class="category-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/APM/">APM</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/">MySQL</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/">PHP</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RFC/">RFC</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/antv/">antv</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gnome/">gnome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iframe/">iframe</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kill/">kill</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/makefile/">makefile</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/">nginx</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/node/">node</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/soar/">soar</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tinker/">tinker</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vue/">vue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wiki/">wiki</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/命令行/">命令行</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/截图/">截图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构与算法/">数据结构与算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/杂项/">杂项</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/权限控制/">权限控制</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/移动端/">移动端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/管道/">管道</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/转载/">转载</a><span class="tag-list-count">6</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/APM/" style="font-size: 13.5px;">APM</a> <a href="/tags/Linux/" style="font-size: 14px;">Linux</a> <a href="/tags/MySQL/" style="font-size: 13.25px;">MySQL</a> <a href="/tags/PHP/" style="font-size: 13.75px;">PHP</a> <a href="/tags/RFC/" style="font-size: 13px;">RFC</a> <a href="/tags/antv/" style="font-size: 13px;">antv</a> <a href="/tags/docker/" style="font-size: 13.25px;">docker</a> <a href="/tags/git/" style="font-size: 13px;">git</a> <a href="/tags/gnome/" style="font-size: 13px;">gnome</a> <a href="/tags/iframe/" style="font-size: 13px;">iframe</a> <a href="/tags/kill/" style="font-size: 13px;">kill</a> <a href="/tags/laravel/" style="font-size: 13.25px;">laravel</a> <a href="/tags/linux/" style="font-size: 13px;">linux</a> <a href="/tags/mac/" style="font-size: 13.5px;">mac</a> <a href="/tags/makefile/" style="font-size: 13.25px;">makefile</a> <a href="/tags/nginx/" style="font-size: 13px;">nginx</a> <a href="/tags/node/" style="font-size: 13px;">node</a> <a href="/tags/php/" style="font-size: 13.25px;">php</a> <a href="/tags/soar/" style="font-size: 13.25px;">soar</a> <a href="/tags/tinker/" style="font-size: 13px;">tinker</a> <a href="/tags/ubuntu/" style="font-size: 13.25px;">ubuntu</a> <a href="/tags/vue/" style="font-size: 13px;">vue</a> <a href="/tags/wiki/" style="font-size: 13.25px;">wiki</a> <a href="/tags/命令行/" style="font-size: 13px;">命令行</a> <a href="/tags/截图/" style="font-size: 13px;">截图</a> <a href="/tags/数据结构与算法/" style="font-size: 13px;">数据结构与算法</a> <a href="/tags/杂项/" style="font-size: 13.25px;">杂项</a> <a href="/tags/权限控制/" style="font-size: 13px;">权限控制</a> <a href="/tags/移动端/" style="font-size: 13px;">移动端</a> <a href="/tags/管道/" style="font-size: 13px;">管道</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/转载/" style="font-size: 14px;">转载</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/29/wasmcloud-otp-start/" class="title">wasmcloud OTP 启动流程分析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-29T10:55:11.000Z" itemprop="datePublished">2022-09-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/29/wasmcloud-lattice-protocol/" class="title">wasmcloud Lattice(NATS) 通信协议总结</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-29T10:53:09.000Z" itemprop="datePublished">2022-09-29</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/28/wasmcloud-app-interface/" class="title">wasmcloud app interface 源码阅读</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-28T05:57:16.000Z" itemprop="datePublished">2022-09-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/28/wasmcloud-app-provider-read/" class="title">wasmcloud app provider 源码阅读</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-28T02:33:49.000Z" itemprop="datePublished">2022-09-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/WASM/">WASM</a>
+              </p>
+              <p class="item-title">
+                <a href="/2022/09/23/wasmcloud-app-development/" class="title">wasmcloud app development</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-09-23T05:57:31.000Z" itemprop="datePublished">2022-09-23</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#监听-nats-server-消息"><span class="toc-number">1.0.1.</span> <span class="toc-text">监听 nats-server 消息</span></a></li></ol></li></ol><li class="toc-item toc-level-1"><a class="toc-link" href="#Lattice-Protocols"><span class="toc-number">2.</span> <span class="toc-text">Lattice Protocols</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Topic-一览"><span class="toc-number">2.1.</span> <span class="toc-text">Topic 一览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RPC"><span class="toc-number">2.2.</span> <span class="toc-text">RPC</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Invocation-结构体"><span class="toc-number">2.2.1.</span> <span class="toc-text">Invocation 结构体</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Actor-subscriptions"><span class="toc-number">2.2.2.</span> <span class="toc-text">Actor subscriptions</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Capability-provider-subscriptions"><span class="toc-number">2.2.3.</span> <span class="toc-text">Capability provider subscriptions</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Additional-topics"><span class="toc-number">2.2.4.</span> <span class="toc-text">Additional topics</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Control-interface"><span class="toc-number">2.3.</span> <span class="toc-text">Control interface</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#NATS-control-interface"><span class="toc-number">2.3.1.</span> <span class="toc-text">NATS control interface</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lattice-Events"><span class="toc-number">2.3.2.</span> <span class="toc-text">Lattice Events</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#附录"><span class="toc-number">3.</span> <span class="toc-text">附录</span></a></li>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-wasmcloud-lattice-protocol" class="article article-type-post" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      wasmcloud Lattice(NATS) 通信协议总结
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2022/09/29/wasmcloud-lattice-protocol/" class="article-date">
+	  <time datetime="2022-09-29T10:53:09.000Z" itemprop="datePublished">2022-09-29</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/WASM/">WASM</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/09/29/wasmcloud-lattice-protocol/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 1.3k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 5(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>借助 Lattice，我们可以很方便的部署一个 mesh 网络，并且这个网络具备自发现、自愈的能力。本文主要根据官方文档，罗列了 wasmcloud 系统中各模块用于交互的通信协议，通过跟踪这些对应的消息，更便于我们梳理 wasmcloud 的工作机制。</p>
+<h3 id="监听-nats-server-消息"><a href="#监听-nats-server-消息" class="headerlink" title="监听 nats-server 消息"></a>监听 nats-server 消息</h3><p>使用 verbose 模式启动 nats-server，可以很方便监听其消息交互情况：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nats-server -js -p 4222 -m 8222 -V -l nats.log</span><br></pre></td></tr></table></figure>
+<p><em>更多用法请参阅 <a href="https://docs.nats.io/running-a-nats-service/configuration/logging" target="_blank" rel="noopener">https://docs.nats.io/running-a-nats-service/configuration/logging</a></em></p>
+<h1 id="Lattice-Protocols"><a href="#Lattice-Protocols" class="headerlink" title="Lattice Protocols"></a>Lattice Protocols</h1><h2 id="Topic-一览"><a href="#Topic-一览" class="headerlink" title="Topic 一览"></a>Topic 一览</h2><table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>wasmbus.rpc.{namespace}.{actor public key}</td>
+<td>actor 订阅的 topic，用于 RPC 通信</td>
+</tr>
+<tr>
+<td>wasmbus.rpc.{namespace}.{provider public key}.{provider link name}</td>
+<td>provider 订阅的 topic，用于 RPC 通信</td>
+</tr>
+<tr>
+<td>wasmbus.rpc.{prefix}.{public_key}.{link_name}.linkdefs.put</td>
+<td>provider 订阅 put linkdef</td>
+</tr>
+<tr>
+<td>wasmbus.rpc.{prefix}.{public_key}.{link_name}.linkdefs.del</td>
+<td>provider 订阅 del linkedf</td>
+</tr>
+<tr>
+<td>wasmbus.rpc.{prefix}.{public_key}.{link_name}.health</td>
+<td>provider 订阅 health</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.auction.provider</td>
+<td>调度 provider</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.auction.actor</td>
+<td>调度 actor</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.cmd.{host}.la</td>
+<td>Launch Actor</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.cmd.{host}.sa</td>
+<td>Stop Actor</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.cmd.{host}.scale</td>
+<td>扩缩容 actor 的实例个数</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.cmd.{host}.lp</td>
+<td>Launch Provider</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.cmd.{host}.sp</td>
+<td>Stop Provider</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.cmd.{host}.upd</td>
+<td>热更新 Actor</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.get.links</td>
+<td>Get links</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.get.claims</td>
+<td>Get claims</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.get.{host}.inv</td>
+<td>获取指定 Host 下的 inventory</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.linkdefs.put</td>
+<td>put link def</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.linkdefs.del</td>
+<td>del link def</td>
+</tr>
+<tr>
+<td>wasmbus.ctl.{namespace}.ping.hosts</td>
+<td>ping pong 检查</td>
+</tr>
+<tr>
+<td>wasmbus.evt.{prefix}</td>
+<td>Lattice events，满足 cloud event 规范</td>
+</tr>
+</tbody>
+</table>
+<h2 id="RPC"><a href="#RPC" class="headerlink" title="RPC"></a>RPC</h2><p>Lattice 是建立在 NATS message broker 之上的 RPC 总线层，支持以下的交互模型</p>
+<ul>
+<li>Actor-to-Actor</li>
+<li>Actor-to-Provider</li>
+<li>Provider-to-Actor</li>
+</ul>
+<p>处于安全原因，RPC 的 NATS 链接和接下来要介绍的 control interface 链接是分开的。并且所有的请求和回复，使用 message pack 来序列化。</p>
+<p><a href="https://msgpack.org/index.html" target="_blank" rel="noopener"><em>https://msgpack.org/index.html</em></a></p>
+<h3 id="Invocation-结构体"><a href="#Invocation-结构体" class="headerlink" title="Invocation 结构体"></a>Invocation 结构体</h3><p>所有的 RPC 通信，发送 <code>Invocation</code>，接收 <code>InvocationResponse</code>。及时是不关注返回结果的请求，也会返回 InvocationResponse 用于标记请求已处理。这些结构定义可以被不用的语言来实现，这里列出两个参考库：</p>
+<ul>
+<li>Smithy 结构体定义。<a href="https://github.com/wasmCloud/interfaces/blob/main/core/wasmcloud-core.smithy#L143" target="_blank" rel="noopener">https://github.com/wasmCloud/interfaces/blob/main/core/wasmcloud-core.smithy#L143</a></li>
+<li>wasmhost 的 rust 实现。<a href="https://github.com/wasmCloud/wasmcloud-otp/blob/main/host_core/native/hostcore_wasmcloud_native/src/inv.rs#L23" target="_blank" rel="noopener">https://github.com/wasmCloud/wasmcloud-otp/blob/main/host_core/native/hostcore_wasmcloud_native/src/inv.rs#L23</a></li>
+</ul>
+<p>下面列出 <code>Invocation</code> 各字段含义</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>String(GUID)</td>
+<td>Invocation ID。返回体里面也会携带该 ID 用于校验。</td>
+</tr>
+<tr>
+<td>origin</td>
+<td>WasmCloudEntity</td>
+<td>发送方</td>
+</tr>
+<tr>
+<td>target</td>
+<td>WasmCloudEntity</td>
+<td>接收方</td>
+</tr>
+<tr>
+<td>operation</td>
+<td>String</td>
+<td>此次操作的字符串表示，比如：HttpServer.HandleRequest</td>
+</tr>
+<tr>
+<td>msg</td>
+<td>Bytes</td>
+<td>消息的原生字节表示</td>
+</tr>
+<tr>
+<td>encoded_claims</td>
+<td>String</td>
+<td>包含 claims 信息的 jwt 表示。claims 还包含了该 invocation 的 hash</td>
+</tr>
+<tr>
+<td>host_id</td>
+<td>String</td>
+<td>发起 invocation 的 host 的 public key</td>
+</tr>
+</tbody>
+</table>
+<p>其中 <code>WasmCloudEntity</code> 定义如下</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>public_key</td>
+<td>String</td>
+<td>Entity 的 public key。 M 开头表示 actors， V 开头表示 providers。</td>
+</tr>
+<tr>
+<td>contract_id</td>
+<td>String</td>
+<td>entity 的 contract ID。如果是 actor 则留空</td>
+</tr>
+<tr>
+<td>link_name</td>
+<td>String</td>
+<td>Entity 的 link name，如果是 actor 则留空</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Actor-subscriptions"><a href="#Actor-subscriptions" class="headerlink" title="Actor subscriptions"></a>Actor subscriptions</h3><p>Hosts 中所有的 Actors（已连接到 lattice 的）使用 queue subscribe。通过这种方式 NATS 会随机选择一个订阅者来消费。借助该模式，wasmcloud 实现了 actor 的水平扩容。</p>
+<p>所有的 actor 会订阅下面的 topic：</p>
+<p><code>**wasmbus.rpc.{namespace}.{actor public key}**</code></p>
+<p>比如，在默认的 namespace 前缀下，wasmcloud 官方的 echo 示例，会订阅下面的 topic: <code>wasmbus.rpc.default.MBCFOPM6JW2APJLXJD3Z5O4CN7CPYJ2B4FTKLJUR5YR5MITIU7HD3WD5</code></p>
+<h3 id="Capability-provider-subscriptions"><a href="#Capability-provider-subscriptions" class="headerlink" title="Capability provider subscriptions"></a>Capability provider subscriptions</h3><p>Provider 采取和 actor 相同的 queue subscribe 方式，来处理从 link actor 发起的 invocations。其 topic 如下：</p>
+<p><code>**wasmbus.rpc.{namespace}.{provider public key}.{provider link name}**</code></p>
+<p>比如我们使用了 backend linkname 和 prod 的 namespace，其订阅的 topic 为 <code>wasmbus.rpc.prod.VADNMSIML2XGO2X4TPIONTIC55R2UUQGPPDZPAVSC2QD7E76CR77SPW7.backend</code></p>
+<h3 id="Additional-topics"><a href="#Additional-topics" class="headerlink" title="Additional topics"></a>Additional topics</h3><p>Provider 还需要处理 link 的添加和删除。订阅了下面的事件</p>
+<ul>
+<li><code>wasmbus.rpc.{prefix}.{public_key}.{link_name}.linkdefs.put</code></li>
+<li><code>wasmbus.rpc.{prefix}.{public_key}.{link_name}.linkdefs.del</code></li>
+</ul>
+<p>最后，provider 还需要订阅健康检查的 topic。如果 provider 没有正确回复这个 topic，会被标记为不健康：</p>
+<ul>
+<li><code>wasmbus.rpc.{prefix}.{public_key}.{link_name}.health</code></li>
+</ul>
+<h2 id="Control-interface"><a href="#Control-interface" class="headerlink" title="Control interface"></a>Control interface</h2><p>Lattice control interface 是一个 message broker protocol。通过和 lattice control interface 进行交互，clients 可以处理或查询下面的信息：</p>
+<ul>
+<li>Actor 的启动和停止(start and stop actors)</li>
+<li>Provider 的启动和停止(start and stop providers)</li>
+<li>声明 link 定义(declare link definitions)</li>
+<li>监听 lattice 事件(monitor lattice events)</li>
+<li>调度(holding auctions to determine scheduling compatibility)</li>
+</ul>
+<h3 id="NATS-control-interface"><a href="#NATS-control-interface" class="headerlink" title="NATS control interface"></a>NATS control interface</h3><p>所有的 control interface 消息，发布在 <code>wasmbus.ctl.{namespace}</code> 为前缀的 NATS Topic 上。其中，namespace 用来却分不同的 lattice。</p>
+<blockquote>
+<p>注意：所有的前缀不能包含 <code>/</code> 或 <code>.</code> 或 <code>&gt;</code>，这些对 NATS message broker 而言有特殊含义。<br><em>具体的控制结构体，可参考 smithy IDL 定义 <a href="https://wasmcloud.github.io/interfaces/html/org_wasmcloud_interface_control.html" target="_blank" rel="noopener">https://wasmcloud.github.io/interfaces/html/org_wasmcloud_interface_control.html</a></em></p>
+</blockquote>
+<p><em>注：</em></p>
+<ul>
+<li><code>*Sub</code> 只订阅，不发布。(Subscribe only）*</li>
+<li><code>*Req</code> 表示包含回复的 Request。注意这里虽然有回复，但是不代表操作已经完整结束。比如在 Start actor 时，会收到验证的 host 发起的 ack，但是不代表操作已完成。*</li>
+<li><code>*Coll</code> 收集（或分散收集）。每隔一段时间定期收集结果*</li>
+</ul>
+<h3 id="Lattice-Events"><a href="#Lattice-Events" class="headerlink" title="Lattice Events"></a>Lattice Events</h3><p>Events 被发布到 <code>wasmbus.evt.{prefix}</code> 前缀的 stream 上，事件的标准采用 cloudEvent 规范。</p>
+<p><a href="https://github.com/cloudevents/spec/blob/v1.0.1/spec.md" target="_blank" rel="noopener"><em>https://github.com/cloudevents/spec/blob/v1.0.1/spec.md</em></a></p>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>作用</th>
+<th>网址</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>msgpack</td>
+<td>RPC通信数据序列化</td>
+<td><a href="https://msgpack.org/index.html" target="_blank" rel="noopener">https://msgpack.org/index.html</a></td>
+</tr>
+<tr>
+<td>cloud event</td>
+<td>系统重出现的事件，采用的格式标准</td>
+<td><a href="https://github.com/cloudevents/spec/blob/v1.0.1/spec.md" target="_blank" rel="noopener">https://github.com/cloudevents/spec/blob/v1.0.1/spec.md</a></td>
+</tr>
+<tr>
+<td>nats log</td>
+<td>NATS 的日志使用</td>
+<td><a href="https://docs.nats.io/running-a-nats-service/configuration/logging" target="_blank" rel="noopener">https://docs.nats.io/running-a-nats-service/configuration/logging</a></td>
+</tr>
+</tbody>
+</table>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://rovast.github.io/2022/09/29/wasmcloud-lattice-protocol/" title="wasmcloud Lattice(NATS) 通信协议总结" target="_blank" rel="external">https://rovast.github.io/2022/09/29/wasmcloud-lattice-protocol/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/rovast" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/rovast" target="_blank"><span class="text-dark">rovast</span><small class="ml-1x">但行好事</small></a></h3>
+        <div>该用户很懒，没有介绍自己。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2022/09/29/wasmcloud-otp-start/" title="wasmcloud OTP 启动流程分析"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2022/09/28/wasmcloud-app-interface/" title="wasmcloud app interface 源码阅读"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/rovast" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: 'd09c04a01484da542af7',
+    clientSecret: '378cbbec6959681baa751421c508b75e3755b27c',
+    repo: 'rovast.github.io',
+    owner: 'rovast',
+    admin: ['rovast'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+
+<!-- Cloudflare Web Analytics -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "772d8ac6c6e34909aabd01d173940c88"}"></script>
+<!-- End Cloudflare Web Analytics -->
+
+</body>
+</html>
