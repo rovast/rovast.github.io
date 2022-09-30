@@ -29,7 +29,7 @@
 <meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/pic.png">
 <meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/pic1.png">
 <meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/pic2.png">
-<meta property="og:updated_time" content="2022-09-30T02:21:25.785Z">
+<meta property="og:updated_time" content="2022-09-30T02:33:17.739Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="wasmcloud app provider 源码阅读">
 <meta name="twitter:description" content="背景provider 在 wasmcloud 体系中扮演者重要的作用。它负责实现 Interface，在 actor 和 provider 建立链接关系后，可为 actor 提供具体的能力。对于同一个 Interface，可以有不同的 Provider 实现，在 link def 阶段，再去指定具体由哪个 Provider 给 actor 提供能力。 而 actor 调用具体的 Interface">
@@ -597,6 +597,17 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?711a563d18d87b95cae94df97e8521b8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
 
 
 <!-- Cloudflare Web Analytics -->
@@ -610,7 +621,7 @@ Sentry.init({
   dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
   // this assumes your build process replaces `process.env.npm_package_version` with a value
   release: "blog@v1",
-  integrations: [new Sentry.BrowserTracing()],
+//   integrations: [new Sentry.BrowserTracing()],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control

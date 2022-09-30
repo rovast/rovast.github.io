@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="phpunit 的官方文档对如何使用 phpunit 进行了详细的说明。本人在通读文档后进行了一些概要提升，同时摘录了一些示例 phpunit-demo，便于以后理解和查阅。 文档较为简洁，但是也涵盖了平时使用的基本用法，适合入门使用。 安装 phpunit项目安装1composer require --dev phpunit/phpunit 使用 ./vendor/bin/phpunit 全局安">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-30T02:21:25.765Z">
+<meta property="og:updated_time" content="2022-09-30T02:33:17.719Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="phpunit 快速入门">
 <meta name="twitter:description" content="phpunit 的官方文档对如何使用 phpunit 进行了详细的说明。本人在通读文档后进行了一些概要提升，同时摘录了一些示例 phpunit-demo，便于以后理解和查阅。 文档较为简洁，但是也涵盖了平时使用的基本用法，适合入门使用。 安装 phpunit项目安装1composer require --dev phpunit/phpunit 使用 ./vendor/bin/phpunit 全局安">
@@ -537,7 +537,7 @@
   <ul class="pager pull-left">
     
     <li class="prev">
-      <a href="/2019/01/12/jia-ban/" title="【转】侯慧 何雪松|“不加班不成活”：互联网员工为何沦为流水线上的“加班狗”|劳动节专辑②"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+      <a href="/2019/01/12/thinking-in-starbucks/" title="【转】为什么星巴克的员工都不太热情？背后这4点值得深思"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
     </li>
     
     
@@ -651,6 +651,17 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?711a563d18d87b95cae94df97e8521b8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
 
 
 <!-- Cloudflare Web Analytics -->
@@ -664,7 +675,7 @@ Sentry.init({
   dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
   // this assumes your build process replaces `process.env.npm_package_version` with a value
   release: "blog@v1",
-  integrations: [new Sentry.BrowserTracing()],
+//   integrations: [new Sentry.BrowserTracing()],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control

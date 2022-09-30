@@ -27,7 +27,7 @@
 <meta property="og:description" content="原文 https://www.ruanyifeng.com/blog/2019/02/npx.html  npm 从5.2版开始，增加了 npx 命令。它有很多用处，本文介绍该命令的主要使用场景。  Node 自带 npm 模块，所以可以直接使用 npx 命令。万一不能用，就要手动安装一下。 1$ npm install -g npx 调用项目安装的模块npx 想要解决的主要问题，就是调用项目内">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://rovast.github.io/assets/bg2019020901.jpg">
-<meta property="og:updated_time" content="2022-09-30T02:21:25.781Z">
+<meta property="og:updated_time" content="2022-09-30T02:33:17.735Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="【转】npx 使用教程">
 <meta name="twitter:description" content="原文 https://www.ruanyifeng.com/blog/2019/02/npx.html  npm 从5.2版开始，增加了 npx 命令。它有很多用处，本文介绍该命令的主要使用场景。  Node 自带 npm 模块，所以可以直接使用 npx 命令。万一不能用，就要手动安装一下。 1$ npm install -g npx 调用项目安装的模块npx 想要解决的主要问题，就是调用项目内">
@@ -619,6 +619,17 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?711a563d18d87b95cae94df97e8521b8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
 
 
 <!-- Cloudflare Web Analytics -->
@@ -632,7 +643,7 @@ Sentry.init({
   dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
   // this assumes your build process replaces `process.env.npm_package_version` with a value
   release: "blog@v1",
-  integrations: [new Sentry.BrowserTracing()],
+//   integrations: [new Sentry.BrowserTracing()],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control

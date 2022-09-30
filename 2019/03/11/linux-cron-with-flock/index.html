@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="场景好多系统中会用到邮件系统，我们假设有一个 PHP 脚本用来发送邮件。使用 Linux cron 每分钟执行一次  我们暂时不引入队列系统，其实使用队列处理此方式更优。  我们得到下面的基本配置 1* * * * * php /home/app/email.php 问题分析和解决如果这个邮件服务出现异常，进程僵死怎么办？假设由于未知因素， email.php 脚本一直执行，没有退出。极端的情况，">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-30T02:21:25.749Z">
+<meta property="og:updated_time" content="2022-09-30T02:33:17.707Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux cron 避坑指南">
 <meta name="twitter:description" content="场景好多系统中会用到邮件系统，我们假设有一个 PHP 脚本用来发送邮件。使用 Linux cron 每分钟执行一次  我们暂时不引入队列系统，其实使用队列处理此方式更优。  我们得到下面的基本配置 1* * * * * php /home/app/email.php 问题分析和解决如果这个邮件服务出现异常，进程僵死怎么办？假设由于未知因素， email.php 脚本一直执行，没有退出。极端的情况，">
@@ -599,6 +599,17 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?711a563d18d87b95cae94df97e8521b8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
 
 
 <!-- Cloudflare Web Analytics -->
@@ -612,7 +623,7 @@ Sentry.init({
   dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
   // this assumes your build process replaces `process.env.npm_package_version` with a value
   release: "blog@v1",
-  integrations: [new Sentry.BrowserTracing()],
+//   integrations: [new Sentry.BrowserTracing()],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control

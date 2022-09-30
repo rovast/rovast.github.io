@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="前言随着网络应用的不断发展，衍生出了「前后端分离」的基本架构。前后端分离的优势这里不作深入讨论。 前后端完全分离后，多端（浏览器、APP等）和服务端的交互可以通过 API 请求的方式进行，本文主要讨论restful api 实践中的一环：数据返回格式的定义。 关于 rest 的一些设计原则，可以参考阮一峰总结的两篇文章：  《RESTful API 设计指南》 RESTful API 最佳实践">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-30T02:21:25.741Z">
+<meta property="og:updated_time" content="2022-09-30T02:33:17.695Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="restful API 的 code 码定义">
 <meta name="twitter:description" content="前言随着网络应用的不断发展，衍生出了「前后端分离」的基本架构。前后端分离的优势这里不作深入讨论。 前后端完全分离后，多端（浏览器、APP等）和服务端的交互可以通过 API 请求的方式进行，本文主要讨论restful api 实践中的一环：数据返回格式的定义。 关于 rest 的一些设计原则，可以参考阮一峰总结的两篇文章：  《RESTful API 设计指南》 RESTful API 最佳实践">
@@ -633,6 +633,17 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?711a563d18d87b95cae94df97e8521b8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
 
 
 <!-- Cloudflare Web Analytics -->
@@ -646,7 +657,7 @@ Sentry.init({
   dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
   // this assumes your build process replaces `process.env.npm_package_version` with a value
   release: "blog@v1",
-  integrations: [new Sentry.BrowserTracing()],
+//   integrations: [new Sentry.BrowserTracing()],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control

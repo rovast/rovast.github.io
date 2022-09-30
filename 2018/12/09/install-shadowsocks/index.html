@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="本文转载自 《科学上网之 Shadowsocks 安装及优化加速》 原文地址： https://yq.aliyun.com/articles/137280?commentId=11711  Shadowsocks使用自行设计的协议进行加密通信。加密算法有AES、Blowfish、IDEA、RC4等，除创建TCP连接外无需握手，每次请求只转发一个连接，因此使用起来网速较快，在移动设备上也比较省电。所">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-30T02:21:25.749Z">
+<meta property="og:updated_time" content="2022-09-30T02:33:17.707Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="科学上网之 Shadowsocks 安装及优化加速">
 <meta name="twitter:description" content="本文转载自 《科学上网之 Shadowsocks 安装及优化加速》 原文地址： https://yq.aliyun.com/articles/137280?commentId=11711  Shadowsocks使用自行设计的协议进行加密通信。加密算法有AES、Blowfish、IDEA、RC4等，除创建TCP连接外无需握手，每次请求只转发一个连接，因此使用起来网速较快，在移动设备上也比较省电。所">
@@ -626,6 +626,17 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?711a563d18d87b95cae94df97e8521b8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
 
 
 <!-- Cloudflare Web Analytics -->
@@ -639,7 +650,7 @@ Sentry.init({
   dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
   // this assumes your build process replaces `process.env.npm_package_version` with a value
   release: "blog@v1",
-  integrations: [new Sentry.BrowserTracing()],
+//   integrations: [new Sentry.BrowserTracing()],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control

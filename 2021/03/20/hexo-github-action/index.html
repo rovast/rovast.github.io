@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://rovast.github.io/assets/image-20210320224530765.png">
 <meta property="og:image" content="https://rovast.github.io/assets/image-20210320224658673.png">
 <meta property="og:image" content="https://rovast.github.io/assets/image-20210320224737049.png">
-<meta property="og:updated_time" content="2022-09-30T02:21:25.749Z">
+<meta property="og:updated_time" content="2022-09-30T02:33:17.703Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 github action 自动发布 hexo blog">
 <meta name="twitter:description" content="背景用 Hexo 来生成 Github Pages 有一段时间了，之前一直是在本地写完 Blog 然后执行下述指令来发博客script12rm -rf publicnpx hexo deploy 今天想想，不是有 github acion 嘛，能不能使用自动化 CI 流程来发布，当我的 Hexo Repo 发布时，自动进行 deply 动作，进而部署到 rovast.github.io。当然是可以">
@@ -615,6 +615,17 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?711a563d18d87b95cae94df97e8521b8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
 
 
 <!-- Cloudflare Web Analytics -->
@@ -628,7 +639,7 @@ Sentry.init({
   dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
   // this assumes your build process replaces `process.env.npm_package_version` with a value
   release: "blog@v1",
-  integrations: [new Sentry.BrowserTracing()],
+//   integrations: [new Sentry.BrowserTracing()],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control

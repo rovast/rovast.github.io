@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="结论先抛出一个结论：  MySQL中，utf8 又名 utf8mb3，存储的字符使用 1~3 个 byte utf8mb4，储存字符时，使用 1~4 个 byte utf8mb4 是 utf8 的超集，对于 utf8 存储的内容， utf8mb4 使用相同的方式存储。 utf8的储存的东西，可以无痛转为 utf8mb4  理论支撑给出结论，是要有理论依据的，让我们来查查 MySQL 官方文档： 1">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-30T02:21:25.781Z">
+<meta property="og:updated_time" content="2022-09-30T02:33:17.735Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="在MySQL中使用utf8mb4来取代utf8(又名：utf8mb3)">
 <meta name="twitter:description" content="结论先抛出一个结论：  MySQL中，utf8 又名 utf8mb3，存储的字符使用 1~3 个 byte utf8mb4，储存字符时，使用 1~4 个 byte utf8mb4 是 utf8 的超集，对于 utf8 存储的内容， utf8mb4 使用相同的方式存储。 utf8的储存的东西，可以无痛转为 utf8mb4  理论支撑给出结论，是要有理论依据的，让我们来查查 MySQL 官方文档： 1">
@@ -615,6 +615,17 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?711a563d18d87b95cae94df97e8521b8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
 
 
 <!-- Cloudflare Web Analytics -->
@@ -628,7 +639,7 @@ Sentry.init({
   dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
   // this assumes your build process replaces `process.env.npm_package_version` with a value
   release: "blog@v1",
-  integrations: [new Sentry.BrowserTracing()],
+//   integrations: [new Sentry.BrowserTracing()],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control

@@ -29,7 +29,7 @@
 <meta property="og:image" content="https://rovast.github.io/2019/04/18/php-strval-in-c/0.jpg">
 <meta property="og:image" content="https://rovast.github.io/2019/04/18/php-strval-in-c/1.jpg">
 <meta property="og:image" content="https://rovast.github.io/2019/04/18/php-strval-in-c/2.jpg">
-<meta property="og:updated_time" content="2022-09-30T02:21:25.749Z">
+<meta property="og:updated_time" content="2022-09-30T02:33:17.707Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="docker+gdb 调试 PHP 源码，看 strval 函数 C 实现">
 <meta name="twitter:description" content="php strval 函数的作用很简单，就是你给他一个值，他给你返回字符串类型。 算是一个比较简单的函数了，我们来通过 gdb 来一探究竟。 通过本文，你可以窥探下  gdb 的简单使用 gdb gui 模式初探 看看平时写的 PHP 代码在 C 语言里的样子 对使用 gdb 调试 php 代码有个初步了解 对了，文末有一些截图，不要错过  采购食材 电脑一台 docker 和 docker-co">
@@ -631,6 +631,17 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?711a563d18d87b95cae94df97e8521b8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
 
 
 <!-- Cloudflare Web Analytics -->
@@ -644,7 +655,7 @@ Sentry.init({
   dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
   // this assumes your build process replaces `process.env.npm_package_version` with a value
   release: "blog@v1",
-  integrations: [new Sentry.BrowserTracing()],
+//   integrations: [new Sentry.BrowserTracing()],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control

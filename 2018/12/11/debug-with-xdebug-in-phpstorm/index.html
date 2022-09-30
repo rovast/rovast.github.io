@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="前言在开发过程中，如果没有 debug，那是无法想象的。目前调试手段大体有如下几种：  代码中直接输出相关信息，可以是 echo var_dump var_export print_r dd   dd 这个函数在 laravel 中直接可用。其他框架需要安装拓展。 使用 var_dump 时，最好结合 &amp;lt;pre&amp;gt; 标签一起使用   输出调试信息至日志，可以是文件日志、数据库日志等  3">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-30T02:21:25.741Z">
+<meta property="og:updated_time" content="2022-09-30T02:33:17.695Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="在 phpstorm 中使用 xdebug">
 <meta name="twitter:description" content="前言在开发过程中，如果没有 debug，那是无法想象的。目前调试手段大体有如下几种：  代码中直接输出相关信息，可以是 echo var_dump var_export print_r dd   dd 这个函数在 laravel 中直接可用。其他框架需要安装拓展。 使用 var_dump 时，最好结合 &amp;lt;pre&amp;gt; 标签一起使用   输出调试信息至日志，可以是文件日志、数据库日志等  3">
@@ -613,6 +613,17 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?711a563d18d87b95cae94df97e8521b8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
 
 
 <!-- Cloudflare Web Analytics -->
@@ -626,7 +637,7 @@ Sentry.init({
   dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
   // this assumes your build process replaces `process.env.npm_package_version` with a value
   release: "blog@v1",
-  integrations: [new Sentry.BrowserTracing()],
+//   integrations: [new Sentry.BrowserTracing()],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control

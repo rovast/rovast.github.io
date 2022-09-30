@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="123456789101112131415161718192021// 修复 IOS 键盘弹出空白的问题let ua = window.navigator.userAgent;let app = window.navigator.appVersion;//$alert(&apos;浏览器版本: &apos; + app + &apos;\n&apos; + &apos;用户代理: &apos; + ua);if (!!ua.match(/\(i[^;]+;">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-30T02:21:25.741Z">
+<meta property="og:updated_time" content="2022-09-30T02:33:17.699Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="修复 IOS 键盘弹出空白的问题">
 <meta name="twitter:description" content="123456789101112131415161718192021// 修复 IOS 键盘弹出空白的问题let ua = window.navigator.userAgent;let app = window.navigator.appVersion;//$alert(&apos;浏览器版本: &apos; + app + &apos;\n&apos; + &apos;用户代理: &apos; + ua);if (!!ua.match(/\(i[^;]+;">
@@ -548,6 +548,17 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?711a563d18d87b95cae94df97e8521b8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
 
 
 <!-- Cloudflare Web Analytics -->
@@ -561,7 +572,7 @@ Sentry.init({
   dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
   // this assumes your build process replaces `process.env.npm_package_version` with a value
   release: "blog@v1",
-  integrations: [new Sentry.BrowserTracing()],
+//   integrations: [new Sentry.BrowserTracing()],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control

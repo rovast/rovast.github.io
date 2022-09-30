@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/warning.png">
 <meta property="og:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/fix.png">
 <meta property="og:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/done.png">
-<meta property="og:updated_time" content="2022-09-30T02:21:25.761Z">
+<meta property="og:updated_time" content="2022-09-30T02:33:17.719Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="phpstorm 集成 phpCodeSniffer">
 <meta name="twitter:description" content="本文主要指导如何在 phpstorm 中集成 phpCodeSniffer（简称：phpCS）  安装 phpCS 如何在 phpStorm 中加载 phpCS 如何加载自定义的 phpCS 的 xml 规则文件 如何在 php 文件中实时提示 如何根据规则实时修正  phpStorm 官方指导文档：https://www.jetbrains.com/help/phpstorm/using-php">
@@ -606,6 +606,17 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+    <script defer>
+var _hmt = _hmt || [];
+(function() {
+    var hm = document.createElement("script");
+    hm.src = "//hm.baidu.com/hm.js?711a563d18d87b95cae94df97e8521b8";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
 
 
 <!-- Cloudflare Web Analytics -->
@@ -619,7 +630,7 @@ Sentry.init({
   dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
   // this assumes your build process replaces `process.env.npm_package_version` with a value
   release: "blog@v1",
-  integrations: [new Sentry.BrowserTracing()],
+//   integrations: [new Sentry.BrowserTracing()],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control
