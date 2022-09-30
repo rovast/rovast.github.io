@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="自动构建 Set up Automated builds  指定了 dockerfile 后，docker hub 会根据 dockerfile 自动构建。以后你更新了 dockerfile 后，也会触发自动构建（如果你配置了相关设置）。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.166Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.534Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="useful-docker-links">
 <meta name="twitter:description" content="自动构建 Set up Automated builds  指定了 dockerfile 后，docker hub 会根据 dockerfile 自动构建。以后你更新了 dockerfile 后，也会触发自动构建（如果你配置了相关设置）。">
@@ -538,7 +538,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

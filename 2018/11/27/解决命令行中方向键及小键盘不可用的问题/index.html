@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="最近在使用 Laravel 的 tinker 的时候，出现输入方向键或者是小键盘的时候，显示类似 ^[[A ^[[B 的情况，特此记录。 在 Google 一番搜索后，找到解决方案：https://stackoverflow.com/questions/28733733/arrow-keys-not-working-in-shell 使用下述命令打开即可：1rlwrap php artisan t">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.174Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.542Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="解决命令行中方向键及小键盘不可用的问题">
 <meta name="twitter:description" content="最近在使用 Laravel 的 tinker 的时候，出现输入方向键或者是小键盘的时候，显示类似 ^[[A ^[[B 的情况，特此记录。 在 Google 一番搜索后，找到解决方案：https://stackoverflow.com/questions/28733733/arrow-keys-not-working-in-shell 使用下述命令打开即可：1rlwrap php artisan t">
@@ -537,7 +537,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

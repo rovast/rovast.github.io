@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="场景好多系统中会用到邮件系统，我们假设有一个 PHP 脚本用来发送邮件。使用 Linux cron 每分钟执行一次  我们暂时不引入队列系统，其实使用队列处理此方式更优。  我们得到下面的基本配置 1* * * * * php /home/app/email.php 问题分析和解决如果这个邮件服务出现异常，进程僵死怎么办？假设由于未知因素， email.php 脚本一直执行，没有退出。极端的情况，">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.130Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.506Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux cron 避坑指南">
 <meta name="twitter:description" content="场景好多系统中会用到邮件系统，我们假设有一个 PHP 脚本用来发送邮件。使用 Linux cron 每分钟执行一次  我们暂时不引入队列系统，其实使用队列处理此方式更优。  我们得到下面的基本配置 1* * * * * php /home/app/email.php 问题分析和解决如果这个邮件服务出现异常，进程僵死怎么办？假设由于未知因素， email.php 脚本一直执行，没有退出。极端的情况，">
@@ -586,7 +586,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

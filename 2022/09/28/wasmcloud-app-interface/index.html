@@ -30,7 +30,7 @@
 <meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-interface/pic1.png">
 <meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-interface/pic2.png">
 <meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-interface/pic2.png">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.170Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.538Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="wasmcloud app interface 源码阅读">
 <meta name="twitter:description" content="新建 interfacewasmcloud app 开发使用的是 CDD 模式，也就是基于契约开发的模式。其中契约的定义，使用 wash 指令即可完成： 1wash new interface 执行完成后，会根据契约的相关属性信息（如 contractId）等，生成 smithy IDL 的定义文件。smithy 文件专注于契约的定义，而成功将契约和具体的语言实现解耦出来。 简单来说，同一套 sm">
@@ -655,7 +655,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

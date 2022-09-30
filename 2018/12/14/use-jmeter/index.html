@@ -30,7 +30,7 @@
 <meta property="og:image" content="https://rovast.github.io/2018/12/14/use-jmeter/2.png">
 <meta property="og:image" content="https://rovast.github.io/2018/12/14/use-jmeter/3.png">
 <meta property="og:image" content="https://rovast.github.io/2018/12/14/use-jmeter/4.png">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.166Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.534Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="jmeter 使用入门">
 <meta name="twitter:description" content="引言进行压测时，使用 ab 是个不错的选择，奈何 ab 的报表纬度有时候不能满足需要。除了 ab，我们还可以用 jmeter 呀！ 安装1. 下载压缩包 https://jmeter.apache.org/download_jmeter.cgi 2. 安装 jre Ubuntu sudo apt-get install default-jre 3. 运行 我的包解压目录 /home/rovast/">
@@ -579,7 +579,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="前言在开发过程中，如果没有 debug，那是无法想象的。目前调试手段大体有如下几种：  代码中直接输出相关信息，可以是 echo var_dump var_export print_r dd   dd 这个函数在 laravel 中直接可用。其他框架需要安装拓展。 使用 var_dump 时，最好结合 &amp;lt;pre&amp;gt; 标签一起使用   输出调试信息至日志，可以是文件日志、数据库日志等  3">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.118Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.498Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="在 phpstorm 中使用 xdebug">
 <meta name="twitter:description" content="前言在开发过程中，如果没有 debug，那是无法想象的。目前调试手段大体有如下几种：  代码中直接输出相关信息，可以是 echo var_dump var_export print_r dd   dd 这个函数在 laravel 中直接可用。其他框架需要安装拓展。 使用 var_dump 时，最好结合 &amp;lt;pre&amp;gt; 标签一起使用   输出调试信息至日志，可以是文件日志、数据库日志等  3">
@@ -600,7 +600,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

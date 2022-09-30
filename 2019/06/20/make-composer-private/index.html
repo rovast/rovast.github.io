@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="我们知道，正常情况下，我们使用 composer install 时，是从 https://packagist.org/ 拉取的 package.如果设置了 中国镜像，那么就会从你的镜像地址拉取。 处于一些需要，我们往往需要引用自己开发的 composer package。如果是公用还好，我们直接结合 github 和 packagist 发布共有的镜像就好了。 那如果我们使用的是自建的 git">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.134Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.506Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="composer 私有化备忘录">
 <meta name="twitter:description" content="我们知道，正常情况下，我们使用 composer install 时，是从 https://packagist.org/ 拉取的 package.如果设置了 中国镜像，那么就会从你的镜像地址拉取。 处于一些需要，我们往往需要引用自己开发的 composer package。如果是公用还好，我们直接结合 github 和 packagist 发布共有的镜像就好了。 那如果我们使用的是自建的 git">
@@ -568,7 +568,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

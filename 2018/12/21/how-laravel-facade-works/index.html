@@ -27,7 +27,7 @@
 <meta property="og:description" content="Facade 门面模式定义：  门面模式（Facade）又称外观模式，用于为子系统中的一组接口提供一个一致的界面。门面模式定义了一个高层接口，这个接口使得子系统更加容易使用：引入门面角色之后，用户只需要直接与门面角色交互，用户与子系统之间的复杂关系由门面角色来实现，从而降低了系统的耦合度。  在 laravel 中，使用 facade 可以提高很高的便利性，比如我们使用缓存，可用下述代码实现 12">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://rovast.github.io/2018/12/21/how-laravel-facade-works/1.png">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.130Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.506Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初探laravel-facade实现">
 <meta name="twitter:description" content="Facade 门面模式定义：  门面模式（Facade）又称外观模式，用于为子系统中的一组接口提供一个一致的界面。门面模式定义了一个高层接口，这个接口使得子系统更加容易使用：引入门面角色之后，用户只需要直接与门面角色交互，用户与子系统之间的复杂关系由门面角色来实现，从而降低了系统的耦合度。  在 laravel 中，使用 facade 可以提高很高的便利性，比如我们使用缓存，可用下述代码实现 12">
@@ -573,7 +573,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

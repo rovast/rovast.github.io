@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="参考链接： http://xahlee.info/linux/git_diff.html  本文阐述 git diff 的不同用法。 git 中有三个主要区域  Working Directory 工作区。当前用户正在工作的区域 Staging Area（也被叫做 cache，index）。使用 git add 后存放的临时位置 HEAD 指向一个 commit 位置。通常情况下，是指上一次提交">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.122Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.498Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="git diff between {working dir, staged area, last commit}">
 <meta name="twitter:description" content="参考链接： http://xahlee.info/linux/git_diff.html  本文阐述 git diff 的不同用法。 git 中有三个主要区域  Working Directory 工作区。当前用户正在工作的区域 Staging Area（也被叫做 cache，index）。使用 git add 后存放的临时位置 HEAD 指向一个 commit 位置。通常情况下，是指上一次提交">
@@ -572,7 +572,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="最近在部署一个较为复杂的 web 应用，其中涉及到 mongodb redis php node cron。为了简化部署，想到了使用 docker 部署。 使用 node 时，可以使用 node 的官方 image。 其 docker-compose.yaml 可以如下配置 123456789101112version: &quot;2&quot;services:  node-build:    image: &quot;n">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.118Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.498Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="记录一次 docker 部署前端应用 npm 的问题">
 <meta name="twitter:description" content="最近在部署一个较为复杂的 web 应用，其中涉及到 mongodb redis php node cron。为了简化部署，想到了使用 docker 部署。 使用 node 时，可以使用 node 的官方 image。 其 docker-compose.yaml 可以如下配置 123456789101112version: &quot;2&quot;services:  node-build:    image: &quot;n">
@@ -572,7 +572,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

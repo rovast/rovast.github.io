@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="背景在一些项目中，需要用到组件数据的双向绑定，即父子组件共享变量，一方改动另一方联动。 补充 2019年07月09日 根据之前用的方法，在部分环境中使用失效，参考 浅析Vue自定义组件的v-model 用了另外一种方式实现。虽然这样确实可以实现了，但是在一些原理上还是不太明白，有时间去看看源码吧。  SyncValue component 定义 12345678910111213141516&amp;lt">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.114Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.494Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="vue组件中实现双向绑定">
 <meta name="twitter:description" content="背景在一些项目中，需要用到组件数据的双向绑定，即父子组件共享变量，一方改动另一方联动。 补充 2019年07月09日 根据之前用的方法，在部分环境中使用失效，参考 浅析Vue自定义组件的v-model 用了另外一种方式实现。虽然这样确实可以实现了，但是在一些原理上还是不太明白，有时间去看看源码吧。  SyncValue component 定义 12345678910111213141516&amp;lt">
@@ -566,7 +566,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="其实这个没啥好说的，就是记录下解决的过程（说得好像跟一篇水文似的…）。或者给遇到这类问题的小伙伴提供个思路。 痛点我们在部署 web 服务时，经常用到定时任务。正常的流程就是直接执行下面的指令来配置定时任务 1crontab -e 问题来了，正常情况下，这个指令在哪个用户下面执行，这个权限就是谁的（如果你听不懂我在说啥，那基本就是属于 root的）。  定时任务本身的配置也是个精细活，你可以阅读下">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.146Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.518Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 www-data 用户运行定时任务（cron）">
 <meta name="twitter:description" content="其实这个没啥好说的，就是记录下解决的过程（说得好像跟一篇水文似的…）。或者给遇到这类问题的小伙伴提供个思路。 痛点我们在部署 web 服务时，经常用到定时任务。正常的流程就是直接执行下面的指令来配置定时任务 1crontab -e 问题来了，正常情况下，这个指令在哪个用户下面执行，这个权限就是谁的（如果你听不懂我在说啥，那基本就是属于 root的）。  定时任务本身的配置也是个精细活，你可以阅读下">
@@ -582,7 +582,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

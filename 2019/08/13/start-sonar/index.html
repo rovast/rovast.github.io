@@ -29,7 +29,7 @@
 <meta property="og:image" content="https://rovast.github.io/2019/08/13/start-sonar/1565679757086.png">
 <meta property="og:image" content="https://rovast.github.io/2019/08/13/start-sonar/1565682032497.png">
 <meta property="og:image" content="https://rovast.github.io/2019/08/13/start-sonar/1565682259708.png">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.150Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.522Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="sonar 初探">
 <meta name="twitter:description" content="安装 参考文档 https://docs.sonarqube.org/latest/setup/get-started-2-minutes/  sonar 由两部分组成：sonarqube 和 sonar-scanner-cli。前者是 web 端，后者是 CLI 端。下载地址如下：  https://binaries.sonarsource.com/Distribution/sonarqube/">
@@ -627,7 +627,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

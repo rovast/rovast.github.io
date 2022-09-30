@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="iframe 引入部分配置修改后才能进行 iframe 嵌入，默认是不支持的 123allow_embedding: true # 默认是 false， 为了防止 Clickjacking，如果不设置，浏览器会拒绝显示 iframecookie_samesite: none # 如果不设置，无法使用登录功能cookie_secure: true # if you&apos;re using https an">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.130Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.506Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="grafana iframe 接入备忘录">
 <meta name="twitter:description" content="iframe 引入部分配置修改后才能进行 iframe 嵌入，默认是不支持的 123allow_embedding: true # 默认是 false， 为了防止 Clickjacking，如果不设置，浏览器会拒绝显示 iframecookie_samesite: none # 如果不设置，无法使用登录功能cookie_secure: true # if you&apos;re using https an">
@@ -570,7 +570,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

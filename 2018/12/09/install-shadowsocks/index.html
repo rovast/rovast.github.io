@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="本文转载自 《科学上网之 Shadowsocks 安装及优化加速》 原文地址： https://yq.aliyun.com/articles/137280?commentId=11711  Shadowsocks使用自行设计的协议进行加密通信。加密算法有AES、Blowfish、IDEA、RC4等，除创建TCP连接外无需握手，每次请求只转发一个连接，因此使用起来网速较快，在移动设备上也比较省电。所">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.130Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.506Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="科学上网之 Shadowsocks 安装及优化加速">
 <meta name="twitter:description" content="本文转载自 《科学上网之 Shadowsocks 安装及优化加速》 原文地址： https://yq.aliyun.com/articles/137280?commentId=11711  Shadowsocks使用自行设计的协议进行加密通信。加密算法有AES、Blowfish、IDEA、RC4等，除创建TCP连接外无需握手，每次请求只转发一个连接，因此使用起来网速较快，在移动设备上也比较省电。所">
@@ -613,7 +613,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

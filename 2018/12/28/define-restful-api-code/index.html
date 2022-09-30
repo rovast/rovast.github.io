@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="前言随着网络应用的不断发展，衍生出了「前后端分离」的基本架构。前后端分离的优势这里不作深入讨论。 前后端完全分离后，多端（浏览器、APP等）和服务端的交互可以通过 API 请求的方式进行，本文主要讨论restful api 实践中的一环：数据返回格式的定义。 关于 rest 的一些设计原则，可以参考阮一峰总结的两篇文章：  《RESTful API 设计指南》 RESTful API 最佳实践">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.118Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.498Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="restful API 的 code 码定义">
 <meta name="twitter:description" content="前言随着网络应用的不断发展，衍生出了「前后端分离」的基本架构。前后端分离的优势这里不作深入讨论。 前后端完全分离后，多端（浏览器、APP等）和服务端的交互可以通过 API 请求的方式进行，本文主要讨论restful api 实践中的一环：数据返回格式的定义。 关于 rest 的一些设计原则，可以参考阮一峰总结的两篇文章：  《RESTful API 设计指南》 RESTful API 最佳实践">
@@ -620,7 +620,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

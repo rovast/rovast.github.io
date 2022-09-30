@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="使用允许跨域（不安全）模式打开，便于调试，设定一个 Alias 即可 1alias openChromeNoCORS=&quot;open -na Google\ Chrome --args --user-data-dir=/tmp/temporary-chrome-profile-dir --disable-web-security --disable-site-isolation-trials&quot;">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.118Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.498Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MacOS非安全模式打开Chrome">
 <meta name="twitter:description" content="使用允许跨域（不安全）模式打开，便于调试，设定一个 Alias 即可 1alias openChromeNoCORS=&quot;open -na Google\ Chrome --args --user-data-dir=/tmp/temporary-chrome-profile-dir --disable-web-security --disable-site-isolation-trials&quot;">
@@ -554,7 +554,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://rovast.github.io/2022/09/19/wasmcloud-intro/uml.png">
 <meta property="og:image" content="https://rovast.github.io/2022/09/19/wasmcloud-intro/form.png">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.170Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.538Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="wasmcloud actor调度梳理">
 <meta name="twitter:description" content="组成   模块 作用     wasmcloud_host_web Web 平台，由 phoenixframework+liveview 技术栈组成，响应用户的操作。   wasmcloud_host 接收web的操作，包装数据，发送给 nat   host_core 主要负责 nat 消息的处理，actor 进程的直接管理（增删）   host_core/native 执行 actor wasm">
@@ -626,7 +626,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/warning.png">
 <meta property="og:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/fix.png">
 <meta property="og:image" content="https://rovast.github.io/2019/08/14/phpstorm-load-phpCodeSniffer/done.png">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.146Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.518Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="phpstorm 集成 phpCodeSniffer">
 <meta name="twitter:description" content="本文主要指导如何在 phpstorm 中集成 phpCodeSniffer（简称：phpCS）  安装 phpCS 如何在 phpStorm 中加载 phpCS 如何加载自定义的 phpCS 的 xml 规则文件 如何在 php 文件中实时提示 如何根据规则实时修正  phpStorm 官方指导文档：https://www.jetbrains.com/help/phpstorm/using-php">
@@ -593,7 +593,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>

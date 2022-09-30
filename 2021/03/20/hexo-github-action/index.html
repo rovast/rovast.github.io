@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://rovast.github.io/assets/image-20210320224530765.png">
 <meta property="og:image" content="https://rovast.github.io/assets/image-20210320224658673.png">
 <meta property="og:image" content="https://rovast.github.io/assets/image-20210320224737049.png">
-<meta property="og:updated_time" content="2022-09-29T11:11:20.130Z">
+<meta property="og:updated_time" content="2022-09-30T01:55:41.506Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 github action 自动发布 hexo blog">
 <meta name="twitter:description" content="背景用 Hexo 来生成 Github Pages 有一段时间了，之前一直是在本地写完 Blog 然后执行下述指令来发博客script12rm -rf publicnpx hexo deploy 今天想想，不是有 github acion 嘛，能不能使用自动化 CI 流程来发布，当我的 Hexo Repo 发布时，自动进行 deply 动作，进而部署到 rovast.github.io。当然是可以">
@@ -602,7 +602,8 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     owner: 'rovast',
     admin: ['rovast'],
     id: md5(location.pathname),
-    distractionFreeMode: true
+    distractionFreeMode: true,
+    proxy: 'https://cors-proxy.rohao28.workers.dev/?https://github.com/login/oauth/access_token'
   })
   gitalk.render('comments')
   </script>
