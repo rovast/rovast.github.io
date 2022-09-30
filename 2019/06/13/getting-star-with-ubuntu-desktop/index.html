@@ -29,7 +29,7 @@
 <meta property="og:image" content="https://rovast.github.io/2019/06/13/getting-star-with-ubuntu-desktop/bar.png">
 <meta property="og:image" content="https://rovast.github.io/2019/06/13/getting-star-with-ubuntu-desktop/albert.png">
 <meta property="og:image" content="https://rovast.github.io/2019/06/13/getting-star-with-ubuntu-desktop/gitmoji.png">
-<meta property="og:updated_time" content="2022-09-30T01:55:41.498Z">
+<meta property="og:updated_time" content="2022-09-30T02:21:25.741Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ubuntu 桌面版使用备忘">
 <meta name="twitter:description" content="本文记录了使用 ubuntu 桌面版过程中的一些常见问题和初始化步骤。 桌面美化挪动关闭按钮至左侧首先安装 gnome-tweak-tool 1sudo apt install gnome-tweak-tool 安装完成后，打开软件：  选择“窗口”菜单 更改“标题栏按钮 - 放置”，设置为“左”即可  更改顶部 bar 显示方式为 unity 风格安装 unite gnome 拓展（怎么安装，参">
@@ -668,6 +668,22 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "772d8ac6c6e34909aabd01d173940c88"}"></script>
 <!-- End Cloudflare Web Analytics -->
+
+<!--sentry-->
+<script src="https://browser.sentry-cdn.com/7.14.0/bundle.min.js" integrity="sha384-fAxe413fRnr65qPVF9enoAhxS3Y1Irb56LW7uHE8ANEFX2/lhEY0RFLl0ysW75th" crossorigin="anonymous"></script>
+<script>
+Sentry.init({
+  dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
+  // this assumes your build process replaces `process.env.npm_package_version` with a value
+  release: "blog@v1",
+  integrations: [new Sentry.BrowserTracing()],
+
+  // We recommend adjusting this value in production, or using tracesSampler
+  // for finer control
+  tracesSampleRate: 1.0,
+});
+</script>
+
 
 </body>
 </html>

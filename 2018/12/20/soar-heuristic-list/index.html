@@ -27,7 +27,7 @@
 <meta property="og:description" content="摘自： https://github.com/XiaoMi/soar/blob/master/doc/heuristic.md 这是小米 soar 的默认启发规则汇总，也是 DBA 多年精华总结。熟读各个案例，对于一般的 MySQL 优化有很高的帮助。如果你不喜欢太理论的东西，或者没时间去深入，举一反三学习也未尝不可。   启发式规则建议建议使用 AS 关键字显示声明一个别名 Item:ALI.0">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://rovast.github.io/2018/12/20/soar-heuristic-list/1.png">
-<meta property="og:updated_time" content="2022-09-30T01:55:41.518Z">
+<meta property="og:updated_time" content="2022-09-30T02:21:25.765Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="soar 启发规则汇总 &amp;&amp; 常见 MySQL 优化案例">
 <meta name="twitter:description" content="摘自： https://github.com/XiaoMi/soar/blob/master/doc/heuristic.md 这是小米 soar 的默认启发规则汇总，也是 DBA 多年精华总结。熟读各个案例，对于一般的 MySQL 优化有很高的帮助。如果你不喜欢太理论的东西，或者没时间去深入，举一反三学习也未尝不可。   启发式规则建议建议使用 AS 关键字显示声明一个别名 Item:ALI.0">
@@ -1451,6 +1451,22 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "772d8ac6c6e34909aabd01d173940c88"}"></script>
 <!-- End Cloudflare Web Analytics -->
+
+<!--sentry-->
+<script src="https://browser.sentry-cdn.com/7.14.0/bundle.min.js" integrity="sha384-fAxe413fRnr65qPVF9enoAhxS3Y1Irb56LW7uHE8ANEFX2/lhEY0RFLl0ysW75th" crossorigin="anonymous"></script>
+<script>
+Sentry.init({
+  dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
+  // this assumes your build process replaces `process.env.npm_package_version` with a value
+  release: "blog@v1",
+  integrations: [new Sentry.BrowserTracing()],
+
+  // We recommend adjusting this value in production, or using tracesSampler
+  // for finer control
+  tracesSampleRate: 1.0,
+});
+</script>
+
 
 </body>
 </html>

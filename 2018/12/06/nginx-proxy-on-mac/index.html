@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="背景在进行前端的移动端开发时，需要在手机上预览电脑上的项目。以 angular 为例，默认启动项目后，在开发机（以 Mac 为例）的浏览器地址栏输入 http://localhost:4200 即可访问。  我们假设前端默认开启的端口号是4200  如果想要在手机上访问，我们先确保手机和 Mac 链接的同一个网络（链接同一个 WIFI 即可），Mac 上输入  12# 查看本机 ip 地址ifco">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-30T01:55:41.510Z">
+<meta property="og:updated_time" content="2022-09-30T02:21:25.749Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mac 上配置 nginx 端口转发访问 angular 项目">
 <meta name="twitter:description" content="背景在进行前端的移动端开发时，需要在手机上预览电脑上的项目。以 angular 为例，默认启动项目后，在开发机（以 Mac 为例）的浏览器地址栏输入 http://localhost:4200 即可访问。  我们假设前端默认开启的端口号是4200  如果想要在手机上访问，我们先确保手机和 Mac 链接的同一个网络（链接同一个 WIFI 即可），Mac 上输入  12# 查看本机 ip 地址ifco">
@@ -595,6 +595,22 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "772d8ac6c6e34909aabd01d173940c88"}"></script>
 <!-- End Cloudflare Web Analytics -->
+
+<!--sentry-->
+<script src="https://browser.sentry-cdn.com/7.14.0/bundle.min.js" integrity="sha384-fAxe413fRnr65qPVF9enoAhxS3Y1Irb56LW7uHE8ANEFX2/lhEY0RFLl0ysW75th" crossorigin="anonymous"></script>
+<script>
+Sentry.init({
+  dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
+  // this assumes your build process replaces `process.env.npm_package_version` with a value
+  release: "blog@v1",
+  integrations: [new Sentry.BrowserTracing()],
+
+  // We recommend adjusting this value in production, or using tracesSampler
+  // for finer control
+  tracesSampleRate: 1.0,
+});
+</script>
+
 
 </body>
 </html>

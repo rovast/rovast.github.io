@@ -496,5 +496,21 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "772d8ac6c6e34909aabd01d173940c88"}"></script>
 <!-- End Cloudflare Web Analytics -->
 
+<!--sentry-->
+<script src="https://browser.sentry-cdn.com/7.14.0/bundle.min.js" integrity="sha384-fAxe413fRnr65qPVF9enoAhxS3Y1Irb56LW7uHE8ANEFX2/lhEY0RFLl0ysW75th" crossorigin="anonymous"></script>
+<script>
+Sentry.init({
+  dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
+  // this assumes your build process replaces `process.env.npm_package_version` with a value
+  release: "blog@v1",
+  integrations: [new Sentry.BrowserTracing()],
+
+  // We recommend adjusting this value in production, or using tracesSampler
+  // for finer control
+  tracesSampleRate: 1.0,
+});
+</script>
+
+
 </body>
 </html>

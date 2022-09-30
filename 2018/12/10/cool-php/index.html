@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="记录一些平时不怎么用到的，有点 cold 的函数或代码片段 array_walk array_walk 也是对数组的一个遍历，可以拿到 key 和 value，并且返回值是 bool 类型  blog  博客园 《【php学习】array_map，array_walk，array_filter的区别》  example12345678$a = [&quot;a&quot; =&amp;gt; 1, &quot;b&quot; =&amp;gt; 2];">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-30T01:55:41.498Z">
+<meta property="og:updated_time" content="2022-09-30T02:21:25.741Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="PHP 冷门但使用的函数">
 <meta name="twitter:description" content="记录一些平时不怎么用到的，有点 cold 的函数或代码片段 array_walk array_walk 也是对数组的一个遍历，可以拿到 key 和 value，并且返回值是 bool 类型  blog  博客园 《【php学习】array_map，array_walk，array_filter的区别》  example12345678$a = [&quot;a&quot; =&amp;gt; 1, &quot;b&quot; =&amp;gt; 2];">
@@ -621,6 +621,22 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "772d8ac6c6e34909aabd01d173940c88"}"></script>
 <!-- End Cloudflare Web Analytics -->
+
+<!--sentry-->
+<script src="https://browser.sentry-cdn.com/7.14.0/bundle.min.js" integrity="sha384-fAxe413fRnr65qPVF9enoAhxS3Y1Irb56LW7uHE8ANEFX2/lhEY0RFLl0ysW75th" crossorigin="anonymous"></script>
+<script>
+Sentry.init({
+  dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
+  // this assumes your build process replaces `process.env.npm_package_version` with a value
+  release: "blog@v1",
+  integrations: [new Sentry.BrowserTracing()],
+
+  // We recommend adjusting this value in production, or using tracesSampler
+  // for finer control
+  tracesSampleRate: 1.0,
+});
+</script>
+
 
 </body>
 </html>

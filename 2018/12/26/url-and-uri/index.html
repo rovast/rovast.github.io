@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://rovast.github.io/2018/12/26/url-and-uri/1.png">
 <meta property="og:image" content="https://rovast.github.io/2018/12/26/url-and-uri/1.png">
-<meta property="og:updated_time" content="2022-09-30T01:55:41.534Z">
+<meta property="og:updated_time" content="2022-09-30T02:21:25.777Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="URL和URI的区别">
 <meta name="twitter:description" content="摘自：《HTTP权威指南》   1.3　资源Web 服务器是 Web 资源（Web resource）的宿主。Web 资源是 Web 内容的源头。最简单的 Web 资源就是 Web 服务器文件系统中的静态文件。这些文件可以包含任意内容：文本文件、 HTML 文件、微软的 Word 文件、 Adobe 的 Acrobat 文件、 JPEG 图片文件、 AVI 电影文件，或所有其他你能够想到的格式。">
@@ -636,6 +636,22 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "772d8ac6c6e34909aabd01d173940c88"}"></script>
 <!-- End Cloudflare Web Analytics -->
+
+<!--sentry-->
+<script src="https://browser.sentry-cdn.com/7.14.0/bundle.min.js" integrity="sha384-fAxe413fRnr65qPVF9enoAhxS3Y1Irb56LW7uHE8ANEFX2/lhEY0RFLl0ysW75th" crossorigin="anonymous"></script>
+<script>
+Sentry.init({
+  dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
+  // this assumes your build process replaces `process.env.npm_package_version` with a value
+  release: "blog@v1",
+  integrations: [new Sentry.BrowserTracing()],
+
+  // We recommend adjusting this value in production, or using tracesSampler
+  // for finer control
+  tracesSampleRate: 1.0,
+});
+</script>
+
 
 </body>
 </html>

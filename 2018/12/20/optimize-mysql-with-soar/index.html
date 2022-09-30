@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="介绍项目地址： https://github.com/XiaoMi/soar SOAR SOAR(SQL Optimizer And Rewriter)是一个对SQL进行优化和改写的自动化工具。 由小米人工智能与云平台的数据库团队开发与维护。 功能特点  跨平台支持（支持Linux, Mac环境，Windows环境理论上也支持，不过未全面测试） 目前只支持 MySQL 语法族协议的SQL优化 支持">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-30T01:55:41.510Z">
+<meta property="og:updated_time" content="2022-09-30T02:21:25.749Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 soar 优化 MySQL">
 <meta name="twitter:description" content="介绍项目地址： https://github.com/XiaoMi/soar SOAR SOAR(SQL Optimizer And Rewriter)是一个对SQL进行优化和改写的自动化工具。 由小米人工智能与云平台的数据库团队开发与维护。 功能特点  跨平台支持（支持Linux, Mac环境，Windows环境理论上也支持，不过未全面测试） 目前只支持 MySQL 语法族协议的SQL优化 支持">
@@ -601,6 +601,22 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "772d8ac6c6e34909aabd01d173940c88"}"></script>
 <!-- End Cloudflare Web Analytics -->
+
+<!--sentry-->
+<script src="https://browser.sentry-cdn.com/7.14.0/bundle.min.js" integrity="sha384-fAxe413fRnr65qPVF9enoAhxS3Y1Irb56LW7uHE8ANEFX2/lhEY0RFLl0ysW75th" crossorigin="anonymous"></script>
+<script>
+Sentry.init({
+  dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
+  // this assumes your build process replaces `process.env.npm_package_version` with a value
+  release: "blog@v1",
+  integrations: [new Sentry.BrowserTracing()],
+
+  // We recommend adjusting this value in production, or using tracesSampler
+  // for finer control
+  tracesSampleRate: 1.0,
+});
+</script>
+
 
 </body>
 </html>

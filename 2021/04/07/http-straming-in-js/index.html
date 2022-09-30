@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="rovast">
 <meta property="og:description" content="基础概念HTTP 流简单的理解为：服务端维持一个 HTTP 连接，通过这个 HTTP 连接源源不断、持续的输出内容至客户端。相较于我们常见的 HTTP 请求(一次返回)，流处理的特点在于持续返回。 我们举个简单的应用场景：股票网站的股价更新。你可以使用轮询的方式，前端设置定时器周期性的请求股价接口来刷新股价。除此之外，可以使用 HTTP Streaming 的方式，只需要维持一个 HTTP 链接，">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2022-09-30T01:55:41.506Z">
+<meta property="og:updated_time" content="2022-09-30T02:21:25.749Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初探 http-streaming">
 <meta name="twitter:description" content="基础概念HTTP 流简单的理解为：服务端维持一个 HTTP 连接，通过这个 HTTP 连接源源不断、持续的输出内容至客户端。相较于我们常见的 HTTP 请求(一次返回)，流处理的特点在于持续返回。 我们举个简单的应用场景：股票网站的股价更新。你可以使用轮询的方式，前端设置定时器周期性的请求股价接口来刷新股价。除此之外，可以使用 HTTP Streaming 的方式，只需要维持一个 HTTP 链接，">
@@ -602,6 +602,22 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "772d8ac6c6e34909aabd01d173940c88"}"></script>
 <!-- End Cloudflare Web Analytics -->
+
+<!--sentry-->
+<script src="https://browser.sentry-cdn.com/7.14.0/bundle.min.js" integrity="sha384-fAxe413fRnr65qPVF9enoAhxS3Y1Irb56LW7uHE8ANEFX2/lhEY0RFLl0ysW75th" crossorigin="anonymous"></script>
+<script>
+Sentry.init({
+  dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
+  // this assumes your build process replaces `process.env.npm_package_version` with a value
+  release: "blog@v1",
+  integrations: [new Sentry.BrowserTracing()],
+
+  // We recommend adjusting this value in production, or using tracesSampler
+  // for finer control
+  tracesSampleRate: 1.0,
+});
+</script>
+
 
 </body>
 </html>

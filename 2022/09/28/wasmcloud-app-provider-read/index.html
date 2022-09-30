@@ -29,7 +29,7 @@
 <meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/pic.png">
 <meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/pic1.png">
 <meta property="og:image" content="https://rovast.github.io/2022/09/28/wasmcloud-app-provider-read/pic2.png">
-<meta property="og:updated_time" content="2022-09-30T01:55:41.538Z">
+<meta property="og:updated_time" content="2022-09-30T02:21:25.785Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="wasmcloud app provider 源码阅读">
 <meta name="twitter:description" content="背景provider 在 wasmcloud 体系中扮演者重要的作用。它负责实现 Interface，在 actor 和 provider 建立链接关系后，可为 actor 提供具体的能力。对于同一个 Interface，可以有不同的 Provider 实现，在 link def 阶段，再去指定具体由哪个 Provider 给 actor 提供能力。 而 actor 调用具体的 Interface">
@@ -602,6 +602,22 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{"token": "772d8ac6c6e34909aabd01d173940c88"}"></script>
 <!-- End Cloudflare Web Analytics -->
+
+<!--sentry-->
+<script src="https://browser.sentry-cdn.com/7.14.0/bundle.min.js" integrity="sha384-fAxe413fRnr65qPVF9enoAhxS3Y1Irb56LW7uHE8ANEFX2/lhEY0RFLl0ysW75th" crossorigin="anonymous"></script>
+<script>
+Sentry.init({
+  dsn: "https://9bc8501008c9438fbe95e940d84fb58d@o1001830.ingest.sentry.io/4503900255223808",
+  // this assumes your build process replaces `process.env.npm_package_version` with a value
+  release: "blog@v1",
+  integrations: [new Sentry.BrowserTracing()],
+
+  // We recommend adjusting this value in production, or using tracesSampler
+  // for finer control
+  tracesSampleRate: 1.0,
+});
+</script>
+
 
 </body>
 </html>
