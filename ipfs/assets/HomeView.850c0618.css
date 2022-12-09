@@ -1,0 +1,12 @@
+
+table tr td:first-child {
+  width: 60px;
+  padding-top: 10px;
+  vertical-align: top;
+}
+textarea {
+  resize: none;
+  overflow: hidden;
+  min-height: 50px;
+  max-height: 1000px;
+}
