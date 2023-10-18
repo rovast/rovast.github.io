@@ -1,5 +1,27 @@
 [
   {
+    "id": "2972553b-dc4b-4bcd-b598-starstarstarstar",
+    "Top": true,
+    "Adult": false,
+    "note": "高画质/1🪙/需代理",
+    "Search": true,
+    "VODPlus": true,
+    "Cover": "https://vod.infiniteapi.com/img/histar.png",
+    "name": "♾️HiStar",
+    "api": "https://vod.infiniteapi.com/1c1018a404903a2d518bdee1432967e6/histar_vod"
+  },
+  {
+    "id": "4bbc8f2f-4aac-49bb-93ef-b90cf8e4k4k4k",
+    "Top": true,
+    "Adult": false,
+    "note": "高画质/1🪙/无需代理",
+    "Search": true,
+    "VODPlus": true,
+    "Cover": "https://vod.infiniteapi.com/img/biu.png",
+    "name": "♾️BIU",
+    "api": "https://vod.infiniteapi.com/1c1018a404903a2d518bdee1432967e6/s4k_vod"
+  },
+  {
     "id": "749efa89-d429-4a4e-8295-6ae9e01226d4",
     "Top": true,
     "note": "粤语港剧社区平台",
@@ -204,5 +226,33 @@
     "name": "粵語劇",
     "Cover": "https://i.ibb.co/QpnfkDV/0-2465273840015274.png",
     "api": "syncnextPlugin://https://raw.githubusercontent.com/qoli/syncnextPlugin/main/alpha_v2/alpha_v2.json"
+  },
+  {
+    "id": "9ac32fd6-0734-468b-8afc-257b02f30bd8",
+    "Top": true,
+    "note": "1080P 3M",
+    "name": "ICY|哔嘀影视",
+    "api": "syncnextPlugin://https://raw.githubusercontent.com/icy37785/syncnextPlugin/main/alpha_v2/bdys.json"
+  },
+  {
+    "id": "c62ab540-a86d-445b-a16a-feb54840a240",
+    "Top": true,
+    "note": "國內視頻網站索引",
+    "name": "ICY|360影視大全",
+    "api": "syncnextPlugin://https://raw.githubusercontent.com/icy37785/syncnextPlugin/main/alpha_v2/360kan.json"
+  },
+  {
+    "id": "06597cd6-593b-45fe-9a4f-fa8e42c7397a",
+    "Top": true,
+    "note": "斗鱼直播平台",
+    "name": "ICY|鬥魚直播",
+    "api": "syncnextPlugin://https://raw.githubusercontent.com/icy37785/syncnextPlugin/main/alpha_v2/douyuM.json"
+  },
+  {
+    "id": "a3501411-30ad-4ad7-bbe4-d3870e9ab042",
+    "Top": true,
+    "note": "虎牙直播平台",
+    "name": "ICY|虎牙直播",
+    "api": "syncnextPlugin://https://raw.githubusercontent.com/icy37785/syncnextPlugin/main/alpha_v2/huya.json"
   }
 ]
